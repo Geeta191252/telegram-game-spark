@@ -110,8 +110,67 @@ const AdminPanel = () => {
     setSavingProfit(false);
   };
 
+  // Aviator manual crash queue (per currency)
+  const [manualCurrency, setManualCurrency] = useState<"dollar" | "star">("dollar");
+  const [manualQueue, setManualQueue] = useState<number[]>([]);
+  const [manualActive, setManualActive] = useState(false);
+  const [manualInput, setManualInput] = useState<string>("");
 
-  const user = getTelegramUser();
+  const fetchManualQueue = async (curr: "dollar" | "star" = manualCurrency) => {
+    try {
+      const r = await fetch(`${API_BASE_URL}/admin/aviator/manual?ownerId=${OWNER_ID}&currency=${curr}`);
+      if (r.ok) {
+        const d = await r.json();
+        setManualQueue(d.queue || []);
+        setManualActive(!!d.active);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const addManualValue = async (value: number) => {
+    if (!value || value < 1) {
+      toast({ title: "Invalid", description: "Value must be ≥ 1.00x" });
+      return;
+    }
+    try {
+      const r = await fetch(`${API_BASE_URL}/admin/aviator/manual/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), currency: manualCurrency, value }),
+      });
+      const d = await r.json();
+      if (r.ok) {
+        setManualQueue(d.queue);
+        setManualInput("");
+      } else {
+        toast({ title: "Failed", description: d.error || "Could not add" });
+      }
+    } catch { toast({ title: "Network error", description: "Please retry" }); }
+  };
+
+  const removeManualAt = async (index: number) => {
+    try {
+      const r = await fetch(`${API_BASE_URL}/admin/aviator/manual/remove`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), currency: manualCurrency, index }),
+      });
+      const d = await r.json();
+      if (r.ok) setManualQueue(d.queue);
+    } catch { /* ignore */ }
+  };
+
+  const clearManualQueue = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/admin/aviator/manual/clear`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), currency: manualCurrency }),
+      });
+      setManualQueue([]);
+    } catch { /* ignore */ }
+  };
+
   const isOwner = user?.id === OWNER_ID;
 
   const fetchAll = async () => {
