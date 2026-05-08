@@ -68,6 +68,49 @@ const AdminPanel = () => {
   const [adjusting, setAdjusting] = useState(false);
   const [processingWithdrawal, setProcessingWithdrawal] = useState<string | null>(null);
 
+  // Aviator profit %
+  const [aviatorProfit, setAviatorProfit] = useState<number>(50);
+  const [aviatorProfitInput, setAviatorProfitInput] = useState<string>("50");
+  const [savingProfit, setSavingProfit] = useState(false);
+
+  const fetchAviatorProfit = async () => {
+    try {
+      const r = await fetch(`${API_BASE_URL}/admin/aviator/profit?ownerId=${OWNER_ID}`);
+      if (r.ok) {
+        const d = await r.json();
+        setAviatorProfit(d.percent);
+        setAviatorProfitInput(String(d.percent));
+      }
+    } catch (e) { /* ignore */ }
+  };
+
+  const saveAviatorProfit = async () => {
+    const num = Number(aviatorProfitInput);
+    if (isNaN(num) || num < 0 || num > 95) {
+      toast({ title: "Invalid value", description: "Enter a number between 0 and 95" });
+      return;
+    }
+    setSavingProfit(true);
+    try {
+      const r = await fetch(`${API_BASE_URL}/admin/aviator/profit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), percent: num }),
+      });
+      const d = await r.json();
+      if (r.ok && d.success) {
+        setAviatorProfit(d.percent);
+        toast({ title: "Updated", description: `Aviator profit set to ${d.percent}%` });
+      } else {
+        toast({ title: "Failed", description: d.error || "Could not update" });
+      }
+    } catch {
+      toast({ title: "Network error", description: "Please retry" });
+    }
+    setSavingProfit(false);
+  };
+
+
   const user = getTelegramUser();
   const isOwner = user?.id === OWNER_ID;
 
