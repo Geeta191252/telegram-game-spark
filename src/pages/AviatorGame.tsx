@@ -366,7 +366,7 @@ const AviatorGame = () => {
               )}
             </div>
 
-            <img src={rotateBg} alt="" className="absolute -right-24 -bottom-32 h-[420px] w-[420px] max-w-none opacity-40 animate-spin pointer-events-none" style={{ animationDuration: "18s" }} />
+            
 
             {phase === "betting" && (
               <div className="absolute left-4 bottom-6 pointer-events-none">
