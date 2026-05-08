@@ -218,9 +218,14 @@ const AviatorGame = () => {
       <audio preload="auto" src="/sounds/aviator/cashout.mp3" />
 
       <header className="h-12 px-2 flex items-center justify-between border-b border-border bg-card">
-        <button onClick={() => navigate("/")} className="h-9 flex items-center" aria-label="Home">
-          <img src={logoImg} alt="Aviator" className="h-8 w-auto object-contain" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={() => navigate(-1)} className="h-8 w-8 rounded-full bg-muted grid place-items-center" aria-label="Back">
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <button onClick={() => navigate("/")} className="h-9 flex items-center" aria-label="Home">
+            <img src={logoImg} alt="Aviator" className="h-8 w-auto object-contain" />
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrency(currency === "dollar" ? "star" : "dollar")}
