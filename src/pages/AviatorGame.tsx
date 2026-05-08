@@ -130,8 +130,11 @@ const AviatorGame = () => {
         // Phase transitions
         if (s.phase !== lastPhaseRef.current) {
           if (s.phase === "flying") {
-            startTimeRef.current = performance.now();
-            setMultiplier(1);
+            // Rebase start time using server's current multiplier so RAF picks up smoothly
+            const m0 = Math.max(1, s.multiplier || 1);
+            const elapsedMs = (Math.log(m0) / Math.log(1.075) / 1.8) * 1000;
+            startTimeRef.current = performance.now() - elapsedMs;
+            setMultiplier(m0);
             playSound(startAudioRef.current);
           } else if (s.phase === "crashed") {
             if (startAudioRef.current) { startAudioRef.current.pause(); startAudioRef.current.currentTime = 0; }
@@ -151,7 +154,13 @@ const AviatorGame = () => {
           setCrashAt(s.crashAt);
           setMultiplier(s.crashAt);
         } else if (s.phase === "flying") {
-          setMultiplier((prev) => (s.multiplier > prev ? s.multiplier : prev));
+          // If client has drifted behind server, rebase startTimeRef to catch up smoothly.
+          const localElapsed = (performance.now() - startTimeRef.current) / 1000;
+          const localMult = Math.pow(1.075, localElapsed * 1.8);
+          if (s.multiplier > localMult + 0.05) {
+            const elapsedMs = (Math.log(s.multiplier) / Math.log(1.075) / 1.8) * 1000;
+            startTimeRef.current = performance.now() - elapsedMs;
+          }
         }
       } catch {
         // ignore transient errors
