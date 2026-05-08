@@ -379,7 +379,7 @@ const AviatorGame = () => {
                       key={countdown}
                       className="h-full bg-primary"
                       initial={{ width: "100%" }}
-                      animate={{ width: `${(countdown / 5) * 100}%` }}
+                      animate={{ width: `${Math.max(0, Math.min(100, (countdown / 7) * 100))}%` }}
                       transition={{ duration: 0.35 }}
                     />
                   </div>
