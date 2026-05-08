@@ -454,9 +454,6 @@ const BetPanel = ({
   // Lost-bet toast on crash
   useEffect(() => {
     if (phase !== lastPhaseRef.current) {
-      if (phase === "crashed" && hasBet && cashedOutAt === null) {
-        toast.error(`[${title}] FLEW AWAY @ ${multiplier.toFixed(2)}x — Bet lost`);
-      }
       lastPhaseRef.current = phase;
     }
   }, [phase, hasBet, cashedOutAt, multiplier, title]);
@@ -474,7 +471,6 @@ const BetPanel = ({
       setHasBet(true);
       setCashedOutAt(null);
       refreshBalance();
-      toast.success(`[${title}] Bet placed: ${formatMoney(betAmount, currency)}`);
     } catch (e) {
       toast.error((e as Error).message || "Failed to place bet");
     } finally {
