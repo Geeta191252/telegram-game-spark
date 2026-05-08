@@ -235,7 +235,7 @@ const AviatorGame = () => {
 
   return (
     <div className="min-h-screen overflow-hidden bg-background text-foreground" style={{ fontFamily: "Roboto, Inter, sans-serif" }}>
-      <audio preload="auto" src="/sounds/aviator/background.mp3" />
+      
       <audio preload="auto" src="/sounds/aviator/game-start.mp3" />
       <audio preload="auto" src="/sounds/aviator/plane-crash.mp3" />
       <audio preload="auto" src="/sounds/aviator/cashout.mp3" />
