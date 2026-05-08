@@ -2157,7 +2157,7 @@ app.post("/api/admin/aviator/manual/add", (req, res) => {
   if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
   const curr = getAviatorCurr(req);
   const num = Number(value);
-  if (isNaN(num) || num < 1.0 || num > 1000) return res.status(400).json({ error: "Value must be between 1.00 and 1000" });
+  if (isNaN(num) || num <= 0 || num > 100000) return res.status(400).json({ error: "Value must be > 0 and ≤ 100000" });
   const s = aviatorState[curr];
   s.manualQueue = s.manualQueue || [];
   s.manualQueue.push(Number(num.toFixed(2)));
