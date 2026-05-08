@@ -15,6 +15,7 @@ import staticPlane from "@/assets/aviator/static-plane.png";
 import rotateBg from "@/assets/aviator/bg-rotate-old.svg";
 import xAxis from "@/assets/aviator/x-axis.png";
 import yAxis from "@/assets/aviator/y-axis.png";
+import spaceBg from "@/assets/aviator/space-bg.jpg";
 
 type Phase = "betting" | "flying" | "crashed";
 
@@ -298,10 +299,8 @@ const AviatorGame = () => {
           </div>
 
           <div className="relative min-h-[310px] flex-1 lg:rounded-lg lg:border lg:border-border overflow-hidden bg-card">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_hsl(280_85%_45%)_0%,_hsl(220_90%_30%)_45%,_hsl(260_80%_15%)_100%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,_hsl(330_90%_55%/0.55)_0%,_transparent_55%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_85%,_hsl(190_95%_55%/0.45)_0%,_transparent_50%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,_hsl(45_100%_60%/0.35)_0%,_transparent_45%)]" />
+            <img src={spaceBg} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-black/20" />
             
             {phase !== "betting" && (
               <div className="absolute left-5 right-6 bottom-6 top-7 pointer-events-none">
