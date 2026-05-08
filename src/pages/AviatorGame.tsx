@@ -135,7 +135,7 @@ const AviatorGame = () => {
       startTimeRef.current = performance.now();
       const animate = (now: number) => {
         const elapsed = (now - startTimeRef.current) / 1000;
-        const nextMultiplier = Math.pow(1.075, elapsed * 4.2);
+        const nextMultiplier = Math.pow(1.075, elapsed * 1.8);
         if (nextMultiplier >= crashAt) {
           setMultiplier(crashAt);
           setPhase("crashed");
