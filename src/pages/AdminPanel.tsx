@@ -128,8 +128,8 @@ const AdminPanel = () => {
   };
 
   const addManualValue = async (value: number) => {
-    if (!value || value < 1) {
-      toast({ title: "Invalid", description: "Value must be ≥ 1.00x" });
+    if (!isFinite(value) || value <= 0) {
+      toast({ title: "Invalid", description: "Value must be greater than 0" });
       return;
     }
     try {
