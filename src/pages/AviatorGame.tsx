@@ -487,7 +487,7 @@ const BetPanel = ({
     if (phase !== "flying" || !hasBet || cashedOutAt !== null) return;
     if (!tgUserId) return;
     try {
-      const result = await cashOutAviator(tgUserId, currency);
+      const result = await cashOutAviator(tgUserId, currency, auto ? 2 : 1);
       setCashedOutAt(result.multiplier);
       playSound(cashoutAudioRef.current);
       toast.success(`[${title}] Cashed out @ ${result.multiplier.toFixed(2)}x — ${formatMoney(result.winAmount, currency)}`);
