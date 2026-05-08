@@ -464,7 +464,7 @@ const BetPanel = ({
   };
 
   return (
-    <div className="rounded-xl border border-primary/30 bg-[hsl(265_60%_10%)] p-2 space-y-1.5 shadow-[0_0_14px_hsl(280_80%_40%/0.2)]">
+    <div className="rounded-lg border border-primary/30 bg-[hsl(265_60%_10%)] p-1.5 space-y-1 shadow-[0_0_10px_hsl(280_80%_40%/0.18)]">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-bold tracking-widest text-primary/90">{muted ? "AUTO BET" : "BET AMOUNT"}</span>
         {muted && <span className="text-[9px] font-bold text-muted-foreground">AUTO</span>}
