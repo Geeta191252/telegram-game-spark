@@ -1878,14 +1878,17 @@ async function aviatorPhaseTick(currency) {
     const m = aviatorMultiplierAt(elapsed);
 
     // Dynamic house-edge cap (skipped when admin manual override is active).
+    // Uses CUMULATIVE budget so individual rounds are allowed to lose if house is ahead overall.
     if (!s.manualOverride) {
-      const remainingBudget = Math.max(0, (s.maxPayout || 0) - s.totalPaidOut);
+      const cumBudget = (s.cumPool || 0) * (1 - (s.profitPct || 50) / 100);
+      const remainingBudget = Math.max(0, cumBudget - (s.cumPaid || 0));
       let maxRemainingBet = 0;
       for (const k of Object.keys(s.bets)) {
         const b = s.bets[k];
         if (!b.cashedOutAt && b.amount > maxRemainingBet) maxRemainingBet = b.amount;
       }
-      if (maxRemainingBet > 0) {
+      // Only tighten if even one cashout at current crashAt would bust cumulative budget.
+      if (maxRemainingBet > 0 && maxRemainingBet * s.crashAt > remainingBudget) {
         const dynCap = Math.max(1.0, remainingBudget / maxRemainingBet);
         if (dynCap < s.crashAt) s.crashAt = Number(dynCap.toFixed(2));
       }
