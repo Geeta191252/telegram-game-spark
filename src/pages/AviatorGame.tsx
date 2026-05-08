@@ -153,6 +153,7 @@ const AviatorGame = () => {
     }
 
     if (phase === "crashed") {
+      if (startAudioRef.current) { startAudioRef.current.pause(); startAudioRef.current.currentTime = 0; }
       playSound(crashAudioRef.current);
       if (hasBet && cashedOutAt === null) {
         toast.error(`FLEW AWAY @ ${crashAt.toFixed(2)}x — Bet lost`);
