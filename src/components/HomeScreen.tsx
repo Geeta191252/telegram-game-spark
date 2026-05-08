@@ -88,9 +88,16 @@ const HomeScreen = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 1: return <EarnScreen />;
-      case 2: return <FriendsScreen />;
-      case 3: return <WalletScreen />;
+      case 1: return (
+        <div className="relative z-10 px-6 pt-20 pb-32 text-center">
+          <div className="text-6xl mb-4">🏪</div>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: "hsl(45 90% 65%)" }}>Market</h2>
+          <p className="text-sm" style={{ color: "hsl(260 30% 75%)" }}>Coming soon — exclusive items & rewards!</p>
+        </div>
+      );
+      case 2: return <EarnScreen />;
+      case 3: return <FriendsScreen />;
+      case 4: return <WalletScreen />;
       default: return null;
     }
   };
