@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, ClipboardList, Menu, MessageCircle, Plus, Trophy } from "lucide-react";
+import { ArrowLeft, ChevronDown, ClipboardList, Menu, MessageCircle, Plus, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { getTelegramUser, type CurrencyType, fetchAviatorState, placeAviatorBet, cashOutAviator, type AviatorState } from "@/lib/telegram";
