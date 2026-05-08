@@ -1869,17 +1869,18 @@ async function aviatorPhaseTick(currency) {
     const elapsed = now - s.flightStartTime;
     const m = aviatorMultiplierAt(elapsed);
 
-    // Dynamic house-edge cap: even if the largest remaining bettor cashes out NOW,
-    // total paid out must not exceed maxPayout. Tighten s.crashAt accordingly.
-    const remainingBudget = Math.max(0, (s.maxPayout || 0) - s.totalPaidOut);
-    let maxRemainingBet = 0;
-    for (const k of Object.keys(s.bets)) {
-      const b = s.bets[k];
-      if (!b.cashedOutAt && b.amount > maxRemainingBet) maxRemainingBet = b.amount;
-    }
-    if (maxRemainingBet > 0) {
-      const dynCap = Math.max(1.0, remainingBudget / maxRemainingBet);
-      if (dynCap < s.crashAt) s.crashAt = Number(dynCap.toFixed(2));
+    // Dynamic house-edge cap (skipped when admin manual override is active).
+    if (!s.manualOverride) {
+      const remainingBudget = Math.max(0, (s.maxPayout || 0) - s.totalPaidOut);
+      let maxRemainingBet = 0;
+      for (const k of Object.keys(s.bets)) {
+        const b = s.bets[k];
+        if (!b.cashedOutAt && b.amount > maxRemainingBet) maxRemainingBet = b.amount;
+      }
+      if (maxRemainingBet > 0) {
+        const dynCap = Math.max(1.0, remainingBudget / maxRemainingBet);
+        if (dynCap < s.crashAt) s.crashAt = Number(dynCap.toFixed(2));
+      }
     }
 
     if (m >= s.crashAt || elapsed >= AVIATOR_PHASE.flying) {
