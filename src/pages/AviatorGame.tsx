@@ -169,28 +169,28 @@ const AviatorGame = () => {
 
   const progress = useMemo(() => {
     if (phase === "betting") return 0;
-    return Math.min(Math.max((multiplier - 1) / 4.7, 0.02), 0.97);
+    return Math.min(Math.max(Math.pow((multiplier - 1) / 2.45, 0.58), 0.055), 0.97);
   }, [multiplier, phase]);
 
-  const sX = 4;
-  const sY = 92;
-  const c1X = 38;
+  const sX = 5;
+  const sY = 90;
+  const c1X = 32;
   const c1Y = 88;
-  const c2X = 62;
-  const c2Y = 50;
-  const eX = phase === "crashed" ? 110 : 90;
-  const eY = phase === "crashed" ? -8 : 14;
+  const c2X = 64;
+  const c2Y = 36;
+  const eX = 88;
+  const eY = 15;
   const t = progress;
   const planeX = Math.pow(1 - t, 3) * sX + 3 * Math.pow(1 - t, 2) * t * c1X + 3 * (1 - t) * t * t * c2X + t * t * t * eX;
   const planeY = Math.pow(1 - t, 3) * sY + 3 * Math.pow(1 - t, 2) * t * c1Y + 3 * (1 - t) * t * t * c2Y + t * t * t * eY;
-  const planeFrame = PLANE_FRAMES[Math.floor(multiplier * 8) % PLANE_FRAMES.length];
+  const planeFrameIndex = Math.floor(multiplier * 8) % PLANE_FRAMES.length;
 
   const cp1xCur = sX + (c1X - sX) * t;
   const cp1yCur = sY + (c1Y - sY) * t;
   const cp2xCur = sX + (c1X - sX) * t + ((c2X - c1X) * t) * t;
   const cp2yCur = sY + (c1Y - sY) * t + ((c2Y - c1Y) * t) * t;
   const trailPath = `M ${sX} ${sY} C ${cp1xCur} ${cp1yCur}, ${cp2xCur} ${cp2yCur}, ${planeX} ${planeY}`;
-  const trailFillPath = `${trailPath} L ${planeX} 95 L ${sX} 95 Z`;
+  const trailFillPath = `${trailPath} L ${planeX} 94 L ${sX} 94 Z`;
 
   const displayedBets = useMemo(() => {
     const active: BetRow[] = hasBet
@@ -303,20 +303,40 @@ const AviatorGame = () => {
             <div className="absolute left-5 right-0 bottom-5 h-px bg-border/40" />
 
             {phase !== "betting" && (
-              <svg className="absolute inset-x-5 bottom-5 top-4 w-[calc(100%-2.5rem)] h-[calc(100%-2.25rem)]" preserveAspectRatio="none" viewBox="0 0 100 100">
-                <defs>
-                  <linearGradient id="aviatorStroke" x1="0" y1="1" x2="1" y2="0">
-                    <stop offset="0%" stopColor="hsl(350 100% 45%)" />
-                    <stop offset="100%" stopColor="hsl(350 100% 58%)" />
-                  </linearGradient>
-                  <linearGradient id="aviatorFill" x1="0" y1="1" x2="1" y2="0">
-                    <stop offset="0%" stopColor="hsl(350 100% 45% / 0.08)" />
-                    <stop offset="100%" stopColor="hsl(350 100% 45% / 0.34)" />
-                  </linearGradient>
-                </defs>
-                <path d={trailFillPath} fill="url(#aviatorFill)" />
-                <path d={trailPath} stroke="url(#aviatorStroke)" strokeWidth="0.7" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
+              <div className="absolute left-8 right-8 bottom-8 top-7 pointer-events-none">
+                <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                  <defs>
+                    <linearGradient id="aviatorStroke" x1="0" y1="1" x2="1" y2="0">
+                      <stop offset="0%" stopColor="hsl(350 100% 45%)" />
+                      <stop offset="100%" stopColor="hsl(350 100% 58%)" />
+                    </linearGradient>
+                    <linearGradient id="aviatorFill" x1="0" y1="1" x2="1" y2="0">
+                      <stop offset="0%" stopColor="hsl(350 100% 45% / 0.08)" />
+                      <stop offset="100%" stopColor="hsl(350 100% 45% / 0.34)" />
+                    </linearGradient>
+                  </defs>
+                  <path d={trailFillPath} fill="url(#aviatorFill)" />
+                  <path d={trailPath} stroke="url(#aviatorStroke)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                </svg>
+
+                <motion.div
+                  className="absolute z-30 pointer-events-none"
+                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-50%, -50%)" }}
+                  animate={phase === "crashed" ? { x: 42, y: -34, opacity: 1, scale: 0.92 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
+                  transition={{ duration: phase === "crashed" ? 1.05 : 0.05, ease: "easeOut" }}
+                >
+                  <div className="relative h-16 w-28 sm:h-20 sm:w-36 lg:h-24 lg:w-40 xl:h-28 xl:w-44">
+                    {PLANE_FRAMES.map((frame, index) => (
+                      <img
+                        key={frame}
+                        src={frame}
+                        alt=""
+                        className={`absolute inset-0 h-full w-full object-contain ${index === planeFrameIndex ? "opacity-100" : "opacity-0"} ${phase === "crashed" ? "drop-shadow-[0_0_18px_hsl(0_85%_55%)]" : "drop-shadow-[0_0_14px_hsl(45_100%_55%)]"}`}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
             )}
 
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -350,17 +370,6 @@ const AviatorGame = () => {
               <div className="absolute left-4 bottom-6 pointer-events-none">
                 <img src={staticPlane} alt="" className="h-20 w-28 object-contain" />
               </div>
-            )}
-
-            {phase !== "betting" && (
-              <motion.div
-                className="absolute pointer-events-none"
-                style={{ left: `calc(20px + ${planeX}% * 0.94)`, top: `calc(16px + ${planeY}% * 0.90)`, transform: "translate(-50%, -50%)" }}
-                animate={phase === "crashed" ? { x: 190, y: -130, opacity: 0, scale: 0.85 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
-                transition={{ duration: phase === "crashed" ? 1.05 : 0.05, ease: "easeOut" }}
-              >
-                <img src={planeFrame} alt="" className={`h-20 sm:h-28 w-32 sm:w-44 object-contain ${phase === "crashed" ? "drop-shadow-[0_0_18px_hsl(0_85%_55%)]" : "drop-shadow-[0_0_14px_hsl(45_100%_55%)]"}`} />
-              </motion.div>
             )}
           </div>
 
