@@ -1797,6 +1797,7 @@ function makeAviatorPool() {
     totalPool: 0,                // sum of all bets this round
     totalPaidOut: 0,             // running sum of cashouts
     userCooldown: {},            // { telegramId: cooldownUntilRound } — blocks wins for 4-6 rounds after a win
+    manualQueue: [],             // FIFO queue of admin-set crash multipliers (used before any auto/random logic)
   };
 }
 const aviatorState = {
