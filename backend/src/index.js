@@ -2134,7 +2134,66 @@ app.post("/api/admin/aviator/profit", async (req, res) => {
   }
 });
 
-// SPA fallback - serve index.html for all non-API routes
+// ============================================
+// Aviator manual crash queue (admin control)
+// Admin queues exact crash multipliers per currency. Each round consumes one
+// from the head of the queue and uses it as the crash point — bypassing the
+// auto profit cap. When the queue is empty, normal profit% logic resumes.
+// ============================================
+function getAviatorCurr(req) {
+  const c = (req.body && req.body.currency) || req.query.currency;
+  return c === "star" ? "star" : "dollar";
+}
+
+app.get("/api/admin/aviator/manual", (req, res) => {
+  if (String(req.query.ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+  const curr = getAviatorCurr(req);
+  const s = aviatorState[curr];
+  res.json({ currency: curr, queue: s.manualQueue || [], active: !!s.manualOverride, currentCrashAt: s.crashAt });
+});
+
+app.post("/api/admin/aviator/manual/add", (req, res) => {
+  const { ownerId, value } = req.body || {};
+  if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+  const curr = getAviatorCurr(req);
+  const num = Number(value);
+  if (isNaN(num) || num < 1.0 || num > 1000) return res.status(400).json({ error: "Value must be between 1.00 and 1000" });
+  const s = aviatorState[curr];
+  s.manualQueue = s.manualQueue || [];
+  s.manualQueue.push(Number(num.toFixed(2)));
+  res.json({ success: true, queue: s.manualQueue });
+});
+
+app.post("/api/admin/aviator/manual/set", (req, res) => {
+  const { ownerId, queue } = req.body || {};
+  if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+  if (!Array.isArray(queue)) return res.status(400).json({ error: "queue must be an array" });
+  const curr = getAviatorCurr(req);
+  const cleaned = queue.map((v) => Number(v)).filter((n) => !isNaN(n) && n >= 1.0 && n <= 1000).map((n) => Number(n.toFixed(2)));
+  aviatorState[curr].manualQueue = cleaned;
+  res.json({ success: true, queue: cleaned });
+});
+
+app.post("/api/admin/aviator/manual/clear", (req, res) => {
+  const { ownerId } = req.body || {};
+  if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+  const curr = getAviatorCurr(req);
+  aviatorState[curr].manualQueue = [];
+  res.json({ success: true });
+});
+
+app.post("/api/admin/aviator/manual/remove", (req, res) => {
+  const { ownerId, index } = req.body || {};
+  if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+  const curr = getAviatorCurr(req);
+  const s = aviatorState[curr];
+  const i = Number(index);
+  if (isNaN(i) || i < 0 || i >= (s.manualQueue || []).length) return res.status(400).json({ error: "Invalid index" });
+  s.manualQueue.splice(i, 1);
+  res.json({ success: true, queue: s.manualQueue });
+});
+
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
