@@ -319,13 +319,15 @@ const AviatorGame = () => {
                   <path d={trailPath} stroke="url(#aviatorStroke)" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                 </svg>
 
-                <motion.div
+                <div
                   className="absolute z-30 pointer-events-none"
-                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-44%, -60%)" }}
-                  animate={phase === "crashed" ? { x: 18, y: -16, opacity: 1, scale: 0.78 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
-                  transition={{ duration: phase === "crashed" ? 1.05 : 0.05, ease: "easeOut" }}
+                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-44%, -105%)" }}
                 >
-                  <div className="relative h-6 w-12 sm:h-8 sm:w-16 lg:h-10 lg:w-20 xl:h-12 xl:w-24">
+                  <motion.div
+                    className="relative h-6 w-12 sm:h-8 sm:w-16 lg:h-10 lg:w-20 xl:h-12 xl:w-24"
+                    animate={phase === "crashed" ? { x: 18, y: -16, opacity: 1, scale: 0.78 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
+                    transition={{ duration: phase === "crashed" ? 1.05 : 0.05, ease: "easeOut" }}
+                  >
                     {PLANE_FRAMES.map((frame, index) => (
                       <img
                         key={frame}
@@ -334,8 +336,8 @@ const AviatorGame = () => {
                         className={`absolute inset-0 h-full w-full object-contain ${index === planeFrameIndex ? "opacity-100" : "opacity-0"} ${phase === "crashed" ? "drop-shadow-[0_0_18px_hsl(0_85%_55%)]" : "drop-shadow-[0_0_14px_hsl(45_100%_55%)]"}`}
                       />
                     ))}
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </div>
               </div>
             )}
 
