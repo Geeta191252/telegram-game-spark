@@ -392,7 +392,121 @@ const AdminPanel = () => {
                 </p>
               </div>
 
-              {/* Recent Deposits */}
+              {/* Aviator Manual Crash Control */}
+              <div className="rounded-2xl p-4" style={{
+                background: "linear-gradient(135deg, hsla(280, 80%, 35%, 0.22), hsla(220, 80%, 35%, 0.22))",
+                border: "1px solid hsla(280, 80%, 55%, 0.4)",
+              }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="font-bold text-sm" style={{ color: "hsl(45 90% 70%)" }}>🎯 Aviator Manual Crash Control</h2>
+                  {manualActive && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(140 70% 40%)", color: "white" }}>LIVE</span>
+                  )}
+                </div>
+                <p className="text-xs mb-3" style={{ color: "hsl(0 0% 70%)" }}>
+                  Queue exact crash multipliers. Each round consumes one — overrides the auto profit cap.
+                </p>
+
+                {/* Currency tabs */}
+                <div className="flex gap-2 mb-3">
+                  {(["dollar", "star"] as const).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => { setManualCurrency(c); fetchManualQueue(c); }}
+                      className="flex-1 py-1.5 rounded-lg text-xs font-bold transition"
+                      style={{
+                        background: manualCurrency === c ? "hsl(280 70% 50%)" : "hsla(260, 40%, 18%, 0.8)",
+                        color: manualCurrency === c ? "white" : "hsl(0 0% 70%)",
+                        border: `1px solid ${manualCurrency === c ? "hsl(280 70% 60%)" : "hsla(280, 50%, 40%, 0.3)"}`,
+                      }}
+                    >
+                      {c === "dollar" ? "$ Dollar" : "⭐ Star"}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick add buttons */}
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[1, 1.5, 2, 3, 4, 5, 10].map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => addManualValue(v)}
+                      className="px-2.5 py-1 rounded-md text-xs font-bold"
+                      style={{ background: "hsl(350 80% 50%)", color: "white" }}
+                    >
+                      {v}x
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom input */}
+                <div className="flex gap-2 items-center mb-3">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    placeholder="Custom (e.g. 1.75)"
+                    value={manualInput}
+                    onChange={(e) => setManualInput(e.target.value)}
+                    className="flex-1 rounded-lg px-3 py-2 text-sm font-bold outline-none"
+                    style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
+                  />
+                  <button
+                    onClick={() => { const n = Number(manualInput); if (!isNaN(n)) addManualValue(n); }}
+                    className="px-4 py-2 rounded-lg text-xs font-bold"
+                    style={{ background: "hsl(140 70% 40%)", color: "white" }}
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                {/* Queue list */}
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-bold" style={{ color: "hsl(0 0% 70%)" }}>
+                    Queue ({manualQueue.length})
+                  </span>
+                  {manualQueue.length > 0 && (
+                    <button
+                      onClick={clearManualQueue}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded"
+                      style={{ background: "hsla(0, 70%, 40%, 0.3)", color: "hsl(0 90% 75%)" }}
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+                <div className="rounded-lg p-2 min-h-[44px]" style={{ background: "hsla(260, 40%, 12%, 0.6)", border: "1px solid hsla(280, 50%, 40%, 0.2)" }}>
+                  {manualQueue.length === 0 ? (
+                    <p className="text-xs text-center py-2" style={{ color: "hsl(0 0% 50%)" }}>
+                      Empty — auto profit% logic will run.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {manualQueue.map((v, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold"
+                          style={{ background: i === 0 ? "hsl(45 90% 50%)" : "hsla(280, 60%, 50%, 0.8)", color: i === 0 ? "hsl(260 70% 15%)" : "white" }}
+                        >
+                          #{i + 1}: {v}x
+                          <button onClick={() => removeManualAt(i)} className="ml-0.5 opacity-80 hover:opacity-100" aria-label="Remove">✕</button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-[10px] mt-2" style={{ color: "hsl(0 0% 55%)" }}>
+                  #1 (yellow) is next round's crash. Lower values = more user losses, higher profit.
+                </p>
+                <button
+                  onClick={() => fetchManualQueue()}
+                  className="w-full mt-2 py-1.5 rounded-md text-[11px] font-bold"
+                  style={{ background: "hsla(260, 40%, 20%, 0.8)", color: "hsl(0 0% 80%)" }}
+                >
+                  ↻ Refresh
+                </button>
+              </div>
+
               <div>
                 <h2 className="font-bold text-sm mb-3" style={{ color: "hsl(45 90% 70%)" }}>📋 Recent Deposits</h2>
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
