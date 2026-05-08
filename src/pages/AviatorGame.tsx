@@ -406,22 +406,6 @@ const AviatorGame = () => {
             />
           </div>
 
-          <nav className="h-14 grid grid-cols-4 rounded-lg bg-card border border-border lg:hidden">
-            {[
-              { icon: PlaneNavIcon, label: "Aviator", active: true },
-              { icon: ClipboardList, label: "My Bets" },
-              { icon: Trophy, label: "Top" },
-              { icon: MessageCircle, label: "Chat" },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <button key={item.label} className="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold text-muted-foreground data-[active=true]:text-primary" data-active={item.active}>
-                  <Icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
         </section>
       </main>
     </div>
