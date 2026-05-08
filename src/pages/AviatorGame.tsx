@@ -298,9 +298,13 @@ const AviatorGame = () => {
           </div>
 
           <div className="relative min-h-[310px] flex-1 rounded-lg border border-border overflow-hidden bg-card">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(220_40%_8%)_0%,_hsl(222_47%_4%)_100%)]" />
-            <div className="absolute left-5 top-0 bottom-5 w-px bg-border/40" />
-            <div className="absolute left-5 right-0 bottom-5 h-px bg-border/40" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_hsl(280_85%_45%)_0%,_hsl(220_90%_30%)_45%,_hsl(260_80%_15%)_100%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,_hsl(330_90%_55%/0.55)_0%,_transparent_55%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_85%,_hsl(190_95%_55%/0.45)_0%,_transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,_hsl(45_100%_60%/0.35)_0%,_transparent_45%)]" />
+            <div className="absolute inset-0 opacity-40 mix-blend-screen bg-[conic-gradient(from_120deg_at_50%_50%,_hsl(280_90%_55%/0.3),_hsl(190_95%_55%/0.25),_hsl(330_90%_55%/0.3),_hsl(45_100%_60%/0.25),_hsl(280_90%_55%/0.3))]" />
+            <div className="absolute left-5 top-0 bottom-5 w-px bg-white/30" />
+            <div className="absolute left-5 right-0 bottom-5 h-px bg-white/30" />
 
             {phase !== "betting" && (
               <div className="absolute left-5 right-6 bottom-6 top-7 pointer-events-none">
