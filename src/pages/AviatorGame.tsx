@@ -258,7 +258,7 @@ const AviatorGame = () => {
         </div>
       </header>
 
-      <main className="h-[calc(100vh-48px)] min-h-[720px] grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-2 p-2 bg-background">
+      <main className="h-[calc(100dvh-48px)] min-h-0 grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-1 lg:gap-2 p-0 lg:p-2 bg-background">
         <aside className="hidden lg:flex flex-col rounded-lg bg-card border border-border overflow-hidden">
           <div className="h-11 grid grid-cols-2 text-sm font-bold border-b border-border">
             <button className="relative text-foreground">All Bets<span className="absolute left-5 right-5 bottom-0 h-0.5 bg-primary" /></button>
@@ -283,8 +283,8 @@ const AviatorGame = () => {
           </div>
         </aside>
 
-        <section className="min-w-0 flex flex-col gap-2">
-          <div className="h-9 flex items-center justify-between rounded-lg bg-card border border-border px-2">
+        <section className="min-w-0 flex flex-col gap-1 lg:gap-2 overflow-hidden">
+          <div className="h-9 flex items-center justify-between lg:rounded-lg bg-card border-y lg:border border-border px-2">
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
               {history.map((item, index) => (
                 <span key={`${item}-${index}`} className="shrink-0 rounded-full px-2.5 py-1 text-[12px] font-bold bg-muted" style={{ color: roundColor(item) }}>
@@ -297,15 +297,12 @@ const AviatorGame = () => {
             </button>
           </div>
 
-          <div className="relative min-h-[310px] flex-1 rounded-lg border border-border overflow-hidden bg-card">
+          <div className="relative min-h-[310px] flex-1 lg:rounded-lg lg:border lg:border-border overflow-hidden bg-card">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,_hsl(280_85%_45%)_0%,_hsl(220_90%_30%)_45%,_hsl(260_80%_15%)_100%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,_hsl(330_90%_55%/0.55)_0%,_transparent_55%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_85%,_hsl(190_95%_55%/0.45)_0%,_transparent_50%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,_hsl(45_100%_60%/0.35)_0%,_transparent_45%)]" />
             <div className="absolute inset-0 opacity-40 mix-blend-screen bg-[conic-gradient(from_120deg_at_50%_50%,_hsl(280_90%_55%/0.3),_hsl(190_95%_55%/0.25),_hsl(330_90%_55%/0.3),_hsl(45_100%_60%/0.25),_hsl(280_90%_55%/0.3))]" />
-            <div className="absolute left-5 top-0 bottom-5 w-px bg-white/30" />
-            <div className="absolute left-5 right-0 bottom-5 h-px bg-white/30" />
-
             {phase !== "betting" && (
               <div className="absolute left-5 right-6 bottom-6 top-7 pointer-events-none">
                 <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
