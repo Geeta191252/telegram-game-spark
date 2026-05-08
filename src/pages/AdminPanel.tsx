@@ -323,6 +323,92 @@ const AdminPanel = () => {
     setProcessingWithdrawal(null);
   };
 
+  // ---- Offers handlers ----
+  const fetchOffers = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/list`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID) }),
+      });
+      const data = await res.json();
+      if (res.ok) setOffers(data.offers || []);
+    } catch { /* ignore */ }
+  };
+
+  const handleCreateOffer = async () => {
+    const payNum = parseFloat(offerForm.payAmount);
+    const getNum = parseFloat(offerForm.getAmount);
+    if (!offerForm.title.trim() || isNaN(payNum) || payNum <= 0 || isNaN(getNum) || getNum <= 0) {
+      toast({ title: "Invalid offer", description: "Fill title, pay & get amounts." });
+      return;
+    }
+    setCreatingOffer(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerId: String(OWNER_ID),
+          title: offerForm.title.trim(),
+          payAmount: payNum,
+          payCurrency: offerForm.payCurrency,
+          getAmount: getNum,
+          bonusLabel: offerForm.bonusLabel.trim(),
+          valueLabel: offerForm.valueLabel.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast({ title: "Offer created ✅", description: `${offerForm.title} is now live in Market.` });
+      setOfferForm({ title: "", payAmount: "", payCurrency: "star", getAmount: "", bonusLabel: "", valueLabel: "" });
+      fetchOffers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Could not create offer." });
+    } finally {
+      setCreatingOffer(false);
+    }
+  };
+
+  const handleDeleteOffer = async (offerId: string) => {
+    if (!confirm("Delete this offer?")) return;
+    setDeletingOfferId(offerId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), offerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast({ title: "Offer deleted" });
+      setOffers((prev) => prev.filter((o) => o._id !== offerId));
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Could not delete." });
+    } finally {
+      setDeletingOfferId(null);
+    }
+  };
+
+  const handleBroadcastOffer = async (offerId: string) => {
+    if (!confirm("Send this offer to ALL users via bot?")) return;
+    setBroadcastingId(offerId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/broadcast`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), offerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast({ title: "Broadcast sent 📢", description: `Sent to ${data.sent} users (${data.failed} failed).` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Broadcast failed." });
+    } finally {
+      setBroadcastingId(null);
+    }
+  };
+
   if (!isOwner) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(260 60% 15%)" }}>
