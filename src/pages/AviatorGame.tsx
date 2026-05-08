@@ -29,22 +29,11 @@ type BetRow = {
 const PRESETS = [10, 25, 50, 100, 250, 500, 1000];
 const PLANE_FRAMES = [plane0, plane1, plane2, plane3];
 
-const seededRows: BetRow[] = [
-  { user: "A***7", amount: 420, multiplier: 2.14, cashout: 898.8 },
-  { user: "R***2", amount: 100, multiplier: null, cashout: null },
-  { user: "K***9", amount: 750, multiplier: 1.64, cashout: 1230 },
-  { user: "M***4", amount: 250, multiplier: null, cashout: null },
-  { user: "S***1", amount: 1000, multiplier: 3.08, cashout: 3080 },
-  { user: "D***8", amount: 150, multiplier: null, cashout: null },
-];
-
-const generateCrashPoint = () => {
-  const r = Math.random();
-  if (r < 0.15) return Number((1 + Math.random() * 0.35).toFixed(2));
-  if (r < 0.65) return Number((1.35 + Math.random() * 1.75).toFixed(2));
-  if (r < 0.9) return Number((3.1 + Math.random() * 4.8).toFixed(2));
-  return Number((8 + Math.random() * 12).toFixed(2));
+const PRESETS_BY_CURRENCY: Record<CurrencyType, number[]> = {
+  dollar: [1, 5, 10, 25, 50, 100, 250],
+  star: [10, 25, 50, 100, 250, 500, 1000],
 };
+
 
 const formatMoney = (value: number, currency: CurrencyType) => {
   if (currency === "star") return `⭐${Number(value.toFixed(2))}`;
