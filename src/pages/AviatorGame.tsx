@@ -90,12 +90,11 @@ const AviatorGame = () => {
   }, []);
 
   useEffect(() => {
-    bgAudioRef.current = new Audio("/sounds/aviator/background.mp3");
     startAudioRef.current = new Audio("/sounds/aviator/game-start.mp3");
     crashAudioRef.current = new Audio("/sounds/aviator/plane-crash.mp3");
     cashoutAudioRef.current = new Audio("/sounds/aviator/cashout.mp3");
 
-    [bgAudioRef, startAudioRef, crashAudioRef, cashoutAudioRef].forEach((ref) => {
+    [startAudioRef, crashAudioRef, cashoutAudioRef].forEach((ref) => {
       if (ref.current) {
         ref.current.preload = "auto";
         ref.current.volume = 0.7;
@@ -104,7 +103,7 @@ const AviatorGame = () => {
     });
 
     return () => {
-      [bgAudioRef, startAudioRef, crashAudioRef, cashoutAudioRef].forEach((ref) => {
+      [startAudioRef, crashAudioRef, cashoutAudioRef].forEach((ref) => {
         if (ref.current) {
           ref.current.pause();
           ref.current.src = "";
