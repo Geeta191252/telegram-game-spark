@@ -172,6 +172,34 @@ const AdminPanel = () => {
     } catch { /* ignore */ }
   };
 
+  const setManualQueueBulk = async () => {
+    const parts = manualBulkInput
+      .split(/[\s,]+/)
+      .map((p) => p.replace(/x$/i, "").trim())
+      .filter(Boolean)
+      .map((p) => Number(p))
+      .filter((n) => isFinite(n) && n > 0 && n <= 100000);
+    if (parts.length === 0) {
+      toast({ title: "Invalid", description: "Enter values like 1, 3, 1, 2, 4" });
+      return;
+    }
+    try {
+      const r = await fetch(`${API_BASE_URL}/admin/aviator/manual/set`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), currency: manualCurrency, queue: parts }),
+      });
+      const d = await r.json();
+      if (r.ok) {
+        setManualQueue(d.queue);
+        setManualBulkInput("");
+        toast({ title: "Queue set", description: `${d.queue.length} values queued in exact order` });
+      } else {
+        toast({ title: "Failed", description: d.error || "Could not set" });
+      }
+    } catch { toast({ title: "Network error", description: "Please retry" }); }
+  };
+
   const user = getTelegramUser();
   const isOwner = user?.id === OWNER_ID;
 
