@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Users, Star, DollarSign, RefreshCw, User, CreditCard, Plus, Minus, X, Copy } from "lucide-react";
+import { ArrowLeft, Users, Star, DollarSign, RefreshCw, User, CreditCard, Plus, Minus, X, Copy, Tag, Send, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { getTelegramUser } from "@/lib/telegram";
@@ -48,7 +48,19 @@ interface WithdrawalRequest {
   withdrawalNetwork?: string;
 }
 
-type Tab = "stats" | "users" | "withdrawals";
+type Tab = "stats" | "users" | "withdrawals" | "offers";
+
+interface AdminOffer {
+  _id: string;
+  title: string;
+  payAmount: number;
+  payCurrency: "star" | "dollar";
+  getAmount: number;
+  bonusLabel?: string;
+  valueLabel?: string;
+  active: boolean;
+  createdAt: string;
+}
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -67,6 +79,20 @@ const AdminPanel = () => {
   const [adjustAction, setAdjustAction] = useState<"add" | "remove">("add");
   const [adjusting, setAdjusting] = useState(false);
   const [processingWithdrawal, setProcessingWithdrawal] = useState<string | null>(null);
+
+  // Offers state
+  const [offers, setOffers] = useState<AdminOffer[]>([]);
+  const [offerForm, setOfferForm] = useState({
+    title: "",
+    payAmount: "",
+    payCurrency: "star" as "star" | "dollar",
+    getAmount: "",
+    bonusLabel: "",
+    valueLabel: "",
+  });
+  const [creatingOffer, setCreatingOffer] = useState(false);
+  const [broadcastingId, setBroadcastingId] = useState<string | null>(null);
+  const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null);
 
   // Aviator profit %
   const [aviatorProfit, setAviatorProfit] = useState<number>(50);
@@ -231,7 +257,7 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    if (isOwner) { fetchAll(); fetchAviatorProfit(); fetchManualQueue("dollar"); }
+    if (isOwner) { fetchAll(); fetchAviatorProfit(); fetchManualQueue("dollar"); fetchOffers(); }
   }, []);
 
   const handleAdjust = async () => {
@@ -297,6 +323,92 @@ const AdminPanel = () => {
     setProcessingWithdrawal(null);
   };
 
+  // ---- Offers handlers ----
+  const fetchOffers = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/list`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID) }),
+      });
+      const data = await res.json();
+      if (res.ok) setOffers(data.offers || []);
+    } catch { /* ignore */ }
+  };
+
+  const handleCreateOffer = async () => {
+    const payNum = parseFloat(offerForm.payAmount);
+    const getNum = parseFloat(offerForm.getAmount);
+    if (!offerForm.title.trim() || isNaN(payNum) || payNum <= 0 || isNaN(getNum) || getNum <= 0) {
+      toast({ title: "Invalid offer", description: "Fill title, pay & get amounts." });
+      return;
+    }
+    setCreatingOffer(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerId: String(OWNER_ID),
+          title: offerForm.title.trim(),
+          payAmount: payNum,
+          payCurrency: offerForm.payCurrency,
+          getAmount: getNum,
+          bonusLabel: offerForm.bonusLabel.trim(),
+          valueLabel: offerForm.valueLabel.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast({ title: "Offer created ✅", description: `${offerForm.title} is now live in Market.` });
+      setOfferForm({ title: "", payAmount: "", payCurrency: "star", getAmount: "", bonusLabel: "", valueLabel: "" });
+      fetchOffers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Could not create offer." });
+    } finally {
+      setCreatingOffer(false);
+    }
+  };
+
+  const handleDeleteOffer = async (offerId: string) => {
+    if (!confirm("Delete this offer?")) return;
+    setDeletingOfferId(offerId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), offerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast({ title: "Offer deleted" });
+      setOffers((prev) => prev.filter((o) => o._id !== offerId));
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Could not delete." });
+    } finally {
+      setDeletingOfferId(null);
+    }
+  };
+
+  const handleBroadcastOffer = async (offerId: string) => {
+    if (!confirm("Send this offer to ALL users via bot?")) return;
+    setBroadcastingId(offerId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/offers/broadcast`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID), offerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      toast({ title: "Broadcast sent 📢", description: `Sent to ${data.sent} users (${data.failed} failed).` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Broadcast failed." });
+    } finally {
+      setBroadcastingId(null);
+    }
+  };
+
   if (!isOwner) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(260 60% 15%)" }}>
@@ -309,6 +421,7 @@ const AdminPanel = () => {
     { key: "stats", label: "Stats", icon: <Star className="h-4 w-4" /> },
     { key: "users", label: "Users", icon: <Users className="h-4 w-4" /> },
     { key: "withdrawals", label: "Withdrawals", icon: <CreditCard className="h-4 w-4" /> },
+    { key: "offers", label: "Offers", icon: <Tag className="h-4 w-4" /> },
   ];
 
   return (
@@ -797,6 +910,150 @@ const AdminPanel = () => {
                 ))}
                 {withdrawals.length === 0 && (
                   <p className="text-center text-sm py-8" style={{ color: "hsl(0 0% 50%)" }}>No withdrawal requests</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Offers Tab */}
+          {activeTab === "offers" && (
+            <div className="space-y-4">
+              {/* Create new offer form */}
+              <div className="rounded-2xl p-4" style={{
+                background: "linear-gradient(135deg, hsla(45, 90%, 50%, 0.18), hsla(25, 80%, 45%, 0.18))",
+                border: "1px solid hsla(45, 80%, 50%, 0.35)",
+              }}>
+                <h2 className="font-bold text-sm mb-3" style={{ color: "hsl(45 95% 70%)" }}>🎁 Create New Offer</h2>
+
+                <input
+                  type="text"
+                  placeholder="Offer title (e.g. STAR BOOST)"
+                  value={offerForm.title}
+                  onChange={(e) => setOfferForm({ ...offerForm, title: e.target.value })}
+                  className="w-full rounded-lg px-3 py-2 mb-2 text-sm font-bold outline-none"
+                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
+                />
+
+                <div className="flex gap-2 mb-2">
+                  {(["star", "dollar"] as const).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setOfferForm({ ...offerForm, payCurrency: c })}
+                      className="flex-1 py-2 rounded-lg text-xs font-bold"
+                      style={{
+                        background: offerForm.payCurrency === c ? "hsla(45, 80%, 50%, 0.25)" : "hsla(260, 40%, 30%, 0.4)",
+                        border: offerForm.payCurrency === c ? "1px solid hsla(45, 80%, 50%, 0.4)" : "1px solid transparent",
+                        color: offerForm.payCurrency === c ? "hsl(45 90% 70%)" : "hsl(0 0% 55%)",
+                      }}
+                    >
+                      {c === "star" ? "⭐ Star" : "$ Dollar (BTC)"}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <input
+                    type="number"
+                    placeholder="Pay amount"
+                    value={offerForm.payAmount}
+                    onChange={(e) => setOfferForm({ ...offerForm, payAmount: e.target.value })}
+                    className="rounded-lg px-3 py-2 text-sm font-bold outline-none"
+                    style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Get amount"
+                    value={offerForm.getAmount}
+                    onChange={(e) => setOfferForm({ ...offerForm, getAmount: e.target.value })}
+                    className="rounded-lg px-3 py-2 text-sm font-bold outline-none"
+                    style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(120, 60%, 45%, 0.3)" }}
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Bonus label (e.g. +100 ⭐)"
+                  value={offerForm.bonusLabel}
+                  onChange={(e) => setOfferForm({ ...offerForm, bonusLabel: e.target.value })}
+                  className="w-full rounded-lg px-3 py-2 mb-2 text-sm outline-none"
+                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
+                />
+                <input
+                  type="text"
+                  placeholder="Value badge (e.g. 120% VALUE)"
+                  value={offerForm.valueLabel}
+                  onChange={(e) => setOfferForm({ ...offerForm, valueLabel: e.target.value })}
+                  className="w-full rounded-lg px-3 py-2 mb-3 text-sm outline-none"
+                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
+                />
+
+                <button
+                  onClick={handleCreateOffer}
+                  disabled={creatingOffer}
+                  className="w-full py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, hsl(140 70% 40%), hsl(160 60% 35%))", color: "white" }}
+                >
+                  {creatingOffer ? "Creating…" : "➕ Create Offer"}
+                </button>
+              </div>
+
+              {/* Existing offers */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="font-bold text-sm" style={{ color: "hsl(45 90% 70%)" }}>📋 Active Offers ({offers.length})</h2>
+                  <button onClick={fetchOffers} className="p-1.5 rounded-md" style={{ background: "hsla(260, 40%, 25%, 0.6)" }}>
+                    <RefreshCw className="h-3.5 w-3.5" style={{ color: "hsl(45 80% 65%)" }} />
+                  </button>
+                </div>
+
+                {offers.length === 0 ? (
+                  <p className="text-center text-xs py-6" style={{ color: "hsl(0 0% 50%)" }}>No offers yet — create one above.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {offers.map((o) => {
+                      const payDisp = o.payCurrency === "star" ? `${o.payAmount} ⭐` : `$${o.payAmount}`;
+                      const getDisp = o.payCurrency === "star" ? `${o.getAmount} ⭐` : `$${o.getAmount}`;
+                      return (
+                        <div key={o._id} className="rounded-xl p-3" style={{
+                          background: "hsla(260, 40%, 25%, 0.6)",
+                          border: "1px solid hsla(45, 80%, 50%, 0.25)",
+                        }}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <p className="font-bold text-sm" style={{ color: "hsl(45 95% 70%)" }}>{o.title}</p>
+                            {o.valueLabel && (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{
+                                background: "hsla(0, 70%, 50%, 0.3)", color: "hsl(0 90% 75%)",
+                              }}>{o.valueLabel}</span>
+                            )}
+                          </div>
+                          <p className="text-xs mb-2" style={{ color: "hsl(0 0% 75%)" }}>
+                            Pay <span style={{ color: "hsl(0 0% 100%)" }} className="font-bold">{payDisp}</span> → Get <span style={{ color: "hsl(120 70% 60%)" }} className="font-bold">{getDisp}</span>
+                            {o.bonusLabel && <> · <span style={{ color: "hsl(45 95% 65%)" }}>{o.bonusLabel}</span></>}
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleBroadcastOffer(o._id)}
+                              disabled={broadcastingId === o._id}
+                              className="flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                              style={{ background: "linear-gradient(135deg, hsl(200 75% 45%), hsl(220 70% 40%))", color: "white" }}
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              {broadcastingId === o._id ? "Sending…" : "Broadcast"}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteOffer(o._id)}
+                              disabled={deletingOfferId === o._id}
+                              className="px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                              style={{ background: "linear-gradient(135deg, hsl(0 70% 45%), hsl(15 60% 40%))", color: "white" }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </div>

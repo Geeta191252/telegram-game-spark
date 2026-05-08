@@ -9,6 +9,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const User = require("./models/User");
 const Transaction = require("./models/Transaction");
 const GameBet = require("./models/GameBet");
+const Offer = require("./models/Offer");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -2268,6 +2269,121 @@ app.post("/api/admin/aviator/manual/remove", (req, res) => {
   res.json({ success: true, queue: s.manualQueue });
 });
 
+
+
+// ============================================
+// OFFERS — Admin manages, public lists
+// ============================================
+
+// GET /api/offers — public list of active offers (for Market screen)
+app.get("/api/offers", async (req, res) => {
+  try {
+    const offers = await Offer.find({ active: true }).sort({ createdAt: -1 }).lean();
+    res.json({ offers });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/admin/offers/list — admin: list all offers
+app.post("/api/admin/offers/list", async (req, res) => {
+  try {
+    const { ownerId } = req.body || {};
+    if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+    const offers = await Offer.find().sort({ createdAt: -1 }).lean();
+    res.json({ offers });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/admin/offers/create — admin: create new offer
+app.post("/api/admin/offers/create", async (req, res) => {
+  try {
+    const { ownerId, title, payAmount, payCurrency, getAmount, bonusLabel, valueLabel } = req.body || {};
+    if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+    if (!title || !payAmount || !payCurrency || !getAmount) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    if (!["star", "dollar"].includes(payCurrency)) {
+      return res.status(400).json({ error: "payCurrency must be star or dollar" });
+    }
+    const offer = await Offer.create({
+      title: String(title),
+      payAmount: Number(payAmount),
+      payCurrency,
+      getAmount: Number(getAmount),
+      bonusLabel: bonusLabel || "",
+      valueLabel: valueLabel || "",
+      active: true,
+    });
+    res.json({ success: true, offer });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/admin/offers/delete — admin: delete an offer
+app.post("/api/admin/offers/delete", async (req, res) => {
+  try {
+    const { ownerId, offerId } = req.body || {};
+    if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+    if (!offerId) return res.status(400).json({ error: "Missing offerId" });
+    await Offer.deleteOne({ _id: offerId });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/admin/offers/broadcast — admin: send a single offer to all users via bot
+app.post("/api/admin/offers/broadcast", async (req, res) => {
+  try {
+    const { ownerId, offerId } = req.body || {};
+    if (String(ownerId) !== "6965488457") return res.status(403).json({ error: "Unauthorized" });
+    if (!offerId) return res.status(400).json({ error: "Missing offerId" });
+
+    const offer = await Offer.findById(offerId).lean();
+    if (!offer) return res.status(404).json({ error: "Offer not found" });
+
+    const users = await User.find({}, { telegramId: 1 }).lean();
+    const payDisplay = offer.payCurrency === "star" ? `${offer.payAmount} ⭐` : `$${offer.payAmount}`;
+    const getDisplay = offer.payCurrency === "star" ? `${offer.getAmount} ⭐` : `$${offer.getAmount}`;
+    const text =
+      `🎁 <b>${offer.title}</b>\n\n` +
+      `💰 Pay: <b>${payDisplay}</b>\n` +
+      `🎯 Get: <b>${getDisplay}</b>\n` +
+      (offer.bonusLabel ? `✨ Bonus: <b>${offer.bonusLabel}</b>\n` : "") +
+      (offer.valueLabel ? `🔥 ${offer.valueLabel}\n` : "") +
+      `\nTap below to claim this offer in the Market!`;
+
+    const keyboard = {
+      reply_markup: {
+        inline_keyboard: [[
+          { text: "🛒 Open Market", url: "https://t.me/RoyalKingGameBot/RoyalKingGame?startapp=market" },
+        ]],
+      },
+      parse_mode: "HTML",
+    };
+
+    let sent = 0;
+    let failed = 0;
+    for (const u of users) {
+      if (!u.telegramId || u.telegramId === 0) continue;
+      try {
+        await bot.sendMessage(u.telegramId, text, keyboard);
+        sent++;
+      } catch (err) {
+        failed++;
+      }
+      // rate-limit a little to avoid Telegram limits
+      await new Promise((r) => setTimeout(r, 35));
+    }
+    res.json({ success: true, sent, failed, total: users.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
