@@ -321,11 +321,11 @@ const AviatorGame = () => {
 
                 <motion.div
                   className="absolute z-30 pointer-events-none"
-                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-50%, -50%)" }}
-                  animate={phase === "crashed" ? { x: 42, y: -34, opacity: 1, scale: 0.92 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
+                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-72%, -55%)" }}
+                  animate={phase === "crashed" ? { x: 36, y: -28, opacity: 1, scale: 0.88 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
                   transition={{ duration: phase === "crashed" ? 1.05 : 0.05, ease: "easeOut" }}
                 >
-                  <div className="relative h-16 w-28 sm:h-20 sm:w-36 lg:h-24 lg:w-40 xl:h-28 xl:w-44">
+                  <div className="relative h-10 w-20 sm:h-12 sm:w-24 lg:h-14 lg:w-28 xl:h-16 xl:w-32">
                     {PLANE_FRAMES.map((frame, index) => (
                       <img
                         key={frame}
