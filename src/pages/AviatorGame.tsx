@@ -454,32 +454,32 @@ const BetPanel = ({
         {muted && <span className="text-[9px] font-bold text-muted-foreground">AUTO</span>}
       </div>
 
-      <div className="flex items-stretch gap-1">
-        <div className="flex-1 h-7 rounded-md bg-[hsl(265_50%_8%)] border border-primary/40 flex items-center overflow-hidden">
-          <button onClick={() => setValue(value - 1)} disabled={muted} className="w-6 h-full grid place-items-center text-primary text-sm font-bold hover:bg-primary/10 disabled:opacity-50">−</button>
+      <div className="flex items-stretch gap-1.5">
+        <div className="flex-1 h-9 rounded-md bg-[hsl(265_50%_8%)] border border-primary/40 flex items-center overflow-hidden">
+          <button onClick={() => setValue(value - 1)} disabled={muted} className="w-7 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10 disabled:opacity-50">−</button>
           <input
             value={value}
             disabled={muted}
             onChange={(event) => setValue(Number(event.target.value.replace(/[^0-9]/g, "")) || 0)}
-            className="flex-1 min-w-0 bg-transparent px-1 text-center font-bold text-sm text-foreground outline-none disabled:opacity-70"
+            className="flex-1 min-w-0 bg-transparent px-1 text-center font-bold text-base text-foreground outline-none disabled:opacity-70"
             inputMode="numeric"
           />
-          <button onClick={() => setValue(value + 1)} disabled={muted} className="w-6 h-full grid place-items-center text-primary text-sm font-bold hover:bg-primary/10 disabled:opacity-50">+</button>
+          <button onClick={() => setValue(value + 1)} disabled={muted} className="w-7 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10 disabled:opacity-50">+</button>
         </div>
-        <div className="h-7 rounded-md bg-[hsl(265_50%_8%)] border border-primary/40 grid grid-cols-2 overflow-hidden">
+        <div className="h-9 rounded-md bg-[hsl(265_50%_8%)] border border-primary/40 flex overflow-hidden">
           <button
             onClick={() => !muted && setCurrency("dollar")}
             disabled={muted}
-            className={`px-1.5 text-[9px] font-bold transition ${currency === "dollar" ? "bg-primary/30 text-foreground" : "text-muted-foreground"}`}
+            className={`px-2.5 text-[11px] font-black tracking-wide transition ${currency === "dollar" ? "bg-primary/40 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             USD
           </button>
           <button
             onClick={() => !muted && setCurrency("star")}
             disabled={muted}
-            className={`px-1.5 text-xs grid place-items-center transition ${currency === "star" ? "bg-primary/30" : ""}`}
+            className={`px-2.5 grid place-items-center transition border-l border-primary/40 ${currency === "star" ? "bg-primary/40" : ""}`}
           >
-            <span className="text-yellow-400">★</span>
+            <span className="text-yellow-400 text-base leading-none">★</span>
           </button>
         </div>
       </div>
