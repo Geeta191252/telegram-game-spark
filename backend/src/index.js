@@ -2052,6 +2052,7 @@ app.post("/api/aviator/cashout", async (req, res) => {
     bet.cashedOutAt = Number(mult.toFixed(2));
     bet.winAmount = win;
     s.totalPaidOut += win;
+    s.cumPaid = (s.cumPaid || 0) + win;
 
     // Set cooldown: next 4-6 rounds this user can't win
     const cd = 4 + Math.floor(Math.random() * 3);
@@ -2072,25 +2073,22 @@ app.post("/api/aviator/cashout", async (req, res) => {
       game: "aviator",
     });
 
-    // House-edge enforcement: keep at least profit% of pool. Skipped when admin manual override is active.
+    // House-edge enforcement against CUMULATIVE budget. Skipped when manual override is active.
     if (!s.manualOverride) {
-    const profitPct = await getAviatorProfitPercent();
-    const maxPayout = s.totalPool * (1 - profitPct / 100);
-    let remainingExposure = 0;
-    for (const k of Object.keys(s.bets)) {
-      const b = s.bets[k];
-      if (!b.cashedOutAt) remainingExposure += b.amount * mult;
-    }
-    if (s.totalPaidOut >= maxPayout) {
-      s.crashAt = Number(mult.toFixed(2));
-    } else if (s.totalPaidOut + remainingExposure > maxPayout) {
-      const remainingBetSum = Object.values(s.bets).filter((b) => !b.cashedOutAt).reduce((a, b) => a + b.amount, 0);
-      if (remainingBetSum > 0) {
-        const targetMult = (maxPayout - s.totalPaidOut) / remainingBetSum;
-        const safeTarget = Math.max(1.01, Math.min(s.crashAt, Number(targetMult.toFixed(2))));
-        if (safeTarget < s.crashAt) s.crashAt = safeTarget;
+      const profitPct = s.profitPct || (await getAviatorProfitPercent());
+      const cumBudget = (s.cumPool || 0) * (1 - profitPct / 100);
+      const remainingBudget = cumBudget - (s.cumPaid || 0);
+      if (remainingBudget <= 0) {
+        // Cumulative budget exhausted → crash now
+        s.crashAt = Number(mult.toFixed(2));
+      } else {
+        const remainingBetSum = Object.values(s.bets).filter((b) => !b.cashedOutAt).reduce((a, b) => a + b.amount, 0);
+        if (remainingBetSum > 0 && remainingBetSum * s.crashAt > remainingBudget) {
+          const targetMult = remainingBudget / remainingBetSum;
+          const safeTarget = Math.max(1.01, Math.min(s.crashAt, Number(targetMult.toFixed(2))));
+          if (safeTarget < s.crashAt) s.crashAt = safeTarget;
+        }
       }
-    }
     }
 
     res.json({
