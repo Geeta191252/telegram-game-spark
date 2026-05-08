@@ -253,22 +253,33 @@ const AviatorGame = () => {
             ))}
           </div>
 
-          {/* Trail SVG */}
+          {/* Trail SVG — quadratic bezier matching rocket position */}
           {phase === "flying" && (
-            <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
               <defs>
-                <linearGradient id="trail" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(310, 80%, 60%)" stopOpacity="0" />
-                  <stop offset="50%" stopColor="hsl(310, 90%, 65%)" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="hsl(45, 95%, 60%)" stopOpacity="1" />
+                <linearGradient id="trailGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(310, 90%, 55%)" stopOpacity="0.1" />
+                  <stop offset="40%" stopColor="hsl(320, 95%, 60%)" stopOpacity="0.7" />
+                  <stop offset="100%" stopColor="hsl(45, 100%, 65%)" stopOpacity="1" />
+                </linearGradient>
+                <linearGradient id="trailFill" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(310, 90%, 50%)" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="hsl(310, 90%, 60%)" stopOpacity="0.25" />
                 </linearGradient>
               </defs>
+              {/* Filled area under curve for glow effect */}
               <path
-                d={`M 8 92 Q ${planeX * 0.5} 92, ${planeX} ${planeY}`}
-                stroke="url(#trail)"
-                strokeWidth="1.5"
+                d={`M ${startX} ${startY} Q ${ctrlX} ${ctrlY}, ${planeX} ${planeY} L ${planeX} 100 L ${startX} 100 Z`}
+                fill="url(#trailFill)"
+              />
+              {/* Main trail line */}
+              <path
+                d={`M ${startX} ${startY} Q ${ctrlX} ${ctrlY}, ${planeX} ${planeY}`}
+                stroke="url(#trailGrad)"
+                strokeWidth="1.2"
+                strokeLinecap="round"
                 fill="none"
-                style={{ filter: "drop-shadow(0 0 4px hsl(310 90% 60%))" }}
+                style={{ filter: "drop-shadow(0 0 1.5px hsl(310 95% 60%))" }}
               />
             </svg>
           )}
