@@ -961,8 +961,25 @@ app.post("/api/telegram-webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
+    // Handle /cancelbroadcast - stop any running broadcast
+    if (update.message?.text && update.message.text.trim().startsWith("/cancelbroadcast")) {
+      const chatId = update.message.chat.id;
+      const fromId = update.message.from.id;
+      if (String(fromId) !== "6965488457") {
+        await bot.sendMessage(chatId, "⛔ You are not authorized.");
+        return res.sendStatus(200);
+      }
+      if (global.__broadcastRunning) {
+        global.__broadcastCancel = true;
+        await bot.sendMessage(chatId, "🛑 Cancel signal sent. Broadcast will stop shortly...");
+      } else {
+        await bot.sendMessage(chatId, "ℹ️ No broadcast is currently running.");
+      }
+      return res.sendStatus(200);
+    }
+
     // Handle /broadcast command - only for owner
-    if (update.message?.text && update.message.text.startsWith("/broadcast")) {
+    if (update.message?.text && update.message.text.startsWith("/broadcast") && !update.message.text.startsWith("/broadcastgame")) {
       const chatId = update.message.chat.id;
       const fromId = update.message.from.id;
 
@@ -971,9 +988,14 @@ app.post("/api/telegram-webhook", async (req, res) => {
         return res.sendStatus(200);
       }
 
+      if (global.__broadcastRunning) {
+        await bot.sendMessage(chatId, "⚠️ A broadcast is already running. Use /cancelbroadcast first.");
+        return res.sendStatus(200);
+      }
+
       const broadcastText = update.message.text.replace("/broadcast", "").trim();
       if (!broadcastText) {
-        await bot.sendMessage(chatId, "⚠️ Usage: /broadcast Your message here\n\nExample:\n/broadcast 🎉 New update! Check out our latest games!");
+        await bot.sendMessage(chatId, "⚠️ Usage: /broadcast Your message here\n\nExample:\n/broadcast 🎉 New update! Check out our latest games!\n\nTip: use /cancelbroadcast to stop a running broadcast.");
         return res.sendStatus(200);
       }
 
@@ -981,10 +1003,15 @@ app.post("/api/telegram-webhook", async (req, res) => {
       const allUsers = await User.find({ telegramId: { $gt: 0 } }).select("telegramId").lean();
       let sent = 0;
       let failed = 0;
+      let cancelled = false;
 
-      await bot.sendMessage(chatId, `📡 Broadcasting to ${allUsers.length} users...`);
+      global.__broadcastRunning = true;
+      global.__broadcastCancel = false;
+
+      await bot.sendMessage(chatId, `📡 Broadcasting to ${allUsers.length} users...\n\nSend /cancelbroadcast to stop.`);
 
       for (const user of allUsers) {
+        if (global.__broadcastCancel) { cancelled = true; break; }
         try {
           await bot.sendMessage(user.telegramId, broadcastText, { parse_mode: "Markdown" });
           sent++;
@@ -995,7 +1022,10 @@ app.post("/api/telegram-webhook", async (req, res) => {
         if (sent % 25 === 0) await new Promise(r => setTimeout(r, 1000));
       }
 
-      await bot.sendMessage(chatId, `✅ Broadcast complete!\n\n📨 Sent: ${sent}\n❌ Failed: ${failed}\n👥 Total: ${allUsers.length}`);
+      global.__broadcastRunning = false;
+      global.__broadcastCancel = false;
+
+      await bot.sendMessage(chatId, `${cancelled ? "🛑 Broadcast cancelled." : "✅ Broadcast complete!"}\n\n📨 Sent: ${sent}\n❌ Failed: ${failed}\n👥 Total: ${allUsers.length}`);
 
       return res.sendStatus(200);
     }
