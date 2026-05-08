@@ -1838,16 +1838,15 @@ async function aviatorPhaseTick(currency) {
       s.phase = "flying";
       s.flightStartTime = now;
       s.phaseStartTime = now;
-      // Cache profit% and max payout for this round (house keeps >= profit% of pool)
+      // Profit% applies to CUMULATIVE pool (long-term house edge).
       const profitPct = await getAviatorProfitPercent();
       s.profitPct = profitPct;
-      s.maxPayout = s.totalPool * (1 - profitPct / 100);
-      // Initial cap: random fallback. Will be tightened dynamically.
+      s.cumPool = (s.cumPool || 0) + s.totalPool;
+      // Initial pick from varied pattern (1.2x–15x distribution)
       s.crashAt = randomCrashPoint();
       s.manualOverride = false;
 
       // Admin manual override: if queue non-empty, dequeue and use that crash point.
-      // This bypasses house-edge cap (admin is fully in control).
       if (Array.isArray(s.manualQueue) && s.manualQueue.length > 0) {
         const next = Number(s.manualQueue.shift());
         if (!isNaN(next) && next >= 1.0) {
@@ -1857,15 +1856,20 @@ async function aviatorPhaseTick(currency) {
       }
 
       if (!s.manualOverride) {
-        // Pre-rig: if even the smallest possible cashout (any bet × 1.01x) would already exceed budget,
-        // crash instantly. Common when 1 user bets and profit% >= ~0% → max mult < 1.
+        // Cumulative ledger: house must keep >= profitPct of cumulative pool over time.
+        const targetHouse = s.cumPool * (profitPct / 100);
+        const currentHouse = s.cumPool - (s.cumPaid || 0);
+        const slack = currentHouse - targetHouse; // <0 = house behind target
+
         let maxBet = 0;
         for (const k of Object.keys(s.bets)) {
           if (s.bets[k].amount > maxBet) maxBet = s.bets[k].amount;
         }
-        if (maxBet > 0) {
-          const dynCap = s.maxPayout / maxBet;
-          if (dynCap < s.crashAt) s.crashAt = Math.max(1.0, dynCap);
+        if (maxBet > 0 && slack < 0) {
+          // House behind → cap projected loss to half the deficit
+          const allowedLoss = Math.max(0, Math.abs(slack) * 0.5);
+          const safeMult = 1.0 + allowedLoss / maxBet;
+          if (safeMult < s.crashAt) s.crashAt = Math.max(1.0, Number(safeMult.toFixed(2)));
         }
       }
     }
