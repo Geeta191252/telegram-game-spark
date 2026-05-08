@@ -9,6 +9,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const User = require("./models/User");
 const Transaction = require("./models/Transaction");
 const GameBet = require("./models/GameBet");
+const Offer = require("./models/Offer");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
