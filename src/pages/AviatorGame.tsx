@@ -464,49 +464,49 @@ const BetPanel = ({
   };
 
   return (
-    <div className="rounded-2xl border border-primary/30 bg-[hsl(265_60%_10%)] p-3 space-y-2.5 shadow-[0_0_20px_hsl(280_80%_40%/0.25)]">
+    <div className="rounded-xl border border-primary/30 bg-[hsl(265_60%_10%)] p-2 space-y-1.5 shadow-[0_0_14px_hsl(280_80%_40%/0.2)]">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold tracking-widest text-primary/90">{muted ? "AUTO BET" : "BET AMOUNT"}</span>
-        {muted && <span className="text-[10px] font-bold text-muted-foreground">AUTO</span>}
+        <span className="text-[10px] font-bold tracking-widest text-primary/90">{muted ? "AUTO BET" : "BET AMOUNT"}</span>
+        {muted && <span className="text-[9px] font-bold text-muted-foreground">AUTO</span>}
       </div>
 
-      <div className="flex items-stretch gap-2">
-        <div className="flex-1 h-12 rounded-xl bg-[hsl(265_50%_8%)] border border-primary/40 flex items-center overflow-hidden">
-          <button onClick={() => setValue(value - 1)} disabled={muted} className="w-10 h-full grid place-items-center text-primary text-xl font-bold hover:bg-primary/10 disabled:opacity-50">−</button>
+      <div className="flex items-stretch gap-1.5">
+        <div className="flex-1 h-9 rounded-lg bg-[hsl(265_50%_8%)] border border-primary/40 flex items-center overflow-hidden">
+          <button onClick={() => setValue(value - 1)} disabled={muted} className="w-8 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10 disabled:opacity-50">−</button>
           <input
             value={value}
             disabled={muted}
             onChange={(event) => setValue(Number(event.target.value.replace(/[^0-9]/g, "")) || 0)}
-            className="flex-1 min-w-0 bg-transparent px-2 text-center font-bold text-2xl text-foreground outline-none disabled:opacity-70"
+            className="flex-1 min-w-0 bg-transparent px-1 text-center font-bold text-base text-foreground outline-none disabled:opacity-70"
             inputMode="numeric"
           />
-          <button onClick={() => setValue(value + 1)} disabled={muted} className="w-10 h-full grid place-items-center text-primary text-xl font-bold hover:bg-primary/10 disabled:opacity-50">+</button>
+          <button onClick={() => setValue(value + 1)} disabled={muted} className="w-8 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10 disabled:opacity-50">+</button>
         </div>
-        <div className="h-12 rounded-xl bg-[hsl(265_50%_8%)] border border-primary/40 grid grid-cols-2 overflow-hidden">
+        <div className="h-9 rounded-lg bg-[hsl(265_50%_8%)] border border-primary/40 grid grid-cols-2 overflow-hidden">
           <button
             onClick={() => !muted && setCurrency("dollar")}
             disabled={muted}
-            className={`px-3 text-xs font-bold transition ${currency === "dollar" ? "bg-primary/30 text-foreground" : "text-muted-foreground"}`}
+            className={`px-2 text-[10px] font-bold transition ${currency === "dollar" ? "bg-primary/30 text-foreground" : "text-muted-foreground"}`}
           >
             USD
           </button>
           <button
             onClick={() => !muted && setCurrency("star")}
             disabled={muted}
-            className={`px-3 text-base grid place-items-center transition ${currency === "star" ? "bg-primary/30" : ""}`}
+            className={`px-2 text-sm grid place-items-center transition ${currency === "star" ? "bg-primary/30" : ""}`}
           >
             <span className="text-yellow-400">★</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1">
         {PRESETS.map((amount) => (
           <button
             key={`${title}-${amount}`}
             disabled={muted}
             onClick={() => setValue(amount)}
-            className={`h-9 rounded-lg border text-xs font-bold transition disabled:opacity-50 ${
+            className={`h-7 rounded-md border text-[10px] font-bold transition disabled:opacity-50 ${
               value === amount
                 ? "border-primary text-primary bg-primary/10"
                 : "border-primary/30 text-foreground/80 bg-[hsl(265_50%_8%)] hover:border-primary/60"
@@ -518,23 +518,23 @@ const BetPanel = ({
       </div>
 
       {canCashOut ? (
-        <button onClick={cashOut} disabled={muted} className="w-full h-14 rounded-xl bg-gradient-to-b from-yellow-400 to-orange-500 text-black font-game text-2xl flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(30_90%_30%)] disabled:opacity-70">
+        <button onClick={cashOut} disabled={muted} className="w-full h-10 rounded-lg bg-gradient-to-b from-yellow-400 to-orange-500 text-black font-game text-base flex items-center justify-center gap-2 shadow-[inset_0_-2px_0_hsl(30_90%_30%)] disabled:opacity-70">
           <span>CASH OUT</span>
-          <span className="text-base font-sans font-black">{(value * multiplier).toFixed(2)}</span>
+          <span className="text-xs font-sans font-black">{(value * multiplier).toFixed(2)}</span>
         </button>
       ) : cashedOutAt ? (
-        <div className="w-full h-14 rounded-xl bg-primary text-primary-foreground font-game text-xl flex items-center justify-center gap-2 opacity-90">
+        <div className="w-full h-10 rounded-lg bg-primary text-primary-foreground font-game text-sm flex items-center justify-center gap-2 opacity-90">
           <span>CASHED</span>
-          <span className="text-sm">{cashedOutAt.toFixed(2)}x</span>
+          <span className="text-xs">{cashedOutAt.toFixed(2)}x</span>
         </div>
       ) : (
         <button
           onClick={placeBet}
           disabled={muted || isWaiting || phase !== "betting"}
-          className="w-full h-14 rounded-xl bg-gradient-to-b from-[hsl(110_75%_55%)] to-[hsl(120_80%_38%)] text-white font-game text-2xl tracking-wider flex items-center justify-center gap-3 shadow-[inset_0_-4px_0_hsl(120_80%_25%),0_4px_18px_hsl(120_80%_40%/0.5)] disabled:opacity-70"
+          className="w-full h-10 rounded-lg bg-gradient-to-b from-[hsl(110_75%_55%)] to-[hsl(120_80%_38%)] text-white font-game text-base tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(120_80%_25%),0_3px_12px_hsl(120_80%_40%/0.4)] disabled:opacity-70"
         >
           <span>{isWaiting ? "CANCEL" : "PLACE BET"}</span>
-          <svg viewBox="0 0 24 24" className="w-6 h-6 -rotate-12" fill="currentColor">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 -rotate-12" fill="currentColor">
             <path d="M2 21 L23 12 L2 3 L2 10 L17 12 L2 14 Z" />
           </svg>
         </button>
