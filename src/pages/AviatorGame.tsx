@@ -46,13 +46,9 @@ const AviatorGame = () => {
   const tgUser = getTelegramUser();
 
   const [currency, setCurrency] = useState<CurrencyType>("dollar");
-  const [betAmount, setBetAmount] = useState(100);
   const [phase, setPhase] = useState<Phase>("betting");
   const [multiplier, setMultiplier] = useState(1);
   const [crashAt, setCrashAt] = useState(2);
-  const [hasBet, setHasBet] = useState(false);
-  const [pendingBet, setPendingBet] = useState(false);
-  const [cashedOutAt, setCashedOutAt] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(7);
   const [history, setHistory] = useState<number[]>([]);
   const [roundNumber, setRoundNumber] = useState<number>(0);
@@ -126,13 +122,9 @@ const AviatorGame = () => {
         const s: AviatorState = await fetchAviatorState(currency);
         if (cancelled) return;
 
-        // New round detection — reset local bet flags
         if (s.roundNumber !== lastRoundRef.current) {
           lastRoundRef.current = s.roundNumber;
           setRoundNumber(s.roundNumber);
-          setHasBet(false);
-          setCashedOutAt(null);
-          setPendingBet(false);
         }
 
         // Phase transitions
@@ -144,9 +136,6 @@ const AviatorGame = () => {
           } else if (s.phase === "crashed") {
             if (startAudioRef.current) { startAudioRef.current.pause(); startAudioRef.current.currentTime = 0; }
             playSound(crashAudioRef.current);
-            if (hasBet && cashedOutAt === null) {
-              toast.error(`FLEW AWAY @ ${(s.crashAt ?? s.multiplier).toFixed(2)}x — Bet lost`);
-            }
           } else if (s.phase === "betting") {
             setMultiplier(1);
           }
@@ -162,7 +151,6 @@ const AviatorGame = () => {
           setCrashAt(s.crashAt);
           setMultiplier(s.crashAt);
         } else if (s.phase === "flying") {
-          // Sync to server multiplier (in case we drifted)
           setMultiplier((prev) => (s.multiplier > prev ? s.multiplier : prev));
         }
       } catch {
@@ -172,7 +160,7 @@ const AviatorGame = () => {
     poll();
     const id = window.setInterval(poll, 350);
     return () => { cancelled = true; window.clearInterval(id); };
-  }, [currency, hasBet, cashedOutAt, playSound]);
+  }, [currency, playSound]);
 
   // Refresh balance after round ends
   useEffect(() => {
@@ -204,53 +192,7 @@ const AviatorGame = () => {
   const trailPath = `M ${sX} ${sY} C ${cp1xCur} ${cp1yCur}, ${cp2xCur} ${cp2yCur}, ${planeX} ${planeY}`;
   const trailFillPath = `${trailPath} L ${planeX} 91 L ${sX} 91 Z`;
 
-  const displayedBets = useMemo(() => {
-    const mine: BetRow[] = hasBet
-      ? [{ user: `${userName} (you)`, amount: betAmount, multiplier: cashedOutAt, cashout: cashedOutAt ? betAmount * cashedOutAt : null }]
-      : [];
-    return [...mine, ...serverBets];
-  }, [betAmount, cashedOutAt, hasBet, userName, serverBets]);
-
-  const placeBet = useCallback(async () => {
-    unlockAudio();
-    if (phase !== "betting") return toast.error("Wait for next round");
-    if (betAmount <= 0) return toast.error("Enter valid amount");
-    if (betAmount > balance) return toast.error("Insufficient balance");
-    if (hasBet || pendingBet) return;
-    if (!tgUser?.id) return toast.error("Open inside Telegram to bet");
-    setPendingBet(true);
-    try {
-      await placeAviatorBet({
-        userId: tgUser.id,
-        amount: betAmount,
-        currency,
-        firstName: userName,
-      });
-      setHasBet(true);
-      setCashedOutAt(null);
-      refreshBalance();
-      toast.success(`Bet placed: ${formatMoney(betAmount, currency)}`);
-    } catch (e) {
-      toast.error((e as Error).message || "Failed to place bet");
-    } finally {
-      setPendingBet(false);
-    }
-  }, [unlockAudio, phase, betAmount, balance, hasBet, pendingBet, tgUser, currency, userName, refreshBalance]);
-
-  const cashOut = useCallback(async () => {
-    unlockAudio();
-    if (phase !== "flying" || !hasBet || cashedOutAt !== null) return;
-    if (!tgUser?.id) return;
-    try {
-      const result = await cashOutAviator(tgUser.id, currency);
-      setCashedOutAt(result.multiplier);
-      playSound(cashoutAudioRef.current);
-      toast.success(`Cashed out @ ${result.multiplier.toFixed(2)}x — ${formatMoney(result.winAmount, currency)}`);
-      refreshBalance();
-    } catch (e) {
-      toast.error((e as Error).message || "Cashout failed");
-    }
-  }, [unlockAudio, phase, hasBet, cashedOutAt, tgUser, currency, playSound, refreshBalance]);
+  const displayedBets = serverBets;
 
   const roundColor = (value: number) => {
     if (value >= 10) return "hsl(280 88% 62%)";
@@ -406,30 +348,36 @@ const AviatorGame = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <BetPanel
               title="BET"
-              betAmount={betAmount}
-              setBetAmount={setBetAmount}
+              defaultAmount={100}
               phase={phase}
-              hasBet={hasBet}
-              cashedOutAt={cashedOutAt}
               multiplier={multiplier}
-              placeBet={placeBet}
-              cashOut={cashOut}
+              roundNumber={roundNumber}
               currency={currency}
               setCurrency={setCurrency}
+              tgUserId={tgUser?.id}
+              userName={userName}
+              balance={balance}
+              refreshBalance={refreshBalance}
+              unlockAudio={unlockAudio}
+              cashoutAudioRef={cashoutAudioRef}
+              playSound={playSound}
             />
             <BetPanel
               title="AUTO"
-              betAmount={betAmount}
-              setBetAmount={setBetAmount}
+              defaultAmount={50}
               phase={phase}
-              hasBet={hasBet}
-              cashedOutAt={cashedOutAt}
               multiplier={multiplier}
-              placeBet={placeBet}
-              cashOut={cashOut}
+              roundNumber={roundNumber}
               currency={currency}
               setCurrency={setCurrency}
-              muted
+              tgUserId={tgUser?.id}
+              userName={userName}
+              balance={balance}
+              refreshBalance={refreshBalance}
+              unlockAudio={unlockAudio}
+              cashoutAudioRef={cashoutAudioRef}
+              playSound={playSound}
+              auto
             />
           </div>
 
@@ -441,69 +389,133 @@ const AviatorGame = () => {
 
 const BetPanel = ({
   title,
-  betAmount,
-  setBetAmount,
+  defaultAmount,
   phase,
-  hasBet,
-  cashedOutAt,
   multiplier,
-  placeBet,
-  cashOut,
+  roundNumber,
   currency,
   setCurrency,
-  muted = false,
+  tgUserId,
+  userName,
+  balance,
+  refreshBalance,
+  unlockAudio,
+  cashoutAudioRef,
+  playSound,
+  auto = false,
 }: {
   title: string;
-  betAmount: number;
-  setBetAmount: (value: number) => void;
+  defaultAmount: number;
   phase: Phase;
-  hasBet: boolean;
-  cashedOutAt: number | null;
   multiplier: number;
-  placeBet: () => void;
-  cashOut: () => void;
+  roundNumber: number;
   currency: CurrencyType;
   setCurrency: (c: CurrencyType) => void;
-  muted?: boolean;
+  tgUserId: number | undefined;
+  userName: string;
+  balance: number;
+  refreshBalance: () => void;
+  unlockAudio: () => void;
+  cashoutAudioRef: React.MutableRefObject<HTMLAudioElement | null>;
+  playSound: (audio: HTMLAudioElement | null) => void;
+  auto?: boolean;
 }) => {
+  const [betAmount, setBetAmount] = useState(defaultAmount);
+  const [hasBet, setHasBet] = useState(false);
+  const [pendingBet, setPendingBet] = useState(false);
+  const [cashedOutAt, setCashedOutAt] = useState<number | null>(null);
+  const lastRoundRef = useRef<number>(roundNumber);
+  const lastPhaseRef = useRef<Phase>(phase);
+
+  // Reset on new round
+  useEffect(() => {
+    if (roundNumber !== lastRoundRef.current) {
+      lastRoundRef.current = roundNumber;
+      setHasBet(false);
+      setCashedOutAt(null);
+      setPendingBet(false);
+    }
+  }, [roundNumber]);
+
+  // Lost-bet toast on crash
+  useEffect(() => {
+    if (phase !== lastPhaseRef.current) {
+      if (phase === "crashed" && hasBet && cashedOutAt === null) {
+        toast.error(`[${title}] FLEW AWAY @ ${multiplier.toFixed(2)}x — Bet lost`);
+      }
+      lastPhaseRef.current = phase;
+    }
+  }, [phase, hasBet, cashedOutAt, multiplier, title]);
+
+  const placeBet = async () => {
+    unlockAudio();
+    if (phase !== "betting") return toast.error("Wait for next round");
+    if (betAmount <= 0) return toast.error("Enter valid amount");
+    if (betAmount > balance) return toast.error("Insufficient balance");
+    if (hasBet || pendingBet) return;
+    if (!tgUserId) return toast.error("Open inside Telegram to bet");
+    setPendingBet(true);
+    try {
+      await placeAviatorBet({ userId: tgUserId, amount: betAmount, currency, firstName: userName });
+      setHasBet(true);
+      setCashedOutAt(null);
+      refreshBalance();
+      toast.success(`[${title}] Bet placed: ${formatMoney(betAmount, currency)}`);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to place bet");
+    } finally {
+      setPendingBet(false);
+    }
+  };
+
+  const cashOut = async () => {
+    unlockAudio();
+    if (phase !== "flying" || !hasBet || cashedOutAt !== null) return;
+    if (!tgUserId) return;
+    try {
+      const result = await cashOutAviator(tgUserId, currency);
+      setCashedOutAt(result.multiplier);
+      playSound(cashoutAudioRef.current);
+      toast.success(`[${title}] Cashed out @ ${result.multiplier.toFixed(2)}x — ${formatMoney(result.winAmount, currency)}`);
+      refreshBalance();
+    } catch (e) {
+      toast.error((e as Error).message || "Cashout failed");
+    }
+  };
+
   const canCashOut = phase === "flying" && hasBet && cashedOutAt === null;
   const isWaiting = hasBet && phase === "betting";
-  const value = muted ? Math.max(10, Math.round(betAmount / 2)) : betAmount;
+  const value = betAmount;
 
-  const setValue = (next: number) => {
-    if (!muted) setBetAmount(Math.max(1, next));
-  };
+  const setValue = (next: number) => setBetAmount(Math.max(1, next));
 
   return (
     <div className="rounded-lg border border-primary/30 bg-[hsl(265_60%_10%)] p-1.5 space-y-1 shadow-[0_0_10px_hsl(280_80%_40%/0.18)]">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold tracking-widest text-primary/90">{muted ? "AUTO BET" : "BET AMOUNT"}</span>
-        {muted && <span className="text-[9px] font-bold text-muted-foreground">AUTO</span>}
+        <span className="text-[10px] font-bold tracking-widest text-primary/90">{auto ? "AUTO BET" : "BET AMOUNT"}</span>
+        {auto && <span className="text-[9px] font-bold text-muted-foreground">AUTO</span>}
       </div>
 
       <div className="flex items-stretch gap-1.5">
         <div className="flex-1 h-9 rounded-md bg-[hsl(265_50%_8%)] border border-primary/40 flex items-center overflow-hidden">
-          <button onClick={() => setValue(value - 1)} disabled={muted} className="w-7 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10 disabled:opacity-50">−</button>
+          <button onClick={() => setValue(value - 1)} className="w-7 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10">−</button>
           <input
             value={value}
-            disabled={muted}
             onChange={(event) => setValue(Number(event.target.value.replace(/[^0-9]/g, "")) || 0)}
-            className="flex-1 min-w-0 bg-transparent px-1 text-center font-bold text-base text-foreground outline-none disabled:opacity-70"
+            className="flex-1 min-w-0 bg-transparent px-1 text-center font-bold text-base text-foreground outline-none"
             inputMode="numeric"
           />
-          <button onClick={() => setValue(value + 1)} disabled={muted} className="w-7 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10 disabled:opacity-50">+</button>
+          <button onClick={() => setValue(value + 1)} className="w-7 h-full grid place-items-center text-primary text-base font-bold hover:bg-primary/10">+</button>
         </div>
         <div className="h-9 rounded-md bg-[hsl(265_50%_8%)] border border-primary/40 flex overflow-hidden">
           <button
-            onClick={() => !muted && setCurrency("dollar")}
-            disabled={muted}
+            onClick={() => setCurrency("dollar")}
             className={`px-2.5 text-[11px] font-black tracking-wide transition ${currency === "dollar" ? "bg-primary/40 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             USD
           </button>
           <button
-            onClick={() => !muted && setCurrency("star")}
-            disabled={muted}
+            onClick={() => setCurrency("star")}
             className={`px-2.5 grid place-items-center transition border-l border-primary/40 ${currency === "star" ? "bg-primary/40" : ""}`}
           >
             <span className="text-yellow-400 text-base leading-none">★</span>
@@ -515,9 +527,8 @@ const BetPanel = ({
         {PRESETS_BY_CURRENCY[currency].map((amount) => (
           <button
             key={`${title}-${amount}`}
-            disabled={muted}
             onClick={() => setValue(amount)}
-            className={`h-5 rounded text-[9px] font-bold transition disabled:opacity-50 border ${
+            className={`h-5 rounded text-[9px] font-bold transition border ${
               value === amount
                 ? "border-primary text-primary bg-primary/10"
                 : "border-primary/30 text-foreground/80 bg-[hsl(265_50%_8%)] hover:border-primary/60"
@@ -529,7 +540,7 @@ const BetPanel = ({
       </div>
 
       {canCashOut ? (
-        <button onClick={cashOut} disabled={muted} className="w-full h-7 rounded-md bg-gradient-to-b from-yellow-400 to-orange-500 text-black font-game text-xs flex items-center justify-center gap-2 shadow-[inset_0_-2px_0_hsl(30_90%_30%)] disabled:opacity-70">
+        <button onClick={cashOut} className="w-full h-7 rounded-md bg-gradient-to-b from-yellow-400 to-orange-500 text-black font-game text-xs flex items-center justify-center gap-2 shadow-[inset_0_-2px_0_hsl(30_90%_30%)]">
           <span>CASH OUT</span>
           <span className="text-xs font-sans font-black">{(value * multiplier).toFixed(2)}</span>
         </button>
@@ -541,10 +552,10 @@ const BetPanel = ({
       ) : (
         <button
           onClick={placeBet}
-          disabled={muted || isWaiting || phase !== "betting"}
+          disabled={isWaiting || phase !== "betting" || pendingBet}
           className="w-full h-7 rounded-md bg-gradient-to-b from-[hsl(110_75%_55%)] to-[hsl(120_80%_38%)] text-white font-game text-base tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(120_80%_25%),0_3px_12px_hsl(120_80%_40%/0.4)] disabled:opacity-70"
         >
-          <span>{isWaiting ? "CANCEL" : "PLACE BET"}</span>
+          <span>{isWaiting ? "WAITING…" : "PLACE BET"}</span>
           <svg viewBox="0 0 24 24" className="w-4 h-4 -rotate-12" fill="currentColor">
             <path d="M2 21 L23 12 L2 3 L2 10 L17 12 L2 14 Z" />
           </svg>
