@@ -115,6 +115,7 @@ const AdminPanel = () => {
   const [manualQueue, setManualQueue] = useState<number[]>([]);
   const [manualActive, setManualActive] = useState(false);
   const [manualInput, setManualInput] = useState<string>("");
+  const [manualBulkInput, setManualBulkInput] = useState<string>("");
 
   const fetchManualQueue = async (curr: "dollar" | "star" = manualCurrency) => {
     try {
