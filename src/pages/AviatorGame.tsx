@@ -321,8 +321,8 @@ const AviatorGame = () => {
 
                 <motion.div
                   className="absolute z-30 pointer-events-none"
-                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-1%, -56%)" }}
-                  animate={phase === "crashed" ? { x: 22, y: -18, opacity: 1, scale: 0.8 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
+                  style={{ left: `${planeX}%`, top: `${planeY}%`, transform: "translate(-44%, -60%)" }}
+                  animate={phase === "crashed" ? { x: 18, y: -16, opacity: 1, scale: 0.78 } : { x: 0, y: 0, opacity: 1, scale: 1 }}
                   transition={{ duration: phase === "crashed" ? 1.05 : 0.05, ease: "easeOut" }}
                 >
                   <div className="relative h-6 w-12 sm:h-8 sm:w-16 lg:h-10 lg:w-20 xl:h-12 xl:w-24">
