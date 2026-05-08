@@ -142,7 +142,7 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    if (isOwner) fetchAll();
+    if (isOwner) { fetchAll(); fetchAviatorProfit(); }
   }, []);
 
   const handleAdjust = async () => {
