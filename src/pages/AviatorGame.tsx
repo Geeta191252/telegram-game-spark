@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult, getTelegramUser, type CurrencyType } from "@/lib/telegram";
 import { toast } from "sonner";
+import planeImg from "@/assets/aviator-plane.png";
 
 type Phase = "betting" | "flying" | "crashed";
 
@@ -418,23 +419,20 @@ const AviatorGame = () => {
 };
 
 const PlaneSVG = ({ dim = false }: { dim?: boolean }) => (
-  <svg width="68" height="68" viewBox="0 0 64 64" style={{ display: "block" }}>
-    <defs>
-      <linearGradient id="planeBody" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor={dim ? "#7a1010" : "#ff5555"} />
-        <stop offset="60%" stopColor={dim ? "#5a0808" : "#c81e1e"} />
-        <stop offset="100%" stopColor="#5a0000" />
-      </linearGradient>
-      <linearGradient id="planeShade" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor={dim ? "#a02525" : "#ff8585"} />
-        <stop offset="100%" stopColor={dim ? "#600505" : "#a01515"} />
-      </linearGradient>
-    </defs>
-    <polygon points="6,32 56,28 32,34" fill="url(#planeShade)" stroke="#3a0000" strokeWidth="0.8" strokeLinejoin="round" />
-    <polygon points="6,32 56,28 28,42" fill="url(#planeBody)" stroke="#2a0000" strokeWidth="0.8" strokeLinejoin="round" />
-    <line x1="6" y1="32" x2="56" y2="28" stroke="#ffb0b0" strokeWidth="0.6" opacity="0.7" />
-    <polygon points="6,32 14,30 14,34" fill="#3a0000" opacity="0.7" />
-  </svg>
+  <img
+    src={planeImg}
+    alt=""
+    width={80}
+    height={80}
+    style={{
+      display: "block",
+      width: 80,
+      height: 80,
+      objectFit: "contain",
+      opacity: dim ? 0.55 : 1,
+      filter: dim ? "saturate(0.5) brightness(0.6)" : "drop-shadow(0 0 12px hsla(0, 95%, 55%, 0.7))",
+    }}
+  />
 );
 
 const PlaneNavIcon = (props: any) => (
