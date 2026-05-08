@@ -302,7 +302,7 @@ const AviatorGame = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,_hsl(330_90%_55%/0.55)_0%,_transparent_55%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_85%,_hsl(190_95%_55%/0.45)_0%,_transparent_50%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,_hsl(45_100%_60%/0.35)_0%,_transparent_45%)]" />
-            <div className="absolute inset-0 opacity-40 mix-blend-screen bg-[conic-gradient(from_120deg_at_50%_50%,_hsl(280_90%_55%/0.3),_hsl(190_95%_55%/0.25),_hsl(330_90%_55%/0.3),_hsl(45_100%_60%/0.25),_hsl(280_90%_55%/0.3))]" />
+            
             {phase !== "betting" && (
               <div className="absolute left-5 right-6 bottom-6 top-7 pointer-events-none">
                 <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
