@@ -1043,29 +1043,40 @@ app.post("/api/telegram-webhook", async (req, res) => {
       }
 
       const playUrl = `https://t.me/RoyalKingGameBot/RoyalKingGame?startapp=${game.startapp}`;
+      const escapeHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       const text = customMsg
-        ? `${game.emoji} *${game.title}*\n\n${customMsg}`
-        : `${game.emoji} *${game.title}* is live!\n\nTap below to play now and win big! 🏆`;
+        ? `${game.emoji} <b>${escapeHtml(game.title)}</b>\n\n${escapeHtml(customMsg)}`
+        : `${game.emoji} <b>${escapeHtml(game.title)}</b> is live!\n\nTap below to play now and win big! 🏆`;
 
       const allUsers = await User.find({ telegramId: { $gt: 0 } }).select("telegramId").lean();
       let sent = 0;
       let failed = 0;
 
-      await bot.sendMessage(chatId, `📡 Broadcasting *${game.title}* to ${allUsers.length} users...`, { parse_mode: "Markdown" });
+      await bot.sendMessage(chatId, `📡 Broadcasting ${game.title} to ${allUsers.length} users...`);
+
+      const replyMarkup = {
+        inline_keyboard: [
+          [{ text: `▶️ Play ${game.title}`, url: playUrl }],
+        ],
+      };
 
       for (const user of allUsers) {
         try {
           await bot.sendMessage(user.telegramId, text, {
-            parse_mode: "Markdown",
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: `▶️ Play ${game.title}`, url: playUrl }],
-              ],
-            },
+            parse_mode: "HTML",
+            reply_markup: replyMarkup,
           });
           sent++;
         } catch (err) {
-          failed++;
+          // Retry without parse_mode so the Play button still gets delivered
+          try {
+            await bot.sendMessage(user.telegramId, customMsg ? `${game.emoji} ${game.title}\n\n${customMsg}` : `${game.emoji} ${game.title} is live!\n\nTap below to play now and win big! 🏆`, {
+              reply_markup: replyMarkup,
+            });
+            sent++;
+          } catch (e2) {
+            failed++;
+          }
         }
         if (sent % 25 === 0) await new Promise(r => setTimeout(r, 1000));
       }
