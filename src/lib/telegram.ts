@@ -276,3 +276,51 @@ export const fetchMyGreedyKingBets = async (userId: number | string, currency: C
   if (!res.ok) throw new Error("Failed to fetch bets");
   return res.json();
 };
+
+// ============================================
+// AVIATOR MULTIPLAYER API
+// ============================================
+export interface AviatorState {
+  roundNumber: number;
+  phase: "betting" | "flying" | "crashed";
+  multiplier: number;
+  crashAt: number | null;
+  timeLeft: number;
+  bets: Array<{ user: string; amount: number; multiplier: number | null; cashout: number | null }>;
+  totalPlayers: number;
+  history: number[];
+}
+
+export const fetchAviatorState = async (currency: CurrencyType): Promise<AviatorState> => {
+  const res = await fetch(`${API_BASE_URL}/aviator/state?currency=${currency}`);
+  if (!res.ok) throw new Error("Failed to fetch aviator state");
+  return res.json();
+};
+
+export const placeAviatorBet = async (data: {
+  userId: number | string;
+  amount: number;
+  currency: CurrencyType;
+  firstName?: string;
+}): Promise<{ success: boolean; roundNumber: number }> => {
+  const res = await fetch(`${API_BASE_URL}/aviator/bet`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error || "Failed to place bet");
+  return json;
+};
+
+export const cashOutAviator = async (userId: number | string, currency: CurrencyType): Promise<{ success: boolean; multiplier: number; winAmount: number }> => {
+  const res = await fetch(`${API_BASE_URL}/aviator/cashout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, currency }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error || "Failed to cash out");
+  return json;
+};
+
