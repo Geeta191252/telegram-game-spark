@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult, getTelegramUser, type CurrencyType } from "@/lib/telegram";
 import { toast } from "sonner";
+import planeImg from "@/assets/aviator-plane.png";
 
 type Phase = "betting" | "flying" | "crashed";
 
