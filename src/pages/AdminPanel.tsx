@@ -153,6 +153,23 @@ const AdminPanel = () => {
     } catch { /* ignore */ }
   };
 
+  // Per-game stats
+  const [gameStats, setGameStats] = useState<GameStat[]>([]);
+  const [loadingGames, setLoadingGames] = useState(false);
+  const fetchGameStats = async () => {
+    setLoadingGames(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/games-stats`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ownerId: String(OWNER_ID) }),
+      });
+      const data = await res.json();
+      if (res.ok) setGameStats(data.games || []);
+    } catch { /* ignore */ }
+    setLoadingGames(false);
+  };
+
   const handleImageFile = (file: File) => {
     if (file.size > 4 * 1024 * 1024) {
       toast({ title: "Image too large", description: "Max 4MB" });
