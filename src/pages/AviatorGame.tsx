@@ -230,15 +230,17 @@ const AviatorGame = () => {
           <div className="h-8 rounded-full bg-[hsl(265_50%_8%)] border border-primary/40 flex overflow-hidden">
             <button
               onClick={() => setCurrency("dollar")}
-              className={`px-3 text-[11px] font-black tracking-wide transition ${currency === "dollar" ? "bg-primary/40 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-2.5 flex items-center gap-1 text-[11px] font-black tracking-wide transition ${currency === "dollar" ? "bg-primary/40 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              USD
+              <span>$</span>
+              <span className="text-foreground">{totalDollar.toFixed(2)}</span>
             </button>
             <button
               onClick={() => setCurrency("star")}
-              className={`px-3 grid place-items-center transition border-l border-primary/40 ${currency === "star" ? "bg-primary/40" : ""}`}
+              className={`px-2.5 flex items-center gap-1 text-[11px] font-black transition border-l border-primary/40 ${currency === "star" ? "bg-primary/40" : ""}`}
             >
-              <span className="text-yellow-400 text-base leading-none">★</span>
+              <span className="text-yellow-400 text-sm leading-none">★</span>
+              <span className="text-foreground">{Math.floor(totalStar)}</span>
             </button>
           </div>
           <button onClick={() => navigate("/wallet")} className="h-8 w-8 rounded-full bg-primary text-primary-foreground grid place-items-center" aria-label="Wallet">
