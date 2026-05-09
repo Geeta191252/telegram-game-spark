@@ -458,8 +458,8 @@ const PlinkoGame = () => {
                     <div
                       className="relative"
                       style={{
-                        width: "78%",
-                        height: "72%",
+                        width: "62%",
+                        height: "62%",
                         borderRadius: 6,
                         background: `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`,
                         border: isHit
