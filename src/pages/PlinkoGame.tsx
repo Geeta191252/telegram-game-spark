@@ -135,7 +135,7 @@ const PlinkoGame = () => {
 
   // Geometry
   const PEG_TOP = 3;
-  const PEG_BOTTOM = 80;
+  const PEG_BOTTOM = 86;
   // Board geometry: pegs are centered row-by-row and the bottom row spans
   // the same 2%–98% width used by the multiplier buckets.
   const BOARD_SIDE_INSET = 10;
@@ -458,9 +458,9 @@ const PlinkoGame = () => {
                     <div
                       className="relative"
                       style={{
-                        width: "62%",
-                        height: "62%",
-                        borderRadius: 6,
+                        width: "42%",
+                        height: "55%",
+                        borderRadius: 999,
                         background: `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`,
                         border: isHit
                           ? "1.5px solid hsl(45 100% 70%)"
