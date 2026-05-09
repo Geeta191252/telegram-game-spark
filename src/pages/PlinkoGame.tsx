@@ -753,7 +753,7 @@ const PlinkoGame = () => {
                 border: "1px solid hsla(45,80%,55%,0.35)",
               }}
             >
-              +{p}
+              +{p}{activeWallet === "dollar" ? "$" : "⭐"}
             </button>
           ))}
           <button
