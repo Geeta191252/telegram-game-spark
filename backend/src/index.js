@@ -720,6 +720,7 @@ app.post("/api/game/result", async (req, res) => {
         currency,
         amount: winAmount,
         status: "completed",
+        game,
         description: `${game}: Bet ${betAmount}, Won ${winAmount}`,
       });
     }
@@ -730,6 +731,7 @@ app.post("/api/game/result", async (req, res) => {
         currency,
         amount: -betAmount,
         status: "completed",
+        game,
         description: `${game}: Bet ${betAmount}`,
       });
     }
