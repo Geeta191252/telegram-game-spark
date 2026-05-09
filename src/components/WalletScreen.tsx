@@ -695,32 +695,32 @@ const WalletScreen = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         id="star-converter"
-        className="bg-card border border-border rounded-2xl p-4 space-y-3"
+        className="bg-card border border-border rounded-xl p-3 space-y-2"
       >
-        <div className="flex items-center gap-2">
-          <ArrowRightLeft className="h-4 w-4 text-primary" />
-          <h3 className="font-semibold text-sm text-foreground">Star → Dollar Converter</h3>
+        <div className="flex items-center gap-1.5">
+          <ArrowRightLeft className="h-3.5 w-3.5 text-primary" />
+          <h3 className="font-semibold text-xs text-foreground">Star → Dollar Converter</h3>
         </div>
-        <p className="text-xs text-muted-foreground">Rate: {STAR_TO_DOLLAR_RATE} ⭐ = $1.00</p>
-        <div className="flex items-center gap-2">
+        <p className="text-[10px] text-muted-foreground">Rate: {STAR_TO_DOLLAR_RATE} ⭐ = $1.00</p>
+        <div className="flex items-center gap-1.5">
           <div className="flex-1 relative">
             <Input
               type="number"
               placeholder={`Min ${STAR_TO_DOLLAR_RATE}`}
               value={convertStars}
               onChange={(e) => setConvertStars(e.target.value)}
-              className="pr-8 rounded-xl bg-background"
+              className="pr-7 rounded-lg bg-background h-9 text-xs"
               min={STAR_TO_DOLLAR_RATE}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">⭐</span>
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">⭐</span>
           </div>
-          <ArrowRightLeft className="h-4 w-4 text-muted-foreground shrink-0" />
-          <div className="bg-muted/50 border border-border rounded-xl px-3 py-2 min-w-[80px] text-center">
-            <span className="font-bold text-sm text-foreground">${dollarOutput}</span>
+          <ArrowRightLeft className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <div className="bg-muted/50 border border-border rounded-lg px-2 py-1.5 min-w-[70px] text-center">
+            <span className="font-bold text-xs text-foreground">${dollarOutput}</span>
           </div>
         </div>
         <Button
-          className="w-full rounded-xl h-10"
+          className="w-full rounded-lg h-9 text-xs"
           disabled={converting || starInputNum < STAR_TO_DOLLAR_RATE}
           onClick={handleConvert}
         >
