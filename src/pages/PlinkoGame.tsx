@@ -138,7 +138,7 @@ const PlinkoGame = () => {
   const PEG_BOTTOM = 84;
   // Board geometry: pegs are centered row-by-row and the bottom row spans
   // the same 2%–98% width used by the multiplier buckets.
-  const BOARD_SIDE_INSET = 2;
+  const BOARD_SIDE_INSET = 10;
   const PLAY_WIDTH = 100 - BOARD_SIDE_INSET * 2;
   const BUCKET_WIDTH = useMemo(() => PLAY_WIDTH / (lines + 1), [lines]);
   const PEG_GAP = BUCKET_WIDTH;
