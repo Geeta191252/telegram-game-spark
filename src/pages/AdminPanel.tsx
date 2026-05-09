@@ -605,11 +605,11 @@ const AdminPanel = () => {
       </div>
 
       {loading && !stats ? (
-        <div className="flex items-center justify-center py-20">
-          <RefreshCw className="h-8 w-8 animate-spin" style={{ color: "hsl(45 80% 65%)" }} />
+        <div className="flex items-center justify-center py-10">
+          <RefreshCw className="h-6 w-6 animate-spin" style={{ color: "hsl(45 80% 65%)" }} />
         </div>
       ) : (
-        <div className="px-4 mt-4">
+        <div className="px-3 mt-2 max-w-md mx-auto">
           {/* Stats Tab */}
           {activeTab === "stats" && stats && (
             <div className="space-y-4">
