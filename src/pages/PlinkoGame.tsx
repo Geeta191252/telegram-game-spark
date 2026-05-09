@@ -431,7 +431,7 @@ const PlinkoGame = () => {
           </AnimatePresence>
 
           {/* Buckets — drum style with multiplier label below */}
-          <div className="absolute left-0 right-0" style={{ bottom: 0, height: "20%" }}>
+          <div className="absolute left-0 right-0" style={{ bottom: 0, height: "14%" }}>
             <div className="flex w-full h-full px-[10%] items-end">
               {multipliers.map((m, i) => {
                 const isHit = highlightBucket === i;
