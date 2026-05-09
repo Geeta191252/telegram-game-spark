@@ -317,7 +317,7 @@ const PlinkoGame = () => {
       </div>
 
       {/* Lines selector */}
-      <div className="absolute right-3 top-20 z-20">
+      <div className="absolute right-[14%] top-[24%] z-30">
         <div
           className="rounded-full px-2 py-1 flex flex-col items-center"
           style={{
