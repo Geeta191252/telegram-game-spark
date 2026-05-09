@@ -455,42 +455,60 @@ const PlinkoGame = () => {
                   >
                     {/* Drum body */}
                     <div
-                      className="w-full"
+                      className="w-full relative"
                       style={{
-                        height: "62%",
-                        borderTopLeftRadius: 6,
-                        borderTopRightRadius: 6,
-                        borderBottomLeftRadius: 3,
-                        borderBottomRightRadius: 3,
+                        height: "70%",
+                        borderRadius: 6,
                         background: `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`,
                         border: isHit
                           ? "1.5px solid hsl(45 100% 70%)"
-                          : "1px solid hsla(0,0%,0%,0.35)",
+                          : "1px solid hsla(0,0%,0%,0.4)",
                         boxShadow: isHit
-                          ? "0 0 12px hsla(45,95%,60%,0.9), inset 0 -4px 6px hsla(0,0%,0%,0.35)"
-                          : "inset 0 -4px 6px hsla(0,0%,0%,0.45), inset 0 2px 3px hsla(0,0%,100%,0.35), 0 2px 3px hsla(0,0%,0%,0.4)",
-                        position: "relative",
+                          ? "0 0 14px hsla(45,95%,60%,0.95), inset 0 -6px 8px hsla(0,0%,0%,0.4)"
+                          : "inset 0 -6px 8px hsla(0,0%,0%,0.5), inset 0 3px 4px hsla(0,0%,100%,0.3), 0 2px 4px hsla(0,0%,0%,0.5)",
                       }}
                     >
-                      {/* Drum top highlight ring */}
+                      {/* Gold rim top */}
                       <div
                         className="absolute left-0 right-0"
                         style={{
-                          top: 1,
-                          height: 4,
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(180deg, hsla(0,0%,100%,0.5), hsla(0,0%,100%,0))",
+                          top: -2,
+                          height: 5,
+                          borderRadius: 3,
+                          background: "linear-gradient(180deg, hsl(50 100% 70%), hsl(35 95% 50%))",
+                          boxShadow: "0 1px 2px hsla(0,0%,0%,0.5)",
+                        }}
+                      />
+                      {/* Gold rim bottom */}
+                      <div
+                        className="absolute left-0 right-0"
+                        style={{
+                          bottom: -1,
+                          height: 3,
+                          borderRadius: 2,
+                          background: "linear-gradient(180deg, hsl(45 95% 55%), hsl(30 90% 40%))",
+                        }}
+                      />
+                      {/* Vertical sheen */}
+                      <div
+                        className="absolute"
+                        style={{
+                          left: "30%",
+                          top: 4,
+                          bottom: 4,
+                          width: "12%",
+                          background: "linear-gradient(180deg, hsla(0,0%,100%,0.25), hsla(0,0%,100%,0))",
+                          borderRadius: 2,
                         }}
                       />
                     </div>
                     {/* Multiplier label below */}
                     <span
-                      className="font-black leading-none mt-0.5"
+                      className="font-black leading-none mt-1"
                       style={{
                         color: "hsl(45 95% 70%)",
-                        textShadow: "0 1px 2px hsla(0,0%,0%,0.8)",
-                        fontSize: lines >= 14 ? 7 : lines >= 11 ? 8 : 10,
+                        textShadow: "0 1px 2px hsla(0,0%,0%,0.9)",
+                        fontSize: lines >= 14 ? 8 : lines >= 11 ? 9 : 11,
                       }}
                     >
                       {m}x
