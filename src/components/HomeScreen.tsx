@@ -548,6 +548,12 @@ const HomeScreen = () => {
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
+      <AnimatePresence>
+        {openTournament && (
+          <TournamentLeaderboard tournament={openTournament} onClose={() => setOpenTournament(null)} />
+        )}
+      </AnimatePresence>
+
       {/* Profile Modal */}
       <AnimatePresence>
         {showProfile && (
