@@ -139,73 +139,73 @@ const HomeScreen = () => {
         backdropFilter: "blur(20px)",
         boxShadow: "0 4px 30px hsla(260, 50%, 10%, 0.6)",
       }}>
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
           {/* Dollar badge */}
           <motion.div
             whileTap={{ scale: 0.95 }}
-            animate={{ boxShadow: ["0 0 8px hsla(140,60%,45%,0.3)", "0 0 16px hsla(140,60%,45%,0.5)", "0 0 8px hsla(140,60%,45%,0.3)"] }}
+            animate={{ boxShadow: ["0 0 6px hsla(140,60%,45%,0.3)", "0 0 12px hsla(140,60%,45%,0.5)", "0 0 6px hsla(140,60%,45%,0.3)"] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 shrink-0 cursor-pointer"
+            className="flex items-center gap-1 rounded-full px-2 py-1 shrink-0 cursor-pointer"
             style={{
               background: "linear-gradient(135deg, hsl(140 65% 42%), hsl(160 55% 38%))",
             }}
           >
-            <span className="text-xs font-black" style={{ color: "hsl(0 0% 100%)" }}>💲</span>
-            <span className="font-bold text-xs" style={{ color: "hsl(0 0% 100%)" }}>
+            <span className="text-[10px] font-black" style={{ color: "hsl(0 0% 100%)" }}>💲</span>
+            <span className="font-bold text-[10px]" style={{ color: "hsl(0 0% 100%)" }}>
               {totalDollar.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </motion.div>
           {/* Star badge */}
           <motion.div
             whileTap={{ scale: 0.95 }}
-            animate={{ boxShadow: ["0 0 8px hsla(40,90%,55%,0.3)", "0 0 16px hsla(40,90%,55%,0.5)", "0 0 8px hsla(40,90%,55%,0.3)"] }}
+            animate={{ boxShadow: ["0 0 6px hsla(40,90%,55%,0.3)", "0 0 12px hsla(40,90%,55%,0.5)", "0 0 6px hsla(40,90%,55%,0.3)"] }}
             transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 shrink-0 cursor-pointer"
+            className="flex items-center gap-1 rounded-full px-2 py-1 shrink-0 cursor-pointer"
             style={{
               background: "linear-gradient(135deg, hsl(40 90% 50%), hsl(25 85% 45%))",
             }}
           >
-            <span className="text-xs">⭐</span>
-            <span className="font-bold text-xs" style={{ color: "hsl(0 0% 10%)" }}>
-              Star {totalStar.toLocaleString()}
+            <span className="text-[10px]">⭐</span>
+            <span className="font-bold text-[10px]" style={{ color: "hsl(0 0% 10%)" }}>
+              {totalStar.toLocaleString()}
             </span>
           </motion.div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {isOwner && (
             <motion.div
               whileTap={{ scale: 0.9 }}
               onClick={goToAdmin}
-              className="h-9 w-9 rounded-xl flex items-center justify-center cursor-pointer"
+              className="h-7 w-7 rounded-lg flex items-center justify-center cursor-pointer"
               style={{
                 background: "linear-gradient(135deg, hsl(0 75% 55%), hsl(25 85% 50%))",
-                boxShadow: "0 2px 12px hsla(0, 70%, 50%, 0.4)",
+                boxShadow: "0 2px 8px hsla(0, 70%, 50%, 0.4)",
               }}
             >
-              <Shield className="h-4 w-4" style={{ color: "hsl(0 0% 100%)" }} />
+              <Shield className="h-3.5 w-3.5" style={{ color: "hsl(0 0% 100%)" }} />
             </motion.div>
           )}
           <motion.div
             whileTap={{ scale: 0.9 }}
-            className="h-9 w-9 rounded-xl flex items-center justify-center cursor-pointer"
+            className="h-7 w-7 rounded-lg flex items-center justify-center cursor-pointer"
             style={{
               background: "linear-gradient(135deg, hsl(310 65% 55%), hsl(280 55% 50%))",
-              boxShadow: "0 2px 12px hsla(310, 60%, 50%, 0.4)",
+              boxShadow: "0 2px 8px hsla(310, 60%, 50%, 0.4)",
             }}
           >
-            <ShoppingCart className="h-4 w-4" style={{ color: "hsl(0 0% 100%)" }} />
+            <ShoppingCart className="h-3.5 w-3.5" style={{ color: "hsl(0 0% 100%)" }} />
           </motion.div>
           <motion.div
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowProfile(true)}
-            className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center cursor-pointer"
+            className="h-7 w-7 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer"
             style={{
               border: "2px solid hsl(45 85% 60%)",
               background: "linear-gradient(135deg, hsl(45 75% 55%), hsl(30 65% 45%))",
-              boxShadow: "0 2px 12px hsla(45, 80%, 55%, 0.4)",
+              boxShadow: "0 2px 8px hsla(45, 80%, 55%, 0.4)",
             }}
           >
-            <User className="h-4 w-4" style={{ color: "hsl(0 0% 10%)" }} />
+            <User className="h-3.5 w-3.5" style={{ color: "hsl(0 0% 10%)" }} />
           </motion.div>
         </div>
       </div>
