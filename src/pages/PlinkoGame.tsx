@@ -607,20 +607,38 @@ const PlinkoGame = () => {
             <div className="text-[10px] font-bold mb-1" style={{ color: "hsl(45 90% 65%)" }}>
               RISK LEVEL
             </div>
-            <button
-              onClick={cycleRisk}
-              disabled={dropping}
-              className="h-9 px-3 rounded-full font-black text-xs flex items-center gap-1 mx-auto"
+            <div
+              className="flex items-center rounded-full overflow-hidden mx-auto"
               style={{
-                background: riskColor,
-                color: "hsl(0 0% 100%)",
-                border: "2px solid hsl(45 90% 65%)",
-                boxShadow: "0 0 10px hsla(25,90%,55%,0.5)",
-                textShadow: "0 1px 2px hsla(0,0%,0%,0.5)",
+                background: "linear-gradient(135deg, hsl(280 50% 25%), hsl(260 45% 18%))",
+                border: "1.5px solid hsl(45 80% 55%)",
               }}
             >
-              🔥 {riskLabel}
-            </button>
+              {(["low", "medium", "high"] as Risk[]).map((r) => {
+                const active = risk === r;
+                return (
+                  <button
+                    key={r}
+                    onClick={() => !dropping && setRisk(r)}
+                    disabled={dropping}
+                    className="flex-1 h-7 text-[9px] font-black uppercase"
+                    style={{
+                      background: active
+                        ? r === "low"
+                          ? "linear-gradient(135deg, hsl(140 75% 45%), hsl(150 70% 38%))"
+                          : r === "medium"
+                          ? "linear-gradient(135deg, hsl(35 90% 55%), hsl(25 85% 45%))"
+                          : "linear-gradient(135deg, hsl(0 80% 55%), hsl(345 75% 45%))"
+                        : "transparent",
+                      color: active ? "hsl(0 0% 100%)" : "hsl(45 90% 70%)",
+                      textShadow: active ? "0 1px 2px hsla(0,0%,0%,0.5)" : "none",
+                    }}
+                  >
+                    {r === "low" ? "Low" : r === "medium" ? "Med" : "High"}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Play */}
@@ -650,38 +668,42 @@ const PlinkoGame = () => {
 
           {/* Bet */}
           <div className="text-center">
-            <div className="flex justify-center gap-1 mb-1">
+            
+            <div
+              className="flex items-stretch rounded-full overflow-hidden mx-auto mb-1"
+              style={{
+                background: "hsl(265 50% 8%)",
+                border: "1.5px solid hsl(45 80% 55%)",
+                width: "fit-content",
+              }}
+            >
               <button
                 onClick={() => !dropping && setActiveWallet("dollar")}
                 disabled={dropping}
-                className="h-5 w-5 rounded-full font-black text-[10px] flex items-center justify-center"
+                className="px-3 h-6 text-[10px] font-black tracking-wide"
                 style={{
                   background:
                     activeWallet === "dollar"
-                      ? "linear-gradient(135deg, hsl(140 80% 50%), hsl(150 70% 40%))"
-                      : "hsla(0,0%,100%,0.1)",
-                  color: "hsl(0 0% 100%)",
-                  border: activeWallet === "dollar" ? "1.5px solid hsl(45 90% 65%)" : "1px solid hsla(0,0%,100%,0.25)",
-                  boxShadow: activeWallet === "dollar" ? "0 0 8px hsla(140,80%,50%,0.6)" : "none",
+                      ? "linear-gradient(135deg, hsl(280 60% 35%), hsl(260 55% 25%))"
+                      : "transparent",
+                  color: activeWallet === "dollar" ? "hsl(0 0% 100%)" : "hsl(45 60% 60%)",
                 }}
               >
-                $
+                USD
               </button>
               <button
                 onClick={() => !dropping && setActiveWallet("star")}
                 disabled={dropping}
-                className="h-5 w-5 rounded-full font-black text-[10px] flex items-center justify-center"
+                className="px-3 h-6 grid place-items-center"
                 style={{
                   background:
                     activeWallet === "star"
-                      ? "linear-gradient(135deg, hsl(45 95% 55%), hsl(35 85% 45%))"
-                      : "hsla(0,0%,100%,0.1)",
-                  color: "hsl(0 0% 100%)",
-                  border: activeWallet === "star" ? "1.5px solid hsl(45 90% 65%)" : "1px solid hsla(0,0%,100%,0.25)",
-                  boxShadow: activeWallet === "star" ? "0 0 8px hsla(45,95%,55%,0.6)" : "none",
+                      ? "linear-gradient(135deg, hsl(280 60% 35%), hsl(260 55% 25%))"
+                      : "transparent",
+                  borderLeft: "1.5px solid hsl(45 80% 55%)",
                 }}
               >
-                ⭐
+                <span style={{ color: "hsl(50 100% 55%)", fontSize: 13, lineHeight: 1 }}>★</span>
               </button>
             </div>
             <div className="text-[10px] font-bold mb-1" style={{ color: "hsl(45 90% 65%)" }}>
