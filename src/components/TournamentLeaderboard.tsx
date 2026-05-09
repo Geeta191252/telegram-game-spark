@@ -96,8 +96,16 @@ const TournamentLeaderboard = ({ tournament, onClose }: Props) => {
           <div className="flex-1 min-w-0">
             <h2 className="font-bold text-base truncate" style={{ color: "hsl(45 95% 75%)" }}>{tournament.title}</h2>
             <p className="text-[11px]" style={{ color: "hsl(0 0% 80%)" }}>
-              Top {tournament.tier} • Prize: <span className="font-bold">{sym}{tournament.prizePerWinner}</span> each
+              Top {tournament.tier} • {tournament.prizeTiers && tournament.prizeTiers.length > 0
+                ? `1st ${sym}${tournament.prizeTiers[0].amount}`
+                : `Prize ${sym}${tournament.prizePerWinner} each`}
             </p>
+            {tournament.endsAt && (
+              <p className="text-[11px] flex items-center gap-1 mt-0.5 font-bold" style={{ color: remainingMs > 0 ? "hsl(140 70% 65%)" : "hsl(0 70% 65%)" }}>
+                <Clock className="h-3 w-3" />
+                {formatRemaining(remainingMs)}
+              </p>
+            )}
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg" style={{ background: "hsla(0,0%,100%,0.1)" }}>
             <X className="h-4 w-4 text-white" />
