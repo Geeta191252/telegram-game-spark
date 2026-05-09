@@ -1665,7 +1665,9 @@ async function advancePhase() {
     greedyKingState.phase = "spinning";
     greedyKingState.phaseStartTime = Date.now();
 
-    // Determine winner: fruit with least total bets
+    // Determine winner: fruit with LOWEST total payout (totalBet × multiplier).
+    // This guarantees house edge — admin always picks the cheapest outcome.
+    // Empty fruits (payout 0) are preferred so untouched fruits win first.
     const roundNum = greedyKingState.roundNumber;
     const bets = await GameBet.find({ roundNumber: roundNum });
 
@@ -1674,10 +1676,13 @@ async function advancePhase() {
       totalPerFruit[b.fruitIndex] += b.amount;
     });
 
-    // Add small random base so empty rounds still pick
-    const withBase = totalPerFruit.map((t) => t + Math.random() * 0.1);
-    const minVal = Math.min(...withBase);
-    const minFruits = withBase.map((v, i) => (v === minVal ? i : -1)).filter((i) => i !== -1);
+    // Payout per fruit = total bets on it × its multiplier
+    const payoutPerFruit = totalPerFruit.map((t, i) => t * FOOD_ITEMS_SERVER[i].multiplier);
+
+    // Add tiny random tiebreaker so equal payouts pick randomly
+    const withJitter = payoutPerFruit.map((p) => p + Math.random() * 0.001);
+    const minVal = Math.min(...withJitter);
+    const minFruits = withJitter.map((v, i) => (v === minVal ? i : -1)).filter((i) => i !== -1);
     const winnerIdx = minFruits[Math.floor(Math.random() * minFruits.length)];
 
     greedyKingState.winnerIndex = winnerIdx;
