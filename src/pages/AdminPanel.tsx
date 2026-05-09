@@ -612,35 +612,35 @@ const AdminPanel = () => {
         <div className="px-3 mt-2 max-w-md mx-auto">
           {/* Stats Tab */}
           {activeTab === "stats" && stats && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-4" style={{
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl p-3" style={{
                   background: "linear-gradient(135deg, hsla(200, 70%, 50%, 0.2), hsla(220, 60%, 40%, 0.2))",
                   border: "1px solid hsla(200, 70%, 50%, 0.3)",
                 }}>
-                  <Star className="h-5 w-5 mb-2" style={{ color: "hsl(45 90% 60%)" }} />
-                  <p className="text-2xl font-bold" style={{ color: "hsl(0 0% 95%)" }}>{stats.totalStarsEarned}</p>
-                  <p className="text-xs" style={{ color: "hsl(0 0% 60%)" }}>Total Stars Earned</p>
-                  <p className="text-xs mt-1" style={{ color: "hsl(200 70% 60%)" }}>{stats.starDepositCount} deposits</p>
+                  <Star className="h-4 w-4 mb-1" style={{ color: "hsl(45 90% 60%)" }} />
+                  <p className="text-xl font-bold" style={{ color: "hsl(0 0% 95%)" }}>{stats.totalStarsEarned}</p>
+                  <p className="text-[10px]" style={{ color: "hsl(0 0% 60%)" }}>Total Stars Earned</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: "hsl(200 70% 60%)" }}>{stats.starDepositCount} deposits</p>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-2xl p-4" style={{
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl p-3" style={{
                   background: "linear-gradient(135deg, hsla(120, 60%, 40%, 0.2), hsla(140, 50%, 35%, 0.2))",
                   border: "1px solid hsla(120, 60%, 40%, 0.3)",
                 }}>
-                  <DollarSign className="h-5 w-5 mb-2" style={{ color: "hsl(120 60% 55%)" }} />
-                  <p className="text-2xl font-bold" style={{ color: "hsl(0 0% 95%)" }}>${stats.totalDollarsEarned.toFixed(2)}</p>
-                  <p className="text-xs" style={{ color: "hsl(0 0% 60%)" }}>Total Dollars Earned</p>
-                  <p className="text-xs mt-1" style={{ color: "hsl(120 60% 55%)" }}>{stats.dollarDepositCount} deposits</p>
+                  <DollarSign className="h-4 w-4 mb-1" style={{ color: "hsl(120 60% 55%)" }} />
+                  <p className="text-xl font-bold" style={{ color: "hsl(0 0% 95%)" }}>${stats.totalDollarsEarned.toFixed(2)}</p>
+                  <p className="text-[10px]" style={{ color: "hsl(0 0% 60%)" }}>Total Dollars Earned</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: "hsl(120 60% 55%)" }}>{stats.dollarDepositCount} deposits</p>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-2xl p-4" style={{
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl p-3" style={{
                   background: "linear-gradient(135deg, hsla(280, 60%, 50%, 0.2), hsla(300, 50%, 40%, 0.2))",
                   border: "1px solid hsla(280, 60%, 50%, 0.3)",
                 }}>
-                  <Users className="h-5 w-5 mb-2" style={{ color: "hsl(280 60% 65%)" }} />
-                  <p className="text-2xl font-bold" style={{ color: "hsl(0 0% 95%)" }}>{stats.totalUsers}</p>
-                  <p className="text-xs" style={{ color: "hsl(0 0% 60%)" }}>Total Users</p>
+                  <Users className="h-4 w-4 mb-1" style={{ color: "hsl(280 60% 65%)" }} />
+                  <p className="text-xl font-bold" style={{ color: "hsl(0 0% 95%)" }}>{stats.totalUsers}</p>
+                  <p className="text-[10px]" style={{ color: "hsl(0 0% 60%)" }}>Total Users</p>
                 </motion.div>
               </div>
 
