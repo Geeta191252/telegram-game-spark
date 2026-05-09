@@ -12,6 +12,8 @@ import {
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult } from "@/lib/telegram";
+import plinkoHeader from "@/assets/plinko-header.png";
+import plinkoPillar from "@/assets/plinko-pillar.png";
 
 type Risk = "low" | "medium" | "high";
 
@@ -301,58 +303,17 @@ const PlinkoGame = () => {
         </div>
       </div>
 
-      {/* Plinko Logo + Tent */}
-      <div className="relative flex items-center justify-center pt-2 pb-3 z-10">
-        {/* Tent stripes behind */}
-        <div
-          className="absolute top-0 left-0 right-0 h-20 pointer-events-none"
-          style={{
-            background:
-              "repeating-linear-gradient(90deg, hsl(0 80% 50%) 0 18px, hsl(0 0% 98%) 18px 36px)",
-            clipPath: "polygon(0 60%, 8% 30%, 20% 55%, 32% 25%, 44% 55%, 56% 25%, 68% 55%, 80% 25%, 92% 55%, 100% 30%, 100% 100%, 0 100%)",
-            opacity: 0.85,
-            filter: "drop-shadow(0 4px 6px hsla(0,0%,0%,0.4))",
-          }}
+      {/* Plinko Header (tent + logo) */}
+      <div className="relative flex items-center justify-center z-10 -mb-2">
+        <motion.img
+          src={plinkoHeader}
+          alt="Plinko"
+          animate={{ scale: [1, 1.02, 1] }}
+          transition={{ duration: 2.4, repeat: Infinity }}
+          className="w-full max-w-[480px] h-auto pointer-events-none select-none"
+          style={{ filter: "drop-shadow(0 6px 12px hsla(0,0%,0%,0.5))" }}
+          draggable={false}
         />
-        {/* Flag bunting */}
-        <div className="absolute top-[68px] left-2 right-2 flex justify-between pointer-events-none">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 0,
-                height: 0,
-                borderLeft: "6px solid transparent",
-                borderRight: "6px solid transparent",
-                borderTop: `10px solid ${
-                  ["hsl(45 95% 55%)", "hsl(0 80% 55%)", "hsl(200 85% 55%)", "hsl(140 70% 50%)"][i % 4]
-                }`,
-                filter: "drop-shadow(0 2px 2px hsla(0,0%,0%,0.4))",
-              }}
-            />
-          ))}
-        </div>
-
-        <motion.div
-          animate={{ scale: [1, 1.04, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="relative z-10"
-        >
-          <h1
-            className="font-black text-4xl tracking-wider"
-            style={{
-              background:
-                "linear-gradient(180deg, hsl(50 100% 65%) 0%, hsl(35 100% 55%) 45%, hsl(15 95% 50%) 55%, hsl(0 90% 45%) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              filter: "drop-shadow(0 2px 0 hsl(0 0% 0%)) drop-shadow(0 0 12px hsla(45,95%,55%,0.7))",
-              fontFamily: "'Fredoka','Comic Sans MS',cursive",
-              WebkitTextStroke: "1.5px hsl(0 0% 0%)",
-            }}
-          >
-            Plinko
-          </h1>
-        </motion.div>
       </div>
 
       {/* Lines selector */}
