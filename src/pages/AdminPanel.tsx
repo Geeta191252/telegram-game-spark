@@ -593,6 +593,7 @@ const AdminPanel = () => {
     { key: "withdrawals", label: "Wd", icon: <CreditCard className="h-4 w-4" /> },
     { key: "offers", label: "Offers", icon: <Tag className="h-4 w-4" /> },
     { key: "tournaments", label: "Tournament", icon: <Trophy className="h-4 w-4" /> },
+    { key: "games", label: "Games Win/Loss", icon: <Gamepad2 className="h-4 w-4" /> },
   ];
 
   return (
