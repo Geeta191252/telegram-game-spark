@@ -114,9 +114,19 @@ const AdminPanel = () => {
     title: "",
     imageUrl: "",
     prizeCurrency: "dollar" as "star" | "dollar",
-    tier: "50" as "50" | "100",
-    prizePerWinner: "",
+    days: "0",
+    hours: "0",
+    minutes: "15",
+    seconds: "15",
   });
+  const [tierRows, setTierRows] = useState<PrizeTier[]>([
+    { fromRank: 1, toRank: 1, amount: 1000 },
+    { fromRank: 2, toRank: 2, amount: 500 },
+    { fromRank: 3, toRank: 3, amount: 250 },
+    { fromRank: 4, toRank: 20, amount: 50 },
+    { fromRank: 21, toRank: 50, amount: 20 },
+    { fromRank: 51, toRank: 100, amount: 10 },
+  ]);
   const [creatingTournament, setCreatingTournament] = useState(false);
   const [deletingTournamentId, setDeletingTournamentId] = useState<string | null>(null);
   const [distributingId, setDistributingId] = useState<string | null>(null);
@@ -133,10 +143,32 @@ const AdminPanel = () => {
     } catch { /* ignore */ }
   };
 
+  const handleImageFile = (file: File) => {
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 4MB" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setTournamentForm((f) => ({ ...f, imageUrl: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  };
+
   const handleCreateTournament = async () => {
-    const prize = parseFloat(tournamentForm.prizePerWinner);
-    if (!tournamentForm.title.trim() || isNaN(prize) || prize <= 0) {
-      toast({ title: "Invalid", description: "Title aur prize amount bharo." });
+    if (!tournamentForm.title.trim()) {
+      toast({ title: "Invalid", description: "Title bharo." });
+      return;
+    }
+    if (tierRows.length === 0) {
+      toast({ title: "Invalid", description: "Kam se kam ek prize tier add karo." });
+      return;
+    }
+    const days = Number(tournamentForm.days) || 0;
+    const hours = Number(tournamentForm.hours) || 0;
+    const minutes = Number(tournamentForm.minutes) || 0;
+    const seconds = Number(tournamentForm.seconds) || 0;
+    const durationMs = ((days * 24 + hours) * 60 + minutes) * 60 * 1000 + seconds * 1000;
+    if (durationMs <= 0) {
+      toast({ title: "Invalid", description: "Duration set karo." });
       return;
     }
     setCreatingTournament(true);
@@ -147,16 +179,16 @@ const AdminPanel = () => {
         body: JSON.stringify({
           ownerId: String(OWNER_ID),
           title: tournamentForm.title.trim(),
-          imageUrl: tournamentForm.imageUrl.trim(),
+          imageUrl: tournamentForm.imageUrl,
           prizeCurrency: tournamentForm.prizeCurrency,
-          tier: Number(tournamentForm.tier),
-          prizePerWinner: prize,
+          prizeTiers: tierRows,
+          durationMs,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       toast({ title: "Tournament created 🏆" });
-      setTournamentForm({ title: "", imageUrl: "", prizeCurrency: "dollar", tier: "50", prizePerWinner: "" });
+      setTournamentForm({ title: "", imageUrl: "", prizeCurrency: "dollar", days: "0", hours: "0", minutes: "15", seconds: "15" });
       fetchTournaments();
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Failed" });
