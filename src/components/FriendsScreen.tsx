@@ -6,9 +6,9 @@ import { getTelegramUser, getTelegram } from "@/lib/telegram";
 import { useBalance } from "@/hooks/useBalance";
 
 const inviteTasks = [
-  { title: "Invite 1st friend", reward: "10 ⭐", icon: "⭐", target: 1 },
-  { title: "Invite 2nd friend", reward: "10 ⭐", icon: "⭐", target: 2 },
-  { title: "Invite 3rd friend", reward: "10 ⭐", icon: "⭐", target: 3 },
+  { title: "Invite 1st friend", reward: "5 ⭐", icon: "⭐", target: 1 },
+  { title: "Invite 2nd friend", reward: "5 ⭐", icon: "⭐", target: 2 },
+  { title: "Invite 3rd friend", reward: "5 ⭐", icon: "⭐", target: 3 },
 ];
 
 const FriendsScreen = () => {

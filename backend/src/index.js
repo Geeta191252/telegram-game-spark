@@ -597,8 +597,8 @@ app.post("/api/referral", async (req, res) => {
     referrer.referralCount = (referrer.referralCount || 0) + 1;
     const count = referrer.referralCount;
 
-    // Reward: 10 Stars per referral
-    let reward = 10;
+    // Reward: 5 Stars per referral
+    let reward = 5;
 
     referrer.starBalance = (referrer.starBalance || 0) + reward;
     await referrer.save();
