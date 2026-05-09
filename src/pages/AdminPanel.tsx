@@ -50,6 +50,7 @@ interface WithdrawalRequest {
 
 type Tab = "stats" | "users" | "withdrawals" | "offers" | "tournaments";
 
+interface PrizeTier { fromRank: number; toRank: number; amount: number; }
 interface AdminTournament {
   _id: string;
   title: string;
@@ -57,6 +58,8 @@ interface AdminTournament {
   prizeCurrency: "dollar" | "star";
   tier: number;
   prizePerWinner: number;
+  prizeTiers?: PrizeTier[];
+  endsAt?: string | null;
   active: boolean;
   createdAt: string;
 }
@@ -111,9 +114,19 @@ const AdminPanel = () => {
     title: "",
     imageUrl: "",
     prizeCurrency: "dollar" as "star" | "dollar",
-    tier: "50" as "50" | "100",
-    prizePerWinner: "",
+    days: "0",
+    hours: "0",
+    minutes: "15",
+    seconds: "15",
   });
+  const [tierRows, setTierRows] = useState<PrizeTier[]>([
+    { fromRank: 1, toRank: 1, amount: 1000 },
+    { fromRank: 2, toRank: 2, amount: 500 },
+    { fromRank: 3, toRank: 3, amount: 250 },
+    { fromRank: 4, toRank: 20, amount: 50 },
+    { fromRank: 21, toRank: 50, amount: 20 },
+    { fromRank: 51, toRank: 100, amount: 10 },
+  ]);
   const [creatingTournament, setCreatingTournament] = useState(false);
   const [deletingTournamentId, setDeletingTournamentId] = useState<string | null>(null);
   const [distributingId, setDistributingId] = useState<string | null>(null);
@@ -130,10 +143,32 @@ const AdminPanel = () => {
     } catch { /* ignore */ }
   };
 
+  const handleImageFile = (file: File) => {
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 4MB" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setTournamentForm((f) => ({ ...f, imageUrl: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  };
+
   const handleCreateTournament = async () => {
-    const prize = parseFloat(tournamentForm.prizePerWinner);
-    if (!tournamentForm.title.trim() || isNaN(prize) || prize <= 0) {
-      toast({ title: "Invalid", description: "Title aur prize amount bharo." });
+    if (!tournamentForm.title.trim()) {
+      toast({ title: "Invalid", description: "Title bharo." });
+      return;
+    }
+    if (tierRows.length === 0) {
+      toast({ title: "Invalid", description: "Kam se kam ek prize tier add karo." });
+      return;
+    }
+    const days = Number(tournamentForm.days) || 0;
+    const hours = Number(tournamentForm.hours) || 0;
+    const minutes = Number(tournamentForm.minutes) || 0;
+    const seconds = Number(tournamentForm.seconds) || 0;
+    const durationMs = ((days * 24 + hours) * 60 + minutes) * 60 * 1000 + seconds * 1000;
+    if (durationMs <= 0) {
+      toast({ title: "Invalid", description: "Duration set karo." });
       return;
     }
     setCreatingTournament(true);
@@ -144,16 +179,16 @@ const AdminPanel = () => {
         body: JSON.stringify({
           ownerId: String(OWNER_ID),
           title: tournamentForm.title.trim(),
-          imageUrl: tournamentForm.imageUrl.trim(),
+          imageUrl: tournamentForm.imageUrl,
           prizeCurrency: tournamentForm.prizeCurrency,
-          tier: Number(tournamentForm.tier),
-          prizePerWinner: prize,
+          prizeTiers: tierRows,
+          durationMs,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       toast({ title: "Tournament created 🏆" });
-      setTournamentForm({ title: "", imageUrl: "", prizeCurrency: "dollar", tier: "50", prizePerWinner: "" });
+      setTournamentForm({ title: "", imageUrl: "", prizeCurrency: "dollar", days: "0", hours: "0", minutes: "15", seconds: "15" });
       fetchTournaments();
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Failed" });
@@ -1186,19 +1221,28 @@ const AdminPanel = () => {
                   style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
                 />
 
+                {/* Image upload */}
+                <label className="block text-[11px] mb-1 mt-1" style={{ color: "hsl(0 0% 70%)" }}>Tournament Photo (upload)</label>
                 <input
-                  type="text"
-                  placeholder="Image URL (https://...)"
-                  value={tournamentForm.imageUrl}
-                  onChange={(e) => setTournamentForm({ ...tournamentForm, imageUrl: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 mb-1 text-sm outline-none"
-                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }}
+                  className="w-full rounded-lg px-3 py-2 mb-1 text-xs outline-none"
+                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 80%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
                 />
                 {tournamentForm.imageUrl && (
-                  <img src={tournamentForm.imageUrl} alt="preview" className="w-full h-24 object-cover rounded-lg mb-2" />
+                  <div className="relative mb-2">
+                    <img src={tournamentForm.imageUrl} alt="preview" className="w-full h-28 object-cover rounded-lg" />
+                    <button
+                      onClick={() => setTournamentForm({ ...tournamentForm, imageUrl: "" })}
+                      className="absolute top-1 right-1 px-2 py-0.5 rounded-md text-[10px] font-bold"
+                      style={{ background: "hsla(0,70%,45%,0.85)", color: "white" }}
+                    >Remove</button>
+                  </div>
                 )}
 
-                <div className="flex gap-2 mb-2">
+                <label className="block text-[11px] mb-1" style={{ color: "hsl(0 0% 70%)" }}>Prize Currency</label>
+                <div className="flex gap-2 mb-3">
                   {(["dollar", "star"] as const).map((c) => (
                     <button
                       key={c}
@@ -1215,31 +1259,69 @@ const AdminPanel = () => {
                   ))}
                 </div>
 
-                <div className="flex gap-2 mb-2">
-                  {(["50", "100"] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTournamentForm({ ...tournamentForm, tier: t })}
-                      className="flex-1 py-2 rounded-lg text-xs font-bold"
-                      style={{
-                        background: tournamentForm.tier === t ? "hsla(280, 70%, 50%, 0.3)" : "hsla(260, 40%, 30%, 0.4)",
-                        border: tournamentForm.tier === t ? "1px solid hsla(280, 70%, 50%, 0.5)" : "1px solid transparent",
-                        color: tournamentForm.tier === t ? "hsl(280 70% 80%)" : "hsl(0 0% 55%)",
-                      }}
-                    >
-                      Top {t}
-                    </button>
+                {/* Duration */}
+                <label className="block text-[11px] mb-1" style={{ color: "hsl(0 0% 70%)" }}>Duration (Days / Hours / Minutes / Seconds)</label>
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  {(["days","hours","minutes","seconds"] as const).map((k) => (
+                    <input
+                      key={k}
+                      type="number"
+                      min={0}
+                      placeholder={k[0].toUpperCase()}
+                      value={(tournamentForm as any)[k]}
+                      onChange={(e) => setTournamentForm({ ...tournamentForm, [k]: e.target.value })}
+                      className="rounded-lg px-2 py-2 text-sm font-bold text-center outline-none"
+                      style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
+                    />
                   ))}
                 </div>
 
-                <input
-                  type="number"
-                  placeholder="Prize per winner"
-                  value={tournamentForm.prizePerWinner}
-                  onChange={(e) => setTournamentForm({ ...tournamentForm, prizePerWinner: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 mb-3 text-sm font-bold outline-none"
-                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(120, 60%, 45%, 0.3)" }}
-                />
+                {/* Prize tiers editor */}
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px]" style={{ color: "hsl(0 0% 70%)" }}>Prize Tiers (rank ranges, max 100)</label>
+                  <button
+                    onClick={() => {
+                      const last = tierRows[tierRows.length - 1];
+                      const start = last ? last.toRank + 1 : 1;
+                      if (start > 100) return;
+                      setTierRows([...tierRows, { fromRank: start, toRank: Math.min(start, 100), amount: 0 }]);
+                    }}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-md"
+                    style={{ background: "hsla(280, 70%, 50%, 0.4)", color: "white" }}
+                  >+ Add Tier</button>
+                </div>
+                <div className="space-y-1.5 mb-3">
+                  {tierRows.map((row, idx) => (
+                    <div key={idx} className="flex gap-1.5 items-center">
+                      <input
+                        type="number" min={1} max={100} value={row.fromRank}
+                        onChange={(e) => { const v = [...tierRows]; v[idx] = { ...v[idx], fromRank: Number(e.target.value) }; setTierRows(v); }}
+                        className="w-14 rounded-md px-2 py-1.5 text-xs text-center outline-none"
+                        style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.25)" }}
+                      />
+                      <span className="text-[10px]" style={{ color: "hsl(0 0% 60%)" }}>to</span>
+                      <input
+                        type="number" min={1} max={100} value={row.toRank}
+                        onChange={(e) => { const v = [...tierRows]; v[idx] = { ...v[idx], toRank: Number(e.target.value) }; setTierRows(v); }}
+                        className="w-14 rounded-md px-2 py-1.5 text-xs text-center outline-none"
+                        style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.25)" }}
+                      />
+                      <span className="text-[10px]" style={{ color: "hsl(0 0% 60%)" }}>=</span>
+                      <input
+                        type="number" min={0} value={row.amount}
+                        onChange={(e) => { const v = [...tierRows]; v[idx] = { ...v[idx], amount: Number(e.target.value) }; setTierRows(v); }}
+                        placeholder="Prize"
+                        className="flex-1 rounded-md px-2 py-1.5 text-xs font-bold outline-none"
+                        style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(120 70% 70%)", border: "1px solid hsla(120, 60%, 45%, 0.25)" }}
+                      />
+                      <button
+                        onClick={() => setTierRows(tierRows.filter((_, i) => i !== idx))}
+                        className="px-2 py-1.5 rounded-md"
+                        style={{ background: "hsla(0, 70%, 45%, 0.5)", color: "white" }}
+                      ><Trash2 className="h-3 w-3" /></button>
+                    </div>
+                  ))}
+                </div>
 
                 <button
                   onClick={handleCreateTournament}
@@ -1278,8 +1360,13 @@ const AdminPanel = () => {
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-sm truncate" style={{ color: "hsl(45 95% 70%)" }}>{t.title}</p>
                               <p className="text-[11px]" style={{ color: "hsl(0 0% 75%)" }}>
-                                Top {t.tier} • {sym}{t.prizePerWinner} each
+                                Top {t.tier} • {(t.prizeTiers && t.prizeTiers.length) ? `${t.prizeTiers.length} tiers` : `${sym}${t.prizePerWinner} each`}
                               </p>
+                              {t.endsAt && (
+                                <p className="text-[10px]" style={{ color: "hsl(280 60% 75%)" }}>
+                                  Ends: {new Date(t.endsAt).toLocaleString()}
+                                </p>
+                              )}
                               <p className="text-[10px]" style={{ color: "hsl(0 0% 55%)" }}>
                                 {t.active ? "🟢 Active" : "⚫ Closed"}
                               </p>

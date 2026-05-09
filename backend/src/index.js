@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 8000;
 app.use(cors());
 // Capture raw body for IPN signature verification
 app.use(express.json({
+  limit: "10mb",
   verify: (req, res, buf) => {
     if (req.url === '/api/crypto/ipn') {
       req.rawBody = buf.toString('utf8');
@@ -2459,6 +2460,22 @@ app.get("/api/tournaments/active", async (req, res) => {
   }
 });
 
+// Helper: compute prize for a given rank from tiers
+function prizeForRank(t, rank) {
+  if (Array.isArray(t.prizeTiers) && t.prizeTiers.length) {
+    const tier = t.prizeTiers.find((tt) => rank >= tt.fromRank && rank <= tt.toRank);
+    return tier ? tier.amount : 0;
+  }
+  return t.prizePerWinner || 0;
+}
+
+function effectiveTopN(t) {
+  if (Array.isArray(t.prizeTiers) && t.prizeTiers.length) {
+    return Math.min(100, t.prizeTiers.reduce((m, tt) => Math.max(m, tt.toRank), 0));
+  }
+  return t.tier || 50;
+}
+
 // Public: leaderboard for a tournament (top N by games played)
 app.get("/api/tournaments/:id/leaderboard", async (req, res) => {
   try {
@@ -2473,7 +2490,7 @@ app.get("/api/tournaments/:id/leaderboard", async (req, res) => {
     if (t.endsAt) match.createdAt.$lte = t.endsAt;
     if (t.gameFilter) match.game = t.gameFilter;
 
-    const limit = t.tier || 50;
+    const limit = effectiveTopN(t);
     const top = await Transaction.aggregate([
       { $match: match },
       { $group: { _id: "$telegramId", gamesPlayed: { $sum: 1 } } },
@@ -2494,7 +2511,7 @@ app.get("/api/tournaments/:id/leaderboard", async (req, res) => {
       gamesPlayed: row.gamesPlayed,
       firstName: userMap[row._id]?.firstName || "Player",
       username: userMap[row._id]?.username || "",
-      prize: t.prizePerWinner,
+      prize: prizeForRank(t, i + 1),
       currency: t.prizeCurrency,
     }));
 
@@ -2522,23 +2539,40 @@ app.post("/api/admin/tournaments/list", async (req, res) => {
 // Admin: create tournament
 app.post("/api/admin/tournaments/create", async (req, res) => {
   try {
-    const { ownerId, title, imageUrl, prizeCurrency, tier, prizePerWinner, gameFilter, endsAt } = req.body || {};
+    const { ownerId, title, imageUrl, prizeCurrency, prizeTiers, gameFilter, durationMs } = req.body || {};
     if (String(ownerId) !== OWNER_ID_STR) return res.status(403).json({ error: "Unauthorized" });
-    if (!title || !prizeCurrency || !prizePerWinner) {
+    if (!title || !prizeCurrency) {
       return res.status(400).json({ error: "Missing required fields" });
     }
     if (!["star", "dollar"].includes(prizeCurrency)) {
       return res.status(400).json({ error: "prizeCurrency must be star or dollar" });
     }
-    const tierNum = Number(tier) === 100 ? 100 : 50;
+    // Validate prize tiers
+    const tiers = Array.isArray(prizeTiers) ? prizeTiers : [];
+    const cleanTiers = [];
+    for (const row of tiers) {
+      const f = Number(row.fromRank), to = Number(row.toRank), a = Number(row.amount);
+      if (!f || !to || isNaN(a) || f < 1 || to < f || to > 100) {
+        return res.status(400).json({ error: `Invalid tier: ${f}-${to}` });
+      }
+      cleanTiers.push({ fromRank: f, toRank: to, amount: a });
+    }
+    if (cleanTiers.length === 0) {
+      return res.status(400).json({ error: "At least one prize tier required" });
+    }
+    const topN = cleanTiers.reduce((m, tt) => Math.max(m, tt.toRank), 0);
+    const dur = Number(durationMs) || 0;
+    const endsAt = dur > 0 ? new Date(Date.now() + dur) : null;
+
     const t = await Tournament.create({
       title: String(title),
       imageUrl: imageUrl || "",
       prizeCurrency,
-      tier: tierNum,
-      prizePerWinner: Number(prizePerWinner),
+      prizeTiers: cleanTiers,
+      tier: topN,
+      prizePerWinner: 0,
       gameFilter: gameFilter || "",
-      endsAt: endsAt ? new Date(endsAt) : null,
+      endsAt,
       active: true,
     });
     res.json({ success: true, tournament: t });
@@ -2576,23 +2610,27 @@ app.post("/api/admin/tournaments/distribute", async (req, res) => {
       { $match: match },
       { $group: { _id: "$telegramId", gamesPlayed: { $sum: 1 } } },
       { $sort: { gamesPlayed: -1 } },
-      { $limit: t.tier || 50 },
+      { $limit: effectiveTopN(t) },
     ]);
 
     const winningField = t.prizeCurrency === "dollar" ? "dollarWinning" : "starWinning";
     let credited = 0;
-    for (const row of top) {
+    for (let i = 0; i < top.length; i++) {
+      const row = top[i];
+      const rank = i + 1;
+      const prize = prizeForRank(t, rank);
+      if (!prize) continue;
       const u = await User.findOne({ telegramId: row._id });
       if (!u) continue;
-      u[winningField] = (u[winningField] || 0) + t.prizePerWinner;
+      u[winningField] = (u[winningField] || 0) + prize;
       await u.save();
       await Transaction.create({
         telegramId: row._id,
         type: "bonus",
         currency: t.prizeCurrency,
-        amount: t.prizePerWinner,
+        amount: prize,
         status: "completed",
-        description: `Tournament prize: ${t.title}`,
+        description: `Tournament prize (rank #${rank}): ${t.title}`,
       });
       credited++;
     }

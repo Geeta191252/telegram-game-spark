@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Trophy, Crown, Medal } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Trophy, Crown, Medal, Clock } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://broken-bria-chetan1-ea890b93.koyeb.app/api";
 
+export interface PrizeTier { fromRank: number; toRank: number; amount: number; }
 export interface Tournament {
   _id: string;
   title: string;
@@ -11,6 +12,7 @@ export interface Tournament {
   prizeCurrency: "dollar" | "star";
   tier: number;
   prizePerWinner: number;
+  prizeTiers?: PrizeTier[];
   gameFilter?: string;
   startedAt: string;
   endsAt?: string | null;
@@ -32,9 +34,26 @@ interface Props {
   onClose: () => void;
 }
 
+function formatRemaining(ms: number) {
+  if (ms <= 0) return "Ended";
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m ${sec}s`;
+  return `${h}h ${m}m ${sec}s`;
+}
+
 const TournamentLeaderboard = ({ tournament, onClose }: Props) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -50,6 +69,7 @@ const TournamentLeaderboard = ({ tournament, onClose }: Props) => {
   }, [tournament._id]);
 
   const sym = tournament.prizeCurrency === "dollar" ? "$" : "⭐";
+  const remainingMs = tournament.endsAt ? new Date(tournament.endsAt).getTime() - now : 0;
 
   return (
     <motion.div
@@ -76,8 +96,16 @@ const TournamentLeaderboard = ({ tournament, onClose }: Props) => {
           <div className="flex-1 min-w-0">
             <h2 className="font-bold text-base truncate" style={{ color: "hsl(45 95% 75%)" }}>{tournament.title}</h2>
             <p className="text-[11px]" style={{ color: "hsl(0 0% 80%)" }}>
-              Top {tournament.tier} • Prize: <span className="font-bold">{sym}{tournament.prizePerWinner}</span> each
+              Top {tournament.tier} • {tournament.prizeTiers && tournament.prizeTiers.length > 0
+                ? `1st ${sym}${tournament.prizeTiers[0].amount}`
+                : `Prize ${sym}${tournament.prizePerWinner} each`}
             </p>
+            {tournament.endsAt && (
+              <p className="text-[11px] flex items-center gap-1 mt-0.5 font-bold" style={{ color: remainingMs > 0 ? "hsl(140 70% 65%)" : "hsl(0 70% 65%)" }}>
+                <Clock className="h-3 w-3" />
+                {formatRemaining(remainingMs)}
+              </p>
+            )}
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg" style={{ background: "hsla(0,0%,100%,0.1)" }}>
             <X className="h-4 w-4 text-white" />

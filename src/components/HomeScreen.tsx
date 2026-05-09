@@ -86,6 +86,12 @@ const HomeScreen = () => {
   const [filter, setFilter] = useState<FilterTab>("all");
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [openTournament, setOpenTournament] = useState<Tournament | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/tournaments/active`)
@@ -93,6 +99,18 @@ const HomeScreen = () => {
       .then((d) => setTournaments(d.tournaments || []))
       .catch(() => {});
   }, []);
+
+  const formatRemaining = (ms: number) => {
+    if (ms <= 0) return "Ended";
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (d > 0) return `${d}d ${h}h ${m}m`;
+    if (h > 0) return `${h}h ${m}m ${sec}s`;
+    return `${m}m ${sec}s`;
+  };
 
   const goToGreedyKing = () => navigate("/greedy-king");
   const goToDiceMaster = () => navigate("/dice-master");
@@ -316,15 +334,17 @@ const HomeScreen = () => {
                     </div>
                   ) : (
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                      {tournaments.map((t) => {
+                       {tournaments.map((t) => {
                         const sym = t.prizeCurrency === "dollar" ? "$" : "⭐";
+                        const firstPrize = t.prizeTiers && t.prizeTiers.length > 0 ? t.prizeTiers[0].amount : t.prizePerWinner;
+                        const remainingMs = t.endsAt ? new Date(t.endsAt).getTime() - now : 0;
                         return (
                           <motion.div
                             key={t._id}
                             whileTap={{ scale: 0.95 }}
                             whileHover={{ scale: 1.03 }}
                             onClick={() => setOpenTournament(t)}
-                            className="cursor-pointer flex-shrink-0 w-[200px] rounded-2xl overflow-hidden relative"
+                            className="cursor-pointer flex-shrink-0 w-[210px] rounded-2xl overflow-hidden relative"
                             style={{
                               background: "linear-gradient(180deg, hsla(280,70%,30%,0.6), hsla(260,60%,15%,0.8))",
                               border: "1.5px solid hsla(45,80%,55%,0.4)",
@@ -345,11 +365,20 @@ const HomeScreen = () => {
                                 background: "linear-gradient(135deg, hsl(0 80% 50%), hsl(25 80% 45%))",
                                 color: "white",
                               }}>TOP {t.tier}</div>
+                              {t.endsAt && (
+                                <div className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1" style={{
+                                  background: "hsla(0,0%,0%,0.65)",
+                                  color: remainingMs > 0 ? "hsl(140 80% 70%)" : "hsl(0 80% 70%)",
+                                  backdropFilter: "blur(4px)",
+                                }}>
+                                  ⏱ {formatRemaining(remainingMs)}
+                                </div>
+                              )}
                             </div>
                             <div className="p-2.5">
                               <p className="text-xs font-bold truncate" style={{ color: "hsl(0 0% 95%)" }}>{t.title}</p>
                               <p className="text-[11px] mt-0.5" style={{ color: "hsl(45 90% 65%)" }}>
-                                Prize: <span className="font-black">{sym}{t.prizePerWinner}</span> each
+                                1st Prize: <span className="font-black">{sym}{firstPrize}</span>
                               </p>
                             </div>
                           </motion.div>
