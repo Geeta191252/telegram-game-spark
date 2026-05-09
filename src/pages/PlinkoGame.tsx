@@ -244,9 +244,18 @@ const PlinkoGame = () => {
       className="min-h-screen flex flex-col overflow-hidden relative"
       style={{
         background:
-          "radial-gradient(ellipse at top, hsl(265 70% 25%) 0%, hsl(260 75% 12%) 70%, hsl(255 80% 6%) 100%)",
+          "radial-gradient(ellipse at top, hsl(230 80% 35%) 0%, hsl(245 85% 18%) 55%, hsl(255 90% 8%) 100%)",
       }}
     >
+      {/* Light rays from top */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-40"
+        style={{
+          background:
+            "conic-gradient(from 250deg at 50% 0%, transparent 0deg, hsla(210,90%,75%,0.25) 25deg, transparent 50deg, hsla(210,90%,75%,0.25) 75deg, transparent 100deg, hsla(210,90%,75%,0.25) 130deg, transparent 160deg)",
+        }}
+      />
+
       {/* Top bar */}
       <div className="flex items-center justify-between px-3 py-2 z-10">
         <button
