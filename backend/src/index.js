@@ -467,6 +467,74 @@ app.post("/api/admin/stats", async (req, res) => {
 });
 
 // ============================================
+// POST /api/admin/games-stats - Per-game win/loss totals
+// ============================================
+app.post("/api/admin/games-stats", async (req, res) => {
+  try {
+    const { ownerId } = req.body;
+    if (String(ownerId) !== "6965488457") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const rows = await Transaction.aggregate([
+      { $match: { type: { $in: ["bet", "win"] }, status: "completed" } },
+      {
+        $project: {
+          type: 1,
+          currency: 1,
+          amount: 1,
+          game: {
+            $ifNull: [
+              "$game",
+              {
+                $let: {
+                  vars: { d: { $ifNull: ["$description", ""] } },
+                  in: {
+                    $cond: [
+                      { $gt: [{ $indexOfBytes: ["$$d", ":"] }, 0] },
+                      { $substrBytes: ["$$d", 0, { $indexOfBytes: ["$$d", ":"] }] },
+                      "unknown",
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { game: "$game", type: "$type", currency: "$currency" },
+          total: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const games = {};
+    for (const r of rows) {
+      const g = r._id.game || "unknown";
+      if (!games[g]) games[g] = { game: g, dollarWin: 0, starWin: 0, dollarLoss: 0, starLoss: 0, winCount: 0, betCount: 0 };
+      const amt = Math.abs(r.total || 0);
+      if (r._id.type === "win") {
+        if (r._id.currency === "dollar") games[g].dollarWin += amt;
+        if (r._id.currency === "star") games[g].starWin += amt;
+        games[g].winCount += r.count;
+      } else if (r._id.type === "bet") {
+        if (r._id.currency === "dollar") games[g].dollarLoss += amt;
+        if (r._id.currency === "star") games[g].starLoss += amt;
+        games[g].betCount += r.count;
+      }
+    }
+
+    return res.json({ games: Object.values(games).sort((a, b) => (b.dollarLoss + b.starLoss) - (a.dollarLoss + a.starLoss)) });
+  } catch (error) {
+    console.error("Admin games-stats error:", error);
+    return res.status(500).json({ error: "Failed to fetch games stats" });
+  }
+});
+
+// ============================================
 // POST /api/admin/users - Get all users list with balances
 // ============================================
 app.post("/api/admin/users", async (req, res) => {
