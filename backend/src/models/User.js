@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    referralRewarded: {
+      type: Boolean,
+      default: false,
+    },
     lastActive: {
       type: Date,
       default: Date.now,

@@ -57,6 +57,48 @@ async function getOrCreateUser(telegramUserId) {
   return user;
 }
 
+// Credit pending referral reward to referrer when this user makes their first deposit.
+// Idempotent: only fires once via the referralRewarded flag.
+async function creditReferralOnDeposit(depositorTelegramId) {
+  try {
+    const numericId = Number(depositorTelegramId);
+    if (!numericId) return;
+    const depositor = await User.findOne({ telegramId: numericId });
+    if (!depositor) return;
+    if (!depositor.referredBy || depositor.referralRewarded) return;
+
+    const referrer = await User.findOne({ telegramId: depositor.referredBy });
+    if (!referrer) return;
+
+    const reward = 5;
+    referrer.starBalance = (referrer.starBalance || 0) + reward;
+    await referrer.save();
+
+    depositor.referralRewarded = true;
+    await depositor.save();
+
+    await Transaction.create({
+      telegramId: referrer.telegramId,
+      type: "referral",
+      currency: "star",
+      amount: reward,
+      status: "completed",
+      description: `Referral reward: ${reward} ⭐ (referred user ${numericId} made first deposit)`,
+    });
+
+    try {
+      await bot.sendMessage(referrer.telegramId,
+        `🎉 *Referral Reward Unlocked!*\n\n` +
+        `👤 Your referred friend just made their first deposit.\n` +
+        `💰 You earned ${reward} ⭐!`,
+        { parse_mode: "Markdown" }
+      );
+    } catch (e) { /* ignore */ }
+  } catch (err) {
+    console.error("creditReferralOnDeposit error:", err.message);
+  }
+}
+
 // ============================================
 // POST /api/deposit
 // Creates a Telegram Stars invoice for deposit
@@ -589,36 +631,21 @@ app.post("/api/referral", async (req, res) => {
       return res.json({ success: false, message: "Already referred" });
     }
 
-    // Set referral
+    // Set referral (reward is granted only after referred user makes a deposit)
     user.referredBy = numericReferrerId;
     await user.save();
 
     // Increment referrer's count
     referrer.referralCount = (referrer.referralCount || 0) + 1;
     const count = referrer.referralCount;
-
-    // Reward: 5 Stars per referral
-    let reward = 5;
-
-    referrer.starBalance = (referrer.starBalance || 0) + reward;
     await referrer.save();
 
-    // Log reward transaction
-    await Transaction.create({
-      telegramId: numericReferrerId,
-      type: "referral",
-      currency: "star",
-      amount: reward,
-      status: "completed",
-      description: `Referral reward: ${reward} ⭐ (referred user ${numericUserId})`,
-    });
-
-    // Notify referrer
+    // Notify referrer (pending — reward unlocks after first deposit)
     try {
       await bot.sendMessage(numericReferrerId,
         `🎉 *New Referral!*\n\n` +
         `👤 A friend joined using your link!\n` +
-        `💰 You earned ${reward} ⭐!\n` +
+        `🔒 Reward of 5 ⭐ will unlock once they make their first deposit.\n` +
         `📊 Total referrals: ${count}`,
         { parse_mode: "Markdown" }
       );
@@ -626,7 +653,7 @@ app.post("/api/referral", async (req, res) => {
       console.error("Failed to send referral notification:", botErr.message);
     }
 
-    return res.json({ success: true, reward, totalReferrals: count });
+    return res.json({ success: true, pending: true, totalReferrals: count });
   } catch (error) {
     console.error("Referral error:", error);
     return res.status(500).json({ error: "Referral processing failed" });
@@ -858,25 +885,14 @@ app.post("/api/telegram-webhook", async (req, res) => {
 
               referrer.referralCount = (referrer.referralCount || 0) + 1;
               const count = referrer.referralCount;
-              const reward = 10;
-              referrer.starBalance = (referrer.starBalance || 0) + reward;
               await referrer.save();
 
-              await Transaction.create({
-                telegramId: numericReferrerId,
-                type: "referral",
-                currency: "star",
-                amount: reward,
-                status: "completed",
-                description: `Referral reward: ${reward} ⭐ (referred user ${numericUserId})`,
-              });
-
-              // Notify referrer
+              // Reward unlocks only after referred user makes a deposit
               try {
                 await bot.sendMessage(numericReferrerId,
                   `🎉 *New Referral!*\n\n` +
                   `👤 ${firstName} joined using your link!\n` +
-                  `💰 You earned ${reward} ⭐!\n` +
+                  `🔒 Reward of 5 ⭐ will unlock once they make their first deposit.\n` +
                   `📊 Total referrals: ${count}`,
                   { parse_mode: "Markdown" }
                 );
@@ -1224,6 +1240,9 @@ app.post("/api/telegram-webhook", async (req, res) => {
       });
 
       console.log(`✅ Payment received: ${amount} ${currency} for user ${userId}`);
+
+      // Unlock pending referral reward (if any) on first successful deposit
+      await creditReferralOnDeposit(userId);
     }
 
     // Handle pre-checkout query
@@ -1605,6 +1624,9 @@ app.post("/api/crypto/ipn", async (req, res) => {
       await user.save();
 
       console.log(`✅ Crypto deposit completed: $${tx.amount} for user ${tx.telegramId}`);
+
+      // Unlock pending referral reward (if any) on first successful deposit
+      await creditReferralOnDeposit(tx.telegramId);
 
       // Notify user via Telegram bot
       try {
