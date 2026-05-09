@@ -634,10 +634,10 @@ const WalletScreen = () => {
       </motion.div>
 
       {/* Winning Actions */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <Button
           variant="outline"
-          className="rounded-xl h-14 w-full border-green-500/30 text-green-500 hover:bg-green-500/10 flex flex-col items-center justify-center gap-0.5"
+          className="rounded-lg h-11 w-full border-green-500/30 text-green-500 hover:bg-green-500/10 flex flex-col items-center justify-center gap-0"
           onClick={() => {
             if (dollarWinnings < 10) {
               toast({ title: "Minimum $10", description: "You need at least $10 in winnings to withdraw.", variant: "destructive" });
@@ -651,31 +651,31 @@ const WalletScreen = () => {
             setWithdrawDialog(true);
           }}
         >
-          <span className="flex items-center text-xs">
-            <DollarSign className="h-3.5 w-3.5 mr-0.5" /> Winning Withdraw
+          <span className="flex items-center text-[10px]">
+            <DollarSign className="h-3 w-3 mr-0.5" /> Winning Withdraw
           </span>
-          <span className="text-sm font-bold">${dollarWinnings.toFixed(2)}</span>
+          <span className="text-xs font-bold">${dollarWinnings.toFixed(2)}</span>
         </Button>
         <Button
           variant="outline"
-          className="rounded-xl h-14 w-full border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 flex flex-col items-center justify-center gap-0.5"
+          className="rounded-lg h-11 w-full border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 flex flex-col items-center justify-center gap-0"
           onClick={() => {
             const el = document.getElementById("star-converter");
             el?.scrollIntoView({ behavior: "smooth" });
           }}
         >
-          <span className="flex items-center text-xs">
-            <Star className="h-3.5 w-3.5 mr-0.5" /> Winning Star Convert
+          <span className="flex items-center text-[10px]">
+            <Star className="h-3 w-3 mr-0.5" /> Winning Star Convert
           </span>
-          <span className="text-sm font-bold">⭐ {starWinnings.toLocaleString()}</span>
+          <span className="text-xs font-bold">⭐ {starWinnings.toLocaleString()}</span>
         </Button>
       </div>
 
       {/* Withdraw */}
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-2">
         <Button
           variant="outline"
-          className="rounded-xl h-12 w-full"
+          className="rounded-lg h-10 w-full text-xs"
           onClick={() => {
             setWithdrawCurrency("dollar");
             setWithdrawAmount("");
@@ -685,7 +685,7 @@ const WalletScreen = () => {
             setWithdrawDialog(true);
           }}
         >
-          <ArrowUpRight className="h-4 w-4 mr-2" /> Withdraw
+          <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" /> Withdraw
         </Button>
       </div>
 
