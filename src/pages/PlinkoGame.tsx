@@ -451,16 +451,16 @@ const PlinkoGame = () => {
                     key={i}
                     animate={isHit ? { scale: [1, 1.25, 1], y: [0, -6, 0] } : {}}
                     transition={{ duration: 0.5, repeat: isHit ? 2 : 0 }}
-                    className="mx-[1.5px] h-full flex flex-col items-center justify-end relative"
+                    className="mx-[1px] h-full flex flex-col items-center justify-end relative"
                     style={{ width: `${100 / multipliers.length}%` }}
                   >
                     {/* Box body */}
                     <div
                       className="relative"
                       style={{
-                        width: "60%",
-                        height: "28%",
-                        borderRadius: 4,
+                        width: "94%",
+                        height: "55%",
+                        borderRadius: 5,
                         background: `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`,
                         border: isHit
                           ? "1.5px solid hsl(45 100% 70%)"
