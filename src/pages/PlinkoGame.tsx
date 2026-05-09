@@ -134,8 +134,8 @@ const PlinkoGame = () => {
   const currentBalance = activeWallet === "dollar" ? gameDollarBalance : gameStarBalance;
 
   // Geometry
-  const PEG_TOP = 8;
-  const PEG_BOTTOM = 72;
+  const PEG_TOP = 3;
+  const PEG_BOTTOM = 80;
   // Board geometry: pegs are centered row-by-row and the bottom row spans
   // the same 2%–98% width used by the multiplier buckets.
   const BOARD_SIDE_INSET = 10;
@@ -304,7 +304,7 @@ const PlinkoGame = () => {
       </div>
 
       {/* Plinko Header (tent + logo) */}
-      <div className="relative flex items-center justify-center z-10 -mb-2">
+      <div className="relative flex items-center justify-center z-10 -mb-6">
         <motion.img
           src={plinkoHeader}
           alt="Plinko"
