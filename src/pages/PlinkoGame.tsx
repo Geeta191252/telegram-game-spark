@@ -299,13 +299,6 @@ const PlinkoGame = () => {
         </div>
       </div>
 
-      {/* Plinko Logo */}
-      <div className="relative flex items-center justify-center pt-1 pb-2">
-        <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="text-center"
-        >
       {/* Plinko Logo + Tent */}
       <div className="relative flex items-center justify-center pt-2 pb-3 z-10">
         {/* Tent stripes behind */}
