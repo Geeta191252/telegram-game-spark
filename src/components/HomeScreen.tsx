@@ -43,7 +43,7 @@ const GameTile = ({ image, name, description, badge, badgeGradient, borderGradie
     whileTap={{ scale: 0.9 }}
     whileHover={{ scale: 1.05, y: -4 }}
     onClick={onClick}
-    className="cursor-pointer flex-shrink-0 w-[150px]"
+    className="cursor-pointer w-full"
   >
     <div className="relative rounded-2xl overflow-hidden aspect-square mb-2" style={{
       padding: "2px",
@@ -312,7 +312,7 @@ const HomeScreen = () => {
                     <div className="rounded-2xl p-4 text-center text-xs" style={{
                       background: "hsla(260,40%,25%,0.4)", border: "1px dashed hsla(45,80%,55%,0.25)", color: "hsl(260 30% 70%)"
                     }}>
-                      Koi tournament active nahi. Jaldi aane wale hain! 🏆
+                      No tournaments active right now. Coming soon! 🏆
                     </div>
                   ) : (
                     <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -378,6 +378,7 @@ const HomeScreen = () => {
                   </motion.h2>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => setFilter("wheel")}
                     className="flex items-center gap-1 text-xs font-semibold rounded-full px-3 py-1"
                     style={{
                       background: "hsla(45, 70%, 55%, 0.15)",
@@ -388,7 +389,7 @@ const HomeScreen = () => {
                     View all <ChevronRight className="h-3.5 w-3.5" />
                   </motion.button>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="grid grid-cols-2 gap-3 pb-2">
                   <GameTile
                     image={greedyKingThumb}
                     name="Greedy King"
@@ -429,6 +430,7 @@ const HomeScreen = () => {
                   </motion.h2>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => setFilter("crash")}
                     className="flex items-center gap-1 text-xs font-semibold rounded-full px-3 py-1"
                     style={{
                       background: "hsla(310, 70%, 55%, 0.15)",
@@ -439,7 +441,7 @@ const HomeScreen = () => {
                     View all <ChevronRight className="h-3.5 w-3.5" />
                   </motion.button>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="grid grid-cols-2 gap-3 pb-2">
                   <GameTile
                     image={gameAviator}
                     name="Aviator"
@@ -478,6 +480,7 @@ const HomeScreen = () => {
                   </motion.h2>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => setFilter("slots")}
                     className="flex items-center gap-1 text-xs font-semibold rounded-full px-3 py-1"
                     style={{
                       background: "hsla(0, 70%, 55%, 0.15)",
@@ -488,7 +491,7 @@ const HomeScreen = () => {
                     View all <ChevronRight className="h-3.5 w-3.5" />
                   </motion.button>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="grid grid-cols-2 gap-3 pb-2">
                   <GameTile
                     image={gameDice}
                     name="Dice Master"
