@@ -402,13 +402,17 @@ const HomeScreen = () => {
                   />
                 </div>
               </section>
+              )}
 
               {/* Colorful Divider */}
+              {filter === "all" && (
               <div className="h-[2px] rounded-full" style={{
                 background: "linear-gradient(90deg, transparent, hsl(280 60% 55%), hsl(45 80% 55%), hsl(0 70% 55%), transparent)",
               }} />
+              )}
 
               {/* Crash Category */}
+              {(filter === "all" || filter === "crash") && (
               <section>
                 <div className="flex items-center justify-between mb-3">
                   <motion.h2
@@ -449,11 +453,15 @@ const HomeScreen = () => {
                   />
                 </div>
               </section>
+              )}
 
               {/* Colorful Divider */}
+              {filter === "all" && (
               <div className="h-[2px] rounded-full" style={{
                 background: "linear-gradient(90deg, transparent, hsl(280 60% 55%), hsl(45 80% 55%), hsl(0 70% 55%), transparent)",
               }} />
+              )}
+              {(filter === "all" || filter === "slots") && (
               <section>
                 <div className="flex items-center justify-between mb-3">
                   <motion.h2
