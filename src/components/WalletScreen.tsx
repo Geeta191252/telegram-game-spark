@@ -471,43 +471,43 @@ const WalletScreen = () => {
   };
 
   return (
-    <div className="px-4 pt-4 space-y-5">
-      <h2 className="font-bold text-xl text-foreground">Wallet</h2>
+    <div className="px-3 pt-3 space-y-3">
+      <h2 className="font-bold text-base text-foreground">Wallet</h2>
 
       {/* Balances */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border rounded-2xl p-4 space-y-1"
+          className="bg-card border border-border rounded-xl p-2.5 space-y-0.5"
         >
-          <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
-            <DollarSign className="h-3.5 w-3.5" /> Dollar ($)
+          <div className="flex items-center gap-1 text-muted-foreground text-[10px] font-medium">
+            <DollarSign className="h-3 w-3" /> Dollar ($)
           </div>
-          <p className="font-bold text-2xl text-foreground">${totalDollarWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <p className="font-bold text-base text-foreground">${totalDollarWallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-card border border-border rounded-2xl p-4 space-y-1"
+          className="bg-card border border-border rounded-xl p-2.5 space-y-0.5"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
-                <Star className="h-3.5 w-3.5" /> Stars
+          <div className="flex items-center justify-between gap-1">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1 text-muted-foreground text-[10px] font-medium">
+                <Star className="h-3 w-3" /> Stars
               </div>
-              <p className="font-bold text-2xl text-foreground">{totalStarWallet.toLocaleString()}</p>
+              <p className="font-bold text-base text-foreground">{totalStarWallet.toLocaleString()}</p>
             </div>
             <Button
               size="sm"
               variant="outline"
-              className="text-xs border-primary/50 text-primary hover:bg-primary/10"
+              className="h-7 px-2 text-[10px] border-primary/50 text-primary hover:bg-primary/10"
               onClick={() => {
                 setAmountDialog({ open: true, action: "deposit", currency: "star" });
               }}
             >
-              + Add Fund
+              + Add
             </Button>
           </div>
         </motion.div>
