@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, Music, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -13,37 +13,76 @@ import {
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult } from "@/lib/telegram";
 
-// 16-line medium-risk multipliers (17 buckets, symmetric)
-const MULTIPLIERS = [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110];
-const ROWS = 16; // pegs rows -> ROWS+1 buckets (= 17)
-const BUCKETS = MULTIPLIERS.length; // 17
+type Risk = "low" | "medium" | "high";
+
+// Multiplier tables: [risk][lines] => array length lines+1 (symmetric)
+const MULTIPLIER_TABLE: Record<Risk, Record<number, number[]>> = {
+  low: {
+    8: [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
+    9: [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
+    10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
+    11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
+    12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
+    13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
+    14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
+    15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
+    16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
+  },
+  medium: {
+    8: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+    9: [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
+    10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
+    11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
+    12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+    13: [43, 13, 6, 3, 1.3, 0.7, 0.4, 0.4, 0.7, 1.3, 3, 6, 13, 43],
+    14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.2, 0.5, 1, 1.9, 4, 7, 15, 58],
+    15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
+    16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
+  },
+  high: {
+    8: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+    9: [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
+    10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
+    11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
+    12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+    13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
+    14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
+    15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
+    16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
+  },
+};
 
 const BET_PRESETS = [1, 5, 10, 50, 100];
 
-// Weighted bucket selection — heavily biased to center (rigged for house edge)
-// Lower multipliers (center) are favored.
-const pickRiggedBucket = (): number => {
-  // Target distribution (sums to 1) — favor center indices 7,8,9 (0.5x, 0.3x, 0.5x)
-  const weights = [
-    0.001, 0.003, 0.01, 0.025, 0.04, 0.08, 0.13, 0.18,
-    0.22,
-    0.18, 0.13, 0.08, 0.04, 0.025, 0.01, 0.003, 0.001,
-  ];
-  const total = weights.reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  for (let i = 0; i < weights.length; i++) {
-    r -= weights[i];
-    if (r <= 0) return i;
+// Build weights biased to center for rigging (more bias = bigger house edge)
+const buildRiggedWeights = (lines: number, risk: Risk): number[] => {
+  const n = lines + 1;
+  const center = (n - 1) / 2;
+  // bias factor: high risk -> tighter to center; low risk -> spread a bit
+  const sigma = risk === "high" ? n * 0.13 : risk === "medium" ? n * 0.18 : n * 0.24;
+  const w: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const d = (i - center) / sigma;
+    w.push(Math.exp(-0.5 * d * d));
   }
-  return 8;
+  return w;
 };
 
-// Build a path: ROWS L/R moves. Number of "right" moves = target bucket index.
-const buildPath = (targetBucket: number): boolean[] => {
-  const rights = Math.max(0, Math.min(ROWS, targetBucket));
+const pickRiggedBucket = (lines: number, risk: Risk): number => {
+  const w = buildRiggedWeights(lines, risk);
+  const total = w.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < w.length; i++) {
+    r -= w[i];
+    if (r <= 0) return i;
+  }
+  return Math.floor(lines / 2);
+};
+
+const buildPath = (targetBucket: number, lines: number): boolean[] => {
+  const rights = Math.max(0, Math.min(lines, targetBucket));
   const moves: boolean[] = [];
-  for (let i = 0; i < ROWS; i++) moves.push(i < rights);
-  // Shuffle
+  for (let i = 0; i < lines; i++) moves.push(i < rights);
   for (let i = moves.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [moves[i], moves[j]] = [moves[j], moves[i]];
@@ -80,6 +119,8 @@ const PlinkoGame = () => {
 
   const [activeWallet, setActiveWallet] = useState<"dollar" | "star">("dollar");
   const [bet, setBet] = useState(1);
+  const [lines, setLines] = useState(16);
+  const [risk, setRisk] = useState<Risk>("medium");
   const [dropping, setDropping] = useState(false);
   const [ballPath, setBallPath] = useState<{ x: number; y: number }[]>([]);
   const [ballStep, setBallStep] = useState(-1);
@@ -87,43 +128,44 @@ const PlinkoGame = () => {
   const [lastWin, setLastWin] = useState<number | null>(null);
   const [lastMult, setLastMult] = useState<number | null>(null);
 
+  const multipliers = useMemo(() => MULTIPLIER_TABLE[risk][lines], [risk, lines]);
   const currentBalance = activeWallet === "dollar" ? gameDollarBalance : gameStarBalance;
 
-  // Geometry of pegs / board
-  // Triangle: row r has r+3 pegs (rows 0..ROWS-1)
-  // Use percentages so we can render flexibly
-  const BOARD_W = 100; // percent
-  const PEG_TOP = 4; // %
-  const PEG_BOTTOM = 88; // %
-  const HORIZONTAL_SPACING = 4.4; // % per peg gap
+  // Geometry
+  const PEG_TOP = 4;
+  const PEG_BOTTOM = 88;
+  // Adapt horizontal spacing based on lines so the bottom row fits
+  const HORIZONTAL_SPACING = useMemo(() => {
+    // bottom row peg count = lines + 2; total span = (lines+1) * (sp/2)
+    // want span <= 92% of board, so sp <= 184 / (lines+1)
+    return Math.min(5, 184 / (lines + 1));
+  }, [lines]);
 
   const computePath = useCallback((moves: boolean[]) => {
     const points: { x: number; y: number }[] = [];
-    let x = 50; // start at center top
+    let x = 50;
     points.push({ x, y: PEG_TOP - 4 });
-    const rowGap = (PEG_BOTTOM - PEG_TOP) / (ROWS - 1);
+    const rowGap = (PEG_BOTTOM - PEG_TOP) / Math.max(1, lines - 1);
     const half = HORIZONTAL_SPACING / 2;
-    for (let r = 0; r < ROWS; r++) {
+    for (let r = 0; r < lines; r++) {
       const y = PEG_TOP + r * rowGap;
       points.push({ x, y });
       x += moves[r] ? half : -half;
     }
-    // Final fall into bucket
     points.push({ x, y: PEG_BOTTOM + 6 });
     return points;
-  }, []);
+  }, [lines, HORIZONTAL_SPACING]);
 
   const drop = useCallback(async () => {
     if (dropping) return;
     if (currentBalance < bet) return;
 
-    // Deduct bet
     if (activeWallet === "dollar") setLocalDollarAdj((p) => p - bet);
     else setLocalStarAdj((p) => p - bet);
     if (soundRef.current) playBetSound();
 
-    const target = pickRiggedBucket();
-    const moves = buildPath(target);
+    const target = pickRiggedBucket(lines, risk);
+    const moves = buildPath(target, lines);
     const path = computePath(moves);
 
     setLastWin(null);
@@ -133,7 +175,6 @@ const PlinkoGame = () => {
     setBallStep(0);
     setDropping(true);
 
-    // Animate step by step
     const stepMs = 110;
     for (let i = 1; i < path.length; i++) {
       await new Promise((r) => setTimeout(r, stepMs));
@@ -142,7 +183,7 @@ const PlinkoGame = () => {
     }
     await new Promise((r) => setTimeout(r, 200));
 
-    const mult = MULTIPLIERS[target];
+    const mult = multipliers[target];
     const win = Math.floor(bet * mult * 100) / 100;
     setHighlightBucket(target);
     setLastMult(mult);
@@ -171,13 +212,33 @@ const PlinkoGame = () => {
     await new Promise((r) => setTimeout(r, 800));
     setDropping(false);
     setBallStep(-1);
-  }, [dropping, currentBalance, bet, activeWallet, computePath, refreshBalance]);
+  }, [dropping, currentBalance, bet, activeWallet, computePath, refreshBalance, lines, risk, multipliers]);
 
-  const adjustBet = (delta: number) => {
-    setBet((b) => Math.max(1, b + delta));
+  const adjustBet = (delta: number) => setBet((b) => Math.max(1, b + delta));
+  const adjustLines = (delta: number) => {
+    if (dropping) return;
+    setLines((l) => Math.max(8, Math.min(16, l + delta)));
+    setHighlightBucket(null);
+    setLastWin(null);
+    setLastMult(null);
+  };
+  const cycleRisk = () => {
+    if (dropping) return;
+    setRisk((r) => (r === "low" ? "medium" : r === "medium" ? "high" : "low"));
+    setHighlightBucket(null);
+    setLastWin(null);
+    setLastMult(null);
   };
 
   const ballPos = ballStep >= 0 && ballPath[ballStep] ? ballPath[ballStep] : null;
+
+  const riskColor =
+    risk === "low"
+      ? "linear-gradient(135deg, hsl(140 70% 45%), hsl(160 65% 38%))"
+      : risk === "medium"
+      ? "linear-gradient(135deg, hsl(25 95% 55%), hsl(0 85% 50%))"
+      : "linear-gradient(135deg, hsl(0 90% 55%), hsl(330 80% 42%))";
+  const riskLabel = risk === "low" ? "LOW" : risk === "medium" ? "MED" : "HIGH";
 
   return (
     <div
@@ -230,7 +291,7 @@ const PlinkoGame = () => {
         </div>
       </div>
 
-      {/* Plinko Logo / Tent */}
+      {/* Plinko Logo */}
       <div className="relative flex items-center justify-center pt-1 pb-2">
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
@@ -251,7 +312,6 @@ const PlinkoGame = () => {
             🎪 Plinko
           </h1>
         </motion.div>
-        {/* Tent banner */}
         <div
           className="absolute top-0 left-0 right-0 h-16 -z-0 opacity-60 pointer-events-none"
           style={{
@@ -263,7 +323,7 @@ const PlinkoGame = () => {
         />
       </div>
 
-      {/* Lines display */}
+      {/* Lines selector */}
       <div className="absolute right-3 top-20 z-20">
         <div
           className="rounded-full px-2 py-1 flex flex-col items-center"
@@ -275,9 +335,13 @@ const PlinkoGame = () => {
         >
           <span className="text-[9px] font-bold" style={{ color: "hsl(45 90% 65%)" }}>LINES</span>
           <div className="flex items-center gap-1">
-            <ChevronLeft className="h-3 w-3" style={{ color: "hsl(45 90% 60%)" }} />
-            <span className="font-black text-sm" style={{ color: "hsl(0 0% 100%)" }}>16</span>
-            <ChevronRight className="h-3 w-3" style={{ color: "hsl(45 90% 60%)" }} />
+            <button onClick={() => adjustLines(-1)} disabled={dropping || lines <= 8}>
+              <ChevronLeft className="h-3.5 w-3.5" style={{ color: "hsl(45 90% 60%)" }} />
+            </button>
+            <span className="font-black text-sm w-5 text-center" style={{ color: "hsl(0 0% 100%)" }}>{lines}</span>
+            <button onClick={() => adjustLines(1)} disabled={dropping || lines >= 16}>
+              <ChevronRight className="h-3.5 w-3.5" style={{ color: "hsl(45 90% 60%)" }} />
+            </button>
           </div>
         </div>
       </div>
@@ -295,7 +359,6 @@ const PlinkoGame = () => {
             boxShadow: "inset 0 0 40px hsla(280, 70%, 30%, 0.5), 0 0 30px hsla(280, 60%, 30%, 0.4)",
           }}
         >
-          {/* Spotlight rays */}
           <div
             className="absolute inset-0 opacity-30 pointer-events-none"
             style={{
@@ -305,9 +368,9 @@ const PlinkoGame = () => {
           />
 
           {/* Pegs */}
-          {Array.from({ length: ROWS }).map((_, r) => {
+          {Array.from({ length: lines }).map((_, r) => {
             const pegCount = r + 3;
-            const rowGap = (PEG_BOTTOM - PEG_TOP) / (ROWS - 1);
+            const rowGap = (PEG_BOTTOM - PEG_TOP) / Math.max(1, lines - 1);
             const y = PEG_TOP + r * rowGap;
             const totalWidth = (pegCount - 1) * (HORIZONTAL_SPACING / 2);
             const startX = 50 - totalWidth;
@@ -316,7 +379,7 @@ const PlinkoGame = () => {
                 {Array.from({ length: pegCount }).map((_, p) => {
                   const x = startX + p * (HORIZONTAL_SPACING / 2);
                   return (
-                    <motion.div
+                    <div
                       key={p}
                       className="absolute rounded-full"
                       style={{
@@ -360,7 +423,7 @@ const PlinkoGame = () => {
           {/* Buckets */}
           <div className="absolute left-0 right-0" style={{ bottom: 0, height: "10%" }}>
             <div className="flex w-full h-full px-[2%]">
-              {MULTIPLIERS.map((m, i) => {
+              {multipliers.map((m, i) => {
                 const isHit = highlightBucket === i;
                 return (
                   <motion.div
@@ -379,10 +442,14 @@ const PlinkoGame = () => {
                     }}
                   >
                     <span
-                      className="font-black text-[8px] leading-none"
-                      style={{ color: "hsl(0 0% 100%)", textShadow: "0 1px 2px hsla(0,0%,0%,0.6)" }}
+                      className="font-black leading-none"
+                      style={{
+                        color: "hsl(0 0% 100%)",
+                        textShadow: "0 1px 2px hsla(0,0%,0%,0.6)",
+                        fontSize: lines >= 14 ? 7 : lines >= 11 ? 8 : 9,
+                      }}
                     >
-                      {m < 1 ? m : m % 1 === 0 ? `${m}x` : `${m}x`}
+                      {m}x
                     </span>
                   </motion.div>
                 );
@@ -429,38 +496,28 @@ const PlinkoGame = () => {
       {/* Controls */}
       <div className="px-3 pb-3 pt-2 z-10">
         <div className="grid grid-cols-3 gap-2 items-end">
-          {/* Risk Level (display only) */}
+          {/* Risk Level */}
           <div className="text-center">
             <div className="text-[10px] font-bold mb-1" style={{ color: "hsl(45 90% 65%)" }}>
               RISK LEVEL
             </div>
-            <div className="flex justify-center gap-1">
-              <div
-                className="h-7 w-7 rounded-full flex items-center justify-center"
-                style={{ background: "hsla(0,0%,0%,0.5)", border: "1.5px solid hsla(0,0%,100%,0.15)" }}
-              >
-                <span className="text-xs">🔥</span>
-              </div>
-              <div
-                className="h-8 w-8 rounded-full flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, hsl(25 95% 55%), hsl(0 85% 50%))",
-                  boxShadow: "0 0 10px hsla(25,90%,55%,0.7)",
-                  border: "2px solid hsl(45 90% 65%)",
-                }}
-              >
-                <span className="text-sm">🔥</span>
-              </div>
-              <div
-                className="h-7 w-7 rounded-full flex items-center justify-center"
-                style={{ background: "hsla(0,0%,0%,0.5)", border: "1.5px solid hsla(0,0%,100%,0.15)" }}
-              >
-                <span className="text-xs">🔥</span>
-              </div>
-            </div>
+            <button
+              onClick={cycleRisk}
+              disabled={dropping}
+              className="h-9 px-3 rounded-full font-black text-xs flex items-center gap-1 mx-auto"
+              style={{
+                background: riskColor,
+                color: "hsl(0 0% 100%)",
+                border: "2px solid hsl(45 90% 65%)",
+                boxShadow: "0 0 10px hsla(25,90%,55%,0.5)",
+                textShadow: "0 1px 2px hsla(0,0%,0%,0.5)",
+              }}
+            >
+              🔥 {riskLabel}
+            </button>
           </div>
 
-          {/* Play button */}
+          {/* Play */}
           <div className="flex justify-center">
             <motion.button
               whileTap={{ scale: 0.92 }}
@@ -485,7 +542,7 @@ const PlinkoGame = () => {
             </motion.button>
           </div>
 
-          {/* Bet amount */}
+          {/* Bet */}
           <div className="text-center">
             <div className="text-[10px] font-bold mb-1" style={{ color: "hsl(45 90% 65%)" }}>
               BET AMOUNT
