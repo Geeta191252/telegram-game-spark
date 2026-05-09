@@ -105,23 +105,33 @@ const MarketScreen = ({ onGoToWallet }: MarketScreenProps) => {
     }
   };
 
-  const claimDollarOffer = async (offer: BackendOffer) => {
+  const claimDollarOffer = (offer: BackendOffer) => {
+    // Open coin picker first — user picks BTC/LTC/USDT/etc., then we create payment directly
+    setCoinPickerOffer(offer);
+  };
+
+  const startCryptoPayment = async (offer: BackendOffer, coinId: string) => {
     setBusyId(offer._id);
+    setCoinPickerOffer(null);
     try {
       const tg = getTelegram();
       const userId = tg?.initDataUnsafe?.user?.id || "demo";
+      const apiCurrency = cryptoApiTicker[coinId] || coinId;
       const res = await fetch(`${apiBase}/crypto/create-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, amount: offer.payAmount, currency: "btc" }),
+        body: JSON.stringify({ userId, amount: offer.payAmount, currency: apiCurrency }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create payment");
-      toast({
-        title: "Offer Started! 🪙",
-        description: `Pay ${data.payAmount} BTC in Wallet → Crypto. ${offer.bonusLabel || "Bonus"} after confirmation.`,
+      if (!data.payAddress) throw new Error("No payment address returned");
+      setCryptoPayment({
+        payAddress: data.payAddress,
+        payAmount: data.payAmount,
+        payCurrency: data.payCurrency,
+        orderId: data.orderId,
+        offerLabel: `${offer.title} • Get $${offer.getAmount}`,
       });
-      onGoToWallet?.();
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Could not start offer.", variant: "destructive" });
     } finally {
