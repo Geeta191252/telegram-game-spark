@@ -165,6 +165,7 @@ const PlinkoGame = () => {
   const [highlightBucket, setHighlightBucket] = useState<number | null>(null);
   const [lastWin, setLastWin] = useState<number | null>(null);
   const [lastMult, setLastMult] = useState<number | null>(null);
+  const betCounterRef = useRef(0);
 
   const multipliers = useMemo(() => MULTIPLIER_TABLE[risk][lines], [risk, lines]);
   const currentBalance = activeWallet === "dollar" ? gameDollarBalance : gameStarBalance;
