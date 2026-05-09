@@ -15,6 +15,7 @@ import gameDice from "@/assets/game-dice.jpg";
 import gameCarnivalSpin from "@/assets/game-carnival-spin.jpg";
 import gameMines from "@/assets/game-mines.jpg";
 import gameAviator from "@/assets/game-aviator.jpg";
+import gamePlinko from "@/assets/game-plinko.jpg";
 import homeBg from "@/assets/home-bg.png";
 
 interface GameTileProps {
@@ -82,6 +83,7 @@ const HomeScreen = () => {
   const goToCarnivalSpin = () => navigate("/carnival-spin");
   const goToMines = () => navigate("/mines");
   const goToAviator = () => navigate("/aviator");
+  const goToPlinko = () => navigate("/plinko");
   const goToAdmin = () => navigate("/admin");
 
   const telegramUser = getTelegramUser();
@@ -397,6 +399,17 @@ const HomeScreen = () => {
                     glowColor="hsla(0, 70%, 55%, 0.35)"
                     delay={0.2}
                     onClick={goToMines}
+                  />
+                  <GameTile
+                    image={gamePlinko}
+                    name="Plinko"
+                    description="Drop the ball, win big!"
+                    badge="🎪 NEW"
+                    badgeGradient="linear-gradient(135deg, hsl(45 90% 55%), hsl(15 85% 50%))"
+                    borderGradient="linear-gradient(135deg, hsl(45 90% 60%), hsl(15 85% 55%), hsl(310 70% 55%))"
+                    glowColor="hsla(45, 90%, 55%, 0.4)"
+                    delay={0.25}
+                    onClick={goToPlinko}
                   />
                 </div>
               </section>
