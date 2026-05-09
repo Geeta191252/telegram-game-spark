@@ -454,13 +454,13 @@ const PlinkoGame = () => {
                     className="mx-[1.5px] h-full flex flex-col items-center justify-end relative"
                     style={{ width: `${100 / multipliers.length}%` }}
                   >
-                    {/* Drum body */}
+                    {/* Box body */}
                     <div
                       className="relative"
                       style={{
-                        width: "42%",
-                        height: "55%",
-                        borderRadius: 999,
+                        width: "60%",
+                        height: "28%",
+                        borderRadius: 4,
                         background: `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`,
                         border: isHit
                           ? "1.5px solid hsl(45 100% 70%)"
