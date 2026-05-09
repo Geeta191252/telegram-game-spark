@@ -589,36 +589,21 @@ app.post("/api/referral", async (req, res) => {
       return res.json({ success: false, message: "Already referred" });
     }
 
-    // Set referral
+    // Set referral (reward is granted only after referred user makes a deposit)
     user.referredBy = numericReferrerId;
     await user.save();
 
     // Increment referrer's count
     referrer.referralCount = (referrer.referralCount || 0) + 1;
     const count = referrer.referralCount;
-
-    // Reward: 5 Stars per referral
-    let reward = 5;
-
-    referrer.starBalance = (referrer.starBalance || 0) + reward;
     await referrer.save();
 
-    // Log reward transaction
-    await Transaction.create({
-      telegramId: numericReferrerId,
-      type: "referral",
-      currency: "star",
-      amount: reward,
-      status: "completed",
-      description: `Referral reward: ${reward} ⭐ (referred user ${numericUserId})`,
-    });
-
-    // Notify referrer
+    // Notify referrer (pending — reward unlocks after first deposit)
     try {
       await bot.sendMessage(numericReferrerId,
         `🎉 *New Referral!*\n\n` +
         `👤 A friend joined using your link!\n` +
-        `💰 You earned ${reward} ⭐!\n` +
+        `🔒 Reward of 5 ⭐ will unlock once they make their first deposit.\n` +
         `📊 Total referrals: ${count}`,
         { parse_mode: "Markdown" }
       );
@@ -626,7 +611,7 @@ app.post("/api/referral", async (req, res) => {
       console.error("Failed to send referral notification:", botErr.message);
     }
 
-    return res.json({ success: true, reward, totalReferrals: count });
+    return res.json({ success: true, pending: true, totalReferrals: count });
   } catch (error) {
     console.error("Referral error:", error);
     return res.status(500).json({ error: "Referral processing failed" });
