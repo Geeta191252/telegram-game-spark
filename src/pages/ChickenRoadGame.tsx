@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Volume2, VolumeX, HelpCircle } from "lucide-react";
+import { BookOpen, Maximize2, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   playBetSound,
@@ -19,31 +19,35 @@ type Phase = "betting" | "playing" | "lost" | "cashed";
 
 const DIFFICULTY_CONFIG: Record<
   Difficulty,
-  { multipliers: number[]; crashBase: number; label: string; color: string }
+  { multipliers: number[]; crashBase: number; label: string; color: string; ring: string }
 > = {
   easy: {
     multipliers: [1.05, 1.15, 1.30, 1.48, 1.70, 1.95, 2.25, 2.60],
     crashBase: 0.07,
     label: "Easy",
-    color: "hsl(140 70% 50%)",
+    color: "hsl(140 75% 50%)",
+    ring: "hsl(140 90% 65%)",
   },
   medium: {
     multipliers: [1.20, 1.45, 1.78, 2.20, 2.75, 3.45, 4.35, 5.50],
     crashBase: 0.15,
     label: "Medium",
-    color: "hsl(45 90% 55%)",
+    color: "hsl(210 90% 55%)",
+    ring: "hsl(210 95% 70%)",
   },
   hard: {
     multipliers: [1.50, 2.10, 3.00, 4.30, 6.20, 9.00, 13.0, 19.0],
     crashBase: 0.26,
     label: "Hard",
-    color: "hsl(25 90% 55%)",
+    color: "hsl(28 95% 55%)",
+    ring: "hsl(28 100% 68%)",
   },
   hardcore: {
     multipliers: [2.00, 4.00, 8.00, 16.0, 32.0, 64.0, 128, 256],
     crashBase: 0.45,
     label: "Hardcore",
-    color: "hsl(0 80% 55%)",
+    color: "hsl(0 85% 55%)",
+    ring: "hsl(0 95% 68%)",
   },
 };
 
@@ -69,17 +73,16 @@ const ChickenRoadGame = () => {
   const [selectedBet, setSelectedBet] = useState(1);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [phase, setPhase] = useState<Phase>("betting");
-  const [currentLane, setCurrentLane] = useState(0); // 0 = on chicken sidewalk; 1..N = crossed N lanes
-  const [carLane, setCarLane] = useState<number | null>(null); // lane that has incoming car for crash animation
+  const [currentLane, setCurrentLane] = useState(0);
+  const [carLane, setCarLane] = useState<number | null>(null);
   const [winAmount, setWinAmount] = useState(0);
-  const [round, setRound] = useState(1);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [howOpen, setHowOpen] = useState(false);
 
   useEffect(() => {
     if (soundOn) startBgMusic();
     else stopBgMusic();
-    return () => {
-      stopBgMusic();
-    };
+    return () => stopBgMusic();
   }, [soundOn]);
 
   const cfg = DIFFICULTY_CONFIG[difficulty];
@@ -110,22 +113,23 @@ const ChickenRoadGame = () => {
   }, [currentBalance, selectedBet, activeWallet]);
 
   const goNext = useCallback(() => {
+    if (phase === "betting") {
+      startGame();
+      return;
+    }
     if (phase !== "playing") return;
     if (currentLane >= LANE_COUNT) return;
 
-    // Rigged crash probability — boost early lanes a bit, lessen at the end
-    const stepIndex = currentLane; // 0..LANE_COUNT-1
+    const stepIndex = currentLane;
     const earlyBoost = stepIndex < 2 ? 1.25 : 1.0;
     const lateScale = stepIndex >= LANE_COUNT - 2 ? 1.4 : 1.0;
     const hitProb = Math.min(0.9, cfg.crashBase * earlyBoost * lateScale);
-
     const isHit = Math.random() < hitProb;
 
     if (isHit) {
       setCarLane(stepIndex + 1);
       setPhase("lost");
       if (soundRef.current) playLoseSound();
-      setRound((r) => r + 1);
       reportGameResult({
         betAmount: selectedBet,
         winAmount: 0,
@@ -145,14 +149,12 @@ const ChickenRoadGame = () => {
     setCurrentLane(newLane);
     if (soundRef.current) playResultReveal();
 
-    // Auto-win on final lane
     if (newLane >= LANE_COUNT) {
       const mult = cfg.multipliers[LANE_COUNT - 1];
       const prize = Math.floor(selectedBet * mult * 100) / 100;
       setWinAmount(prize);
       setPhase("cashed");
       if (soundRef.current) playWinSound();
-      setRound((r) => r + 1);
       reportGameResult({
         betAmount: selectedBet,
         winAmount: prize,
@@ -166,7 +168,7 @@ const ChickenRoadGame = () => {
         })
         .catch(console.error);
     }
-  }, [phase, currentLane, cfg, selectedBet, activeWallet, refreshBalance]);
+  }, [phase, currentLane, cfg, selectedBet, activeWallet, refreshBalance, startGame]);
 
   const cashOut = useCallback(() => {
     if (phase !== "playing" || currentLane === 0) return;
@@ -175,7 +177,6 @@ const ChickenRoadGame = () => {
     setWinAmount(prize);
     setPhase("cashed");
     if (soundRef.current) playWinSound();
-    setRound((r) => r + 1);
     reportGameResult({
       betAmount: selectedBet,
       winAmount: prize,
@@ -197,133 +198,208 @@ const ChickenRoadGame = () => {
     setWinAmount(0);
   };
 
-  const cur = activeWallet === "dollar" ? "$" : "⭐";
   const fmt = (n: number) =>
-    activeWallet === "dollar" ? `$${n.toFixed(2)}` : `${n.toFixed(2)} ⭐`;
+    activeWallet === "dollar" ? `${n.toFixed(2)} $` : `${n.toFixed(2)} ⭐`;
+  const potentialWin = currentLane > 0 ? selectedBet * currentMultiplier : selectedBet * nextMultiplier;
+
+  // Show 6 lanes window centered around chicken (chicken always visible at left)
+  const visibleStart = Math.max(0, Math.min(currentLane - 1, LANE_COUNT - 6));
+  const visibleLanes = cfg.multipliers.slice(visibleStart, visibleStart + 6);
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col select-none"
       style={{
-        background:
-          "linear-gradient(180deg, hsl(265 55% 12%) 0%, hsl(255 50% 6%) 100%)",
+        background: "linear-gradient(180deg, #0a0a0f 0%, #050507 100%)",
       }}
     >
-      {/* Top Bar */}
-      <div
-        className="flex items-center justify-between px-3 py-2"
-        style={{ background: "hsla(260, 50%, 18%, 0.9)" }}
-      >
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => navigate("/")}
-            className="h-9 w-9 rounded-lg border-2 flex items-center justify-center"
+      {/* ============ TOP BAR ============ */}
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5" style={{ background: "#0a0a0f" }}>
+        {/* Logo */}
+        <button onClick={() => navigate("/")} className="shrink-0 active:scale-95 transition-transform">
+          <div
+            className="font-black text-[18px] leading-none tracking-tight px-2 py-1 rounded"
             style={{
-              borderColor: "hsla(260, 40%, 50%, 0.5)",
-              background: "hsla(260, 40%, 30%, 0.5)",
+              fontFamily: "Impact, 'Arial Black', sans-serif",
+              background: "linear-gradient(180deg, #ffe27a 0%, #e89a3c 45%, #b06b1a 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              filter: "drop-shadow(0 2px 0 rgba(0,0,0,0.9)) drop-shadow(0 0 6px rgba(255,150,30,0.5))",
+              transform: "skewX(-6deg)",
             }}
           >
-            <Home className="h-4 w-4" style={{ color: "hsl(260, 20%, 90%)" }} />
-          </button>
-          <button
-            onClick={() => setSoundOn((p) => !p)}
-            className="h-9 w-9 rounded-lg border-2 flex items-center justify-center"
-            style={{
-              borderColor: "hsla(260, 40%, 50%, 0.5)",
-              background: "hsla(260, 40%, 30%, 0.5)",
-            }}
-          >
-            {soundOn ? (
-              <Volume2 className="h-4 w-4" style={{ color: "hsl(260, 20%, 90%)" }} />
-            ) : (
-              <VolumeX className="h-4 w-4" style={{ color: "hsl(260, 20%, 90%)" }} />
-            )}
-          </button>
-        </div>
-        <h1
-          className="text-lg font-black tracking-wider"
+            CHICKEN
+            <br />
+            ROAD
+          </div>
+        </button>
+
+        {/* How to play */}
+        <button
+          onClick={() => setHowOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 h-9 rounded-xl text-[11px] font-semibold whitespace-nowrap"
           style={{
-            background:
-              "linear-gradient(135deg, hsl(45 95% 65%), hsl(25 90% 55%), hsl(0 80% 55%))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            filter: "drop-shadow(0 0 10px hsla(25, 90%, 55%, 0.6))",
+            background: "#15161c",
+            border: "1px solid #2a2c36",
+            color: "#cfd2dc",
           }}
         >
-          🐔 CHICKEN ROAD
-        </h1>
+          <BookOpen className="h-3.5 w-3.5" />
+          How to play?
+        </button>
+
+        {/* Balance pill */}
         <div
-          className="rounded-lg px-2.5 py-1 flex items-center gap-1.5"
+          className="flex items-center gap-1 px-2.5 h-9 rounded-xl font-bold text-[12px] whitespace-nowrap"
           style={{
-            background: "hsla(140, 60%, 40%, 0.2)",
-            border: "1px solid hsla(140, 70%, 50%, 0.4)",
-            boxShadow: "0 0 12px hsla(140, 70%, 50%, 0.3)",
+            background: "#0e1116",
+            border: "1.5px solid hsl(140 80% 50%)",
+            boxShadow: "0 0 10px hsla(140,80%,50%,0.3)",
+            color: "#eaf6ea",
           }}
         >
-          <span className="text-xs">{cur}</span>
-          <span
-            className="text-xs font-bold"
-            style={{ color: "hsl(140 80% 75%)" }}
-          >
-            {currentBalance.toFixed(2)}
-          </span>
+          {activeWallet === "dollar"
+            ? `${currentBalance.toFixed(2)} $`
+            : `${currentBalance.toFixed(0)} ⭐`}
         </div>
+
+        {/* Fullscreen */}
+        <button
+          onClick={() => {
+            const el = document.documentElement;
+            if (!document.fullscreenElement) el.requestFullscreen?.().catch(() => {});
+            else document.exitFullscreen?.().catch(() => {});
+          }}
+          className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: "#15161c", border: "1px solid #2a2c36", color: "#cfd2dc" }}
+        >
+          <Maximize2 className="h-4 w-4" />
+        </button>
+
+        {/* Menu */}
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: "#15161c", border: "1px solid #2a2c36", color: "#cfd2dc" }}
+        >
+          <Menu className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Live wins ticker */}
+      {/* ============ LIVE WINS TICKER ============ */}
       <div
-        className="px-3 py-1.5 flex items-center gap-3 overflow-hidden text-[10px]"
-        style={{ background: "hsla(260, 40%, 12%, 0.95)" }}
+        className="px-3 py-1.5 flex items-center gap-2 overflow-hidden text-[10px] border-y"
+        style={{ background: "#07080b", borderColor: "#15171d" }}
       >
         <span className="flex items-center gap-1 shrink-0">
-          <span className="h-1.5 w-1.5 rounded-full inline-block animate-pulse" style={{ background: "hsl(140 70% 55%)" }} />
-          <span style={{ color: "hsl(140 60% 70%)" }}>Live wins</span>
+          <span className="h-1.5 w-1.5 rounded-full inline-block animate-pulse" style={{ background: "hsl(140 75% 55%)" }} />
+          <span style={{ color: "#9aa0ab" }}>Live wins</span>
         </span>
-        <span style={{ color: "hsl(260 25% 65%)" }}>
-          Online: <span style={{ color: "hsl(45 80% 65%)" }} className="font-bold">33,386</span>
+        <span className="shrink-0" style={{ color: "#3e4250" }}>|</span>
+        <span className="shrink-0" style={{ color: "#9aa0ab" }}>
+          Online: <span style={{ color: "hsl(140 75% 60%)" }} className="font-bold">33,386</span>
         </span>
         <div className="flex-1 overflow-hidden whitespace-nowrap">
           <motion.div
             animate={{ x: ["100%", "-100%"] }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="flex gap-6 inline-block"
+            transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+            className="flex gap-5 inline-block"
           >
-            {["Blush +$160.00", "LuckyMike +$98.50", "QueenB +$75.20", "JohnnyX +$52.00", "MaxPwr +$230.00"].map(
-              (t, i) => (
-                <span key={i} style={{ color: "hsl(140 70% 70%)" }}>
-                  ⭐ {t}
-                </span>
-              )
-            )}
+            {[
+              { n: "Blush Comp...", a: "+$160.00" },
+              { n: "LuckyMike", a: "+$98.50" },
+              { n: "QueenB", a: "+$75.20" },
+              { n: "JohnnyX", a: "+$52.00" },
+              { n: "MaxPwr", a: "+$230.00" },
+            ].map((t, i) => (
+              <span key={i} className="inline-flex items-center gap-1">
+                <span style={{ color: "hsl(45 90% 60%)" }}>⭐</span>
+                <span style={{ color: "#cfd2dc" }}>{t.n}</span>
+                <span style={{ color: "hsl(140 75% 60%)" }} className="font-bold">{t.a}</span>
+                <span style={{ color: "#3e4250" }}>•</span>
+              </span>
+            ))}
           </motion.div>
         </div>
       </div>
 
-      {/* PLAY AREA - horizontal road */}
-      <div className="relative flex-1 overflow-hidden" style={{ background: "hsl(0 0% 18%)" }}>
-        {/* Lane dividers (vertical dashed lines) */}
+      {/* ============ ROAD PLAY AREA ============ */}
+      <div className="relative flex-1 overflow-hidden" style={{ background: "#1a1c1e" }}>
+        {/* Asphalt texture */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(circle at 30% 20%, rgba(255,255,255,0.025), transparent 40%),
+              radial-gradient(circle at 70% 60%, rgba(255,255,255,0.02), transparent 50%),
+              linear-gradient(180deg, #232528 0%, #18191c 100%)
+            `,
+          }}
+        />
+
+        {/* Lanes - vertical strips */}
         <div className="absolute inset-0 flex">
-          {/* sidewalk on left */}
+          {/* Sidewalk left */}
           <div
-            className="shrink-0"
+            className="shrink-0 relative"
             style={{
               width: "16%",
-              background:
-                "repeating-linear-gradient(45deg, hsl(0 0% 22%) 0 8px, hsl(0 0% 18%) 8px 16px)",
-              borderRight: "3px solid hsl(45 80% 50%)",
+              background: "linear-gradient(90deg, #1d1f22 0%, #16181b 100%)",
+              borderRight: "2px solid rgba(255,255,255,0.08)",
             }}
-          />
-          {Array.from({ length: LANE_COUNT }).map((_, i) => (
+          >
+            {/* barriers */}
+            <div className="absolute left-1 top-[10%] flex flex-col gap-3">
+              {[0, 1].map((i) => (
+                <div
+                  key={i}
+                  className="w-10 h-7 rounded-sm relative"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(135deg, #f7c948 0 6px, #1a1d24 6px 12px)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.5), inset 0 -2px 0 rgba(0,0,0,0.4)",
+                    border: "1px solid rgba(0,0,0,0.6)",
+                  }}
+                >
+                  <span
+                    className="absolute -top-1 left-1 h-1.5 w-1.5 rounded-full"
+                    style={{ background: "#fff6c2", boxShadow: "0 0 6px #ffd24a" }}
+                  />
+                  <span
+                    className="absolute -top-1 right-1 h-1.5 w-1.5 rounded-full"
+                    style={{ background: "#fff6c2", boxShadow: "0 0 6px #ffd24a" }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 6 visible lane strips */}
+          {visibleLanes.map((_, i) => (
             <div
               key={i}
-              className="flex-1 relative"
+              className="flex-1 relative h-full"
               style={{
                 borderRight:
-                  i < LANE_COUNT - 1
-                    ? "2px dashed hsla(0, 0%, 100%, 0.5)"
-                    : "none",
+                  i < visibleLanes.length - 1
+                    ? "0"
+                    : "0",
               }}
-            />
+            >
+              {/* Dashed center line */}
+              {i < visibleLanes.length - 1 && (
+                <div
+                  className="absolute top-0 bottom-0"
+                  style={{
+                    right: 0,
+                    width: "3px",
+                    backgroundImage:
+                      "linear-gradient(180deg, rgba(255,255,255,0.85) 50%, transparent 50%)",
+                    backgroundSize: "100% 36px",
+                  }}
+                />
+              )}
+            </div>
           ))}
         </div>
 
@@ -331,368 +407,540 @@ const ChickenRoadGame = () => {
         <div className="relative h-full flex">
           {/* Chicken sidewalk */}
           <div
-            className="shrink-0 flex items-center justify-center"
+            className="shrink-0 flex flex-col items-center justify-end pb-12"
             style={{ width: "16%" }}
           >
-            <AnimatePresence>
-              {currentLane === 0 && phase !== "lost" && (
-                <motion.div
-                  initial={{ x: -30, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1, y: [0, -4, 0] }}
-                  exit={{ opacity: 0 }}
-                  transition={{ y: { duration: 1, repeat: Infinity } }}
-                  className="text-5xl drop-shadow-lg"
-                  style={{ filter: "drop-shadow(0 4px 8px hsla(0,0%,0%,0.6))" }}
-                >
-                  🐔
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {currentLane === 0 && phase !== "lost" && (
+              <ChickenOnManhole />
+            )}
           </div>
 
-          {/* Lanes */}
-          {cfg.multipliers.map((mult, i) => {
-            const laneNumber = i + 1;
+          {/* Visible lanes */}
+          {visibleLanes.map((mult, i) => {
+            const laneNumber = visibleStart + i + 1;
             const isCrossed = currentLane >= laneNumber;
             const isCurrent = currentLane === laneNumber && phase === "playing";
             const isCrashLane = carLane === laneNumber;
             const isNextLane = currentLane === laneNumber - 1 && phase === "playing";
+            const isSignLane = i === 0 && currentLane === 0 && phase === "betting";
+            // The current "next target" gets a signboard look
+            const showSignboard = (isNextLane && !isCrossed) || (isSignLane && laneNumber === 1);
 
             return (
-              <div
-                key={i}
-                className="flex-1 relative flex flex-col items-center justify-center"
-              >
-                {/* Car coming down (crash animation) */}
+              <div key={laneNumber} className="flex-1 relative h-full">
+                {/* Truck/car coming down (crash) */}
                 <AnimatePresence>
                   {isCrashLane && (
                     <motion.div
-                      initial={{ y: "-110%" }}
-                      animate={{ y: "30%" }}
-                      transition={{ duration: 0.5, ease: "easeIn" }}
-                      className="absolute top-0 text-4xl"
-                      style={{ filter: "drop-shadow(0 0 10px hsla(0,80%,50%,0.8))" }}
+                      initial={{ y: "-120%" }}
+                      animate={{ y: "60%" }}
+                      transition={{ duration: 0.55, ease: "easeIn" }}
+                      className="absolute left-1/2 -translate-x-1/2 top-0 z-20"
                     >
-                      🚛
+                      <Truck color="#f7c948" />
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Chicken on this lane */}
-                {currentLane === laneNumber && phase === "playing" && (
+                {/* Ambient cars in distance (decoration) */}
+                {!isCrashLane && i === 2 && phase !== "lost" && (
                   <motion.div
-                    layoutId="chicken"
-                    initial={{ scale: 0.5 }}
-                    animate={{ scale: 1, y: [0, -3, 0] }}
-                    transition={{
-                      y: { duration: 0.8, repeat: Infinity },
-                      scale: { type: "spring", stiffness: 200 },
-                    }}
-                    className="absolute text-5xl z-10"
-                    style={{ filter: "drop-shadow(0 4px 8px hsla(0,0%,0%,0.6))" }}
+                    animate={{ y: ["-30%", "30%", "-30%"] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    className="absolute left-1/2 -translate-x-1/2 top-[15%] opacity-90"
                   >
-                    🐔
+                    <Car color="#e8e8ea" />
+                  </motion.div>
+                )}
+                {!isCrashLane && i === 3 && phase !== "lost" && (
+                  <motion.div
+                    animate={{ y: ["10%", "60%", "10%"] }}
+                    transition={{ duration: 7, repeat: Infinity, ease: "linear", delay: 1.5 }}
+                    className="absolute left-1/2 -translate-x-1/2 top-[8%]"
+                  >
+                    <Truck color="#f7c948" />
                   </motion.div>
                 )}
 
-                {/* Crashed chicken */}
+                {/* Chicken if standing on this lane */}
+                {isCurrent && (
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-12 z-20">
+                    <ChickenOnManhole />
+                  </div>
+                )}
+
+                {/* Crashed splat */}
                 {currentLane === laneNumber - 1 && phase === "lost" && carLane === laneNumber && (
                   <motion.div
-                    initial={{ scale: 1 }}
-                    animate={{ scale: [1, 1.3, 0], rotate: [0, 20, -20, 360] }}
-                    transition={{ duration: 0.8 }}
-                    className="absolute text-5xl z-10"
+                    initial={{ scale: 1, opacity: 1 }}
+                    animate={{ scale: [1, 1.4, 0.8], opacity: [1, 1, 0] }}
+                    transition={{ duration: 1 }}
+                    className="absolute left-1/2 -translate-x-1/2 bottom-14 text-4xl z-20"
                   >
                     💥
                   </motion.div>
                 )}
 
-                {/* Multiplier disc */}
-                <motion.div
-                  animate={
-                    isNextLane
-                      ? {
-                          scale: [1, 1.08, 1],
-                          boxShadow: [
-                            `0 0 12px ${cfg.color}66`,
-                            `0 0 24px ${cfg.color}cc`,
-                            `0 0 12px ${cfg.color}66`,
-                          ],
-                        }
-                      : {}
-                  }
-                  transition={{ duration: 1.2, repeat: Infinity }}
-                  className="rounded-full flex items-center justify-center font-bold text-white relative"
-                  style={{
-                    width: "85%",
-                    aspectRatio: "1",
-                    maxWidth: 60,
-                    background: isCrossed
-                      ? "radial-gradient(circle, hsl(140 70% 35%) 0%, hsl(140 60% 22%) 100%)"
-                      : "radial-gradient(circle, hsl(0 0% 35%) 0%, hsl(0 0% 18%) 100%)",
-                    border: isCrossed
-                      ? "2px solid hsl(140 80% 60%)"
-                      : "2px solid hsl(0 0% 45%)",
-                    fontSize: "0.75rem",
-                    boxShadow: isCrossed
-                      ? "0 0 12px hsla(140, 70%, 50%, 0.6)"
-                      : "inset 0 -3px 4px hsla(0,0%,0%,0.4)",
-                  }}
-                >
-                  {isCrossed ? (
-                    <span style={{ color: "hsl(140 90% 80%)" }}>✓</span>
+                {/* Multiplier marker at lane bottom */}
+                <div className="absolute left-0 right-0 bottom-12 flex justify-center pointer-events-none">
+                  {showSignboard ? (
+                    <Signboard value={`${mult.toFixed(2)}x`} color={cfg.ring} />
                   ) : (
-                    <span style={{ fontSize: mult >= 100 ? "0.55rem" : mult >= 10 ? "0.65rem" : "0.7rem" }}>
-                      {mult >= 100 ? mult.toFixed(0) : mult.toFixed(2)}x
-                    </span>
+                    <ManholeCover
+                      label={
+                        isCrossed
+                          ? "✓"
+                          : mult >= 100
+                          ? `${mult.toFixed(0)}x`
+                          : `${mult.toFixed(2)}x`
+                      }
+                      crossed={isCrossed}
+                    />
                   )}
-                </motion.div>
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* Live multiplier overlay */}
-        {phase === "playing" && currentLane > 0 && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full font-bold text-sm"
-            style={{
-              background: "linear-gradient(135deg, hsl(140 70% 45%), hsl(160 60% 40%))",
-              color: "white",
-              boxShadow: "0 0 20px hsla(140, 70%, 50%, 0.6)",
-              border: "1.5px solid hsl(140 90% 65%)",
-            }}
-          >
-            WIN! {fmt(selectedBet * currentMultiplier)}
-          </motion.div>
-        )}
-
-        {/* Lost overlay */}
-        {phase === "lost" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full font-bold text-sm"
-            style={{
-              background: "linear-gradient(135deg, hsl(0 80% 50%), hsl(20 75% 45%))",
-              color: "white",
-              boxShadow: "0 0 20px hsla(0, 80%, 50%, 0.6)",
-            }}
-          >
-            💥 SHOT DOWN!
-          </motion.div>
-        )}
-
-        {/* Cashed overlay */}
-        {phase === "cashed" && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full font-bold text-sm"
-            style={{
-              background: "linear-gradient(135deg, hsl(45 90% 50%), hsl(25 85% 50%))",
-              color: "white",
-              boxShadow: "0 0 20px hsla(45, 90%, 55%, 0.7)",
-            }}
-          >
-            🏆 CASHED OUT {fmt(winAmount)}
-          </motion.div>
-        )}
-      </div>
-
-      {/* Action buttons */}
-      <div className="px-3 py-3 grid grid-cols-2 gap-3" style={{ background: "hsla(260, 40%, 12%, 0.95)" }}>
-        {phase === "playing" ? (
-          <>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={cashOut}
-              disabled={currentLane === 0}
-              className="py-3.5 rounded-2xl font-black text-base relative"
-              style={{
-                background:
-                  currentLane > 0
-                    ? "linear-gradient(135deg, hsl(45 95% 55%), hsl(35 90% 48%))"
-                    : "hsla(0, 0%, 30%, 0.5)",
-                color: currentLane > 0 ? "hsl(0 0% 15%)" : "hsl(0 0% 50%)",
-                boxShadow:
-                  currentLane > 0
-                    ? "0 4px 18px hsla(45, 90%, 50%, 0.5), inset 0 -3px 6px hsla(25, 85%, 30%, 0.5)"
-                    : "none",
-                border: currentLane > 0 ? "2px solid hsl(45 95% 70%)" : "2px solid transparent",
-              }}
-            >
-              <div className="text-[11px] leading-tight">CASH OUT</div>
-              <div className="text-base leading-tight">
-                {currentLane > 0 ? fmt(selectedBet * currentMultiplier) : "—"}
-              </div>
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={goNext}
-              className="py-3.5 rounded-2xl font-black text-lg"
+        {/* Status overlay top */}
+        <AnimatePresence>
+          {phase === "playing" && currentLane > 0 && (
+            <motion.div
+              key="winbox"
+              initial={{ y: -30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -30, opacity: 0 }}
+              className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-black"
               style={{
                 background: "linear-gradient(135deg, hsl(140 75% 45%), hsl(150 70% 38%))",
                 color: "white",
-                boxShadow:
-                  "0 4px 18px hsla(140, 70%, 45%, 0.5), inset 0 -3px 6px hsla(150, 70%, 25%, 0.5)",
-                border: "2px solid hsl(140 85% 60%)",
+                boxShadow: "0 0 18px hsla(140,80%,50%,0.55)",
+                border: "1.5px solid hsl(140 90% 65%)",
               }}
             >
-              GO →
-              <div className="text-[10px] font-bold opacity-80 leading-tight">
-                next: {nextMultiplier.toFixed(2)}x
-              </div>
-            </motion.button>
-          </>
-        ) : (
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={phase === "betting" ? startGame : resetToBet}
-            className="col-span-2 py-3.5 rounded-2xl font-black text-lg"
-            style={{
-              background: "linear-gradient(135deg, hsl(140 75% 45%), hsl(150 70% 38%))",
-              color: "white",
-              boxShadow:
-                "0 4px 18px hsla(140, 70%, 45%, 0.5), inset 0 -3px 6px hsla(150, 70%, 25%, 0.5)",
-              border: "2px solid hsl(140 85% 60%)",
-            }}
-          >
-            {phase === "betting" ? `▶ START — ${fmt(selectedBet)}` : "🔄 PLAY AGAIN"}
-          </motion.button>
-        )}
+              {currentMultiplier.toFixed(2)}x · {fmt(selectedBet * currentMultiplier)}
+            </motion.div>
+          )}
+          {phase === "lost" && (
+            <motion.div
+              key="lostbox"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-black"
+              style={{
+                background: "linear-gradient(135deg, hsl(0 85% 50%), hsl(15 80% 45%))",
+                color: "white",
+                boxShadow: "0 0 18px hsla(0,85%,50%,0.6)",
+              }}
+            >
+              💥 SHOT DOWN
+            </motion.div>
+          )}
+          {phase === "cashed" && (
+            <motion.div
+              key="cashbox"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-black"
+              style={{
+                background: "linear-gradient(135deg, hsl(45 95% 55%), hsl(28 90% 50%))",
+                color: "#1a120a",
+                boxShadow: "0 0 18px hsla(45,95%,55%,0.65)",
+              }}
+            >
+              🏆 WON {fmt(winAmount)}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Difficulty + Bet controls (only in betting) */}
-      {(phase === "betting" || phase === "lost" || phase === "cashed") && (
-        <div className="px-3 pb-4 space-y-2" style={{ background: "hsla(260, 40%, 12%, 0.95)" }}>
-          {/* Difficulty */}
-          <div>
-            <p className="text-[11px] font-bold mb-1.5 px-1" style={{ color: "hsl(260 30% 70%)" }}>
-              Difficulty
-            </p>
-            <div className="grid grid-cols-4 gap-1.5">
-              {(Object.keys(DIFFICULTY_CONFIG) as Difficulty[]).map((d) => {
-                const active = difficulty === d;
-                const c = DIFFICULTY_CONFIG[d].color;
-                return (
-                  <button
-                    key={d}
-                    onClick={() => setDifficulty(d)}
-                    className="rounded-xl py-2 text-[11px] font-black transition-all"
-                    style={{
-                      background: active
-                        ? `linear-gradient(135deg, ${c}, ${c})`
-                        : "hsla(260, 30%, 22%, 0.8)",
-                      color: active ? "white" : "hsl(260 30% 75%)",
-                      border: active ? `1.5px solid ${c}` : "1.5px solid hsla(260, 30%, 35%, 0.5)",
-                      boxShadow: active ? `0 0 12px ${c}80` : "none",
-                    }}
-                  >
-                    {DIFFICULTY_CONFIG[d].label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Bet amount */}
-          <div
-            className="rounded-2xl p-2"
-            style={{ background: "hsla(260, 30%, 18%, 0.9)" }}
-          >
-            <div
-              className="flex items-center justify-between rounded-xl overflow-hidden"
-              style={{ background: "hsla(260, 30%, 28%, 0.8)" }}
+      {/* ============ BOTTOM CONTROL PANEL ============ */}
+      <div className="px-3 pt-3 pb-3 space-y-2" style={{ background: "#0a0b10" }}>
+        {/* Row 1: bet stepper | difficulty label | CASH OUT | GO */}
+        <div className="rounded-2xl p-2.5 flex items-center gap-2" style={{ background: "#101218", border: "1px solid #1d2029" }}>
+          {/* MIN / value / MAX */}
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => setSelectedBet(0.5)}
+              className="h-11 px-2.5 rounded-xl text-[11px] font-bold"
+              style={{ background: "#0d0f14", border: "1px solid #232735", color: "#9aa0ab" }}
             >
-              <button
-                onClick={() => setSelectedBet((prev) => Math.max(0.5, +(prev - 1).toFixed(2)))}
-                className="w-12 h-11 flex items-center justify-center text-2xl font-bold"
-                style={{ color: "hsl(0 0% 80%)" }}
-              >
-                −
-              </button>
-              <div className="flex-1 text-center">
-                <span className="text-lg font-bold" style={{ color: "hsl(45 95% 65%)" }}>
-                  {fmt(selectedBet)}
-                </span>
-              </div>
-              <button
-                onClick={() => setSelectedBet((prev) => +(prev + 1).toFixed(2))}
-                className="w-12 h-11 flex items-center justify-center text-2xl font-bold"
-                style={{ color: "hsl(0 0% 80%)" }}
-              >
-                +
-              </button>
-            </div>
-            <div className="grid grid-cols-4 gap-1.5 mt-2">
-              {BET_PRESETS.map((bet) => (
-                <button
-                  key={bet}
-                  onClick={() => setSelectedBet((prev) => +(prev + bet).toFixed(2))}
-                  className="rounded-xl py-2 text-xs font-bold transition-all"
-                  style={{
-                    background: "hsla(260, 30%, 28%, 0.8)",
-                    color: "hsl(260 30% 80%)",
-                    border: "1px solid hsla(260, 30%, 40%, 0.5)",
-                  }}
-                >
-                  +{activeWallet === "dollar" ? `$${bet}` : `${bet} ⭐`}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Wallet toggle */}
-          <div className="flex gap-2 items-center">
+              MIN
+            </button>
             <div
-              className="flex-1 rounded-full px-3 py-2 flex items-center justify-center gap-2"
-              style={{
-                background: "hsla(260, 30%, 18%, 0.9)",
-                border: `2px solid ${activeWallet === "star" ? "hsl(45 90% 55%)" : "hsl(140 70% 50%)"}`,
-              }}
+              className="h-11 min-w-[58px] px-2 rounded-xl flex items-center justify-center text-[15px] font-bold"
+              style={{ background: "#0d0f14", border: "1px solid #232735", color: "#eaecf2" }}
             >
-              {activeWallet === "star" ? (
-                <>
-                  <span className="text-[10px] font-semibold" style={{ color: "hsl(260 30% 65%)" }}>
-                    Stars
-                  </span>
-                  <span className="text-sm">⭐</span>
-                  <span className="font-bold text-sm" style={{ color: "hsl(45 90% 70%)" }}>
-                    {gameStarBalance.toLocaleString()}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="text-[10px] font-semibold" style={{ color: "hsl(260 30% 65%)" }}>
-                    Balance
-                  </span>
-                  <span className="text-sm">💲</span>
-                  <span className="font-bold text-sm" style={{ color: "hsl(140 80% 75%)" }}>
-                    {gameDollarBalance.toFixed(2)}
-                  </span>
-                </>
-              )}
+              {selectedBet < 1 ? selectedBet.toFixed(2) : selectedBet >= 100 ? selectedBet.toFixed(0) : selectedBet.toFixed(0)}
             </div>
             <button
-              onClick={() =>
-                setActiveWallet((prev) => (prev === "dollar" ? "star" : "dollar"))
-              }
-              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 active:scale-90"
-              style={{
-                background: "hsla(260, 30%, 28%, 0.9)",
-                border: "2px solid hsl(45 80% 55%)",
-              }}
+              onClick={() => setSelectedBet(Math.max(0.5, Math.floor(currentBalance)))}
+              className="h-11 px-2.5 rounded-xl text-[11px] font-bold"
+              style={{ background: "#0d0f14", border: "1px solid #232735", color: "#9aa0ab" }}
             >
-              <span className="text-xs">🔄</span>
+              MAX
             </button>
           </div>
+
+          {/* Difficulty caption */}
+          <div className="flex-1 text-center px-1">
+            <div className="text-[12px] font-bold" style={{ color: "#eaecf2" }}>Difficulty</div>
+            <div className="text-[9px] leading-tight" style={{ color: "#7a8090" }}>
+              Chance of being<br />shot down
+            </div>
+          </div>
+
+          {/* CASH OUT */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={cashOut}
+            disabled={phase !== "playing" || currentLane === 0}
+            className="h-[58px] px-2 rounded-2xl font-black text-center shrink-0"
+            style={{
+              minWidth: 86,
+              background:
+                phase === "playing" && currentLane > 0
+                  ? "linear-gradient(180deg, #ffd84a 0%, #e89a1d 100%)"
+                  : "linear-gradient(180deg, #3a3a3f 0%, #2a2a2f 100%)",
+              color: phase === "playing" && currentLane > 0 ? "#1a120a" : "#5c606a",
+              border:
+                phase === "playing" && currentLane > 0
+                  ? "1.5px solid #ffe87a"
+                  : "1.5px solid #2a2a2f",
+              boxShadow:
+                phase === "playing" && currentLane > 0
+                  ? "0 0 18px rgba(232,154,29,0.55), inset 0 -3px 0 rgba(120,60,0,0.5)"
+                  : "none",
+            }}
+          >
+            <div className="text-[9px] tracking-wider">CASH OUT</div>
+            <div className="text-[15px] leading-tight">
+              {phase === "playing" && currentLane > 0
+                ? `${(selectedBet * currentMultiplier).toFixed(0)} ${activeWallet === "dollar" ? "USD" : "⭐"}`
+                : "—"}
+            </div>
+          </motion.button>
+
+          {/* GO */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={phase === "betting" ? startGame : phase === "playing" ? goNext : resetToBet}
+            className="h-[58px] px-3 rounded-2xl font-black text-[22px] shrink-0"
+            style={{
+              minWidth: 78,
+              background: "linear-gradient(180deg, #44d96a 0%, #1f9c3e 100%)",
+              color: "white",
+              border: "1.5px solid #6df08a",
+              boxShadow:
+                "0 0 18px rgba(31,156,62,0.55), inset 0 -3px 0 rgba(0,60,15,0.5)",
+              textShadow: "0 2px 0 rgba(0,0,0,0.35)",
+            }}
+          >
+            GO
+          </motion.button>
         </div>
-      )}
+
+        {/* Row 2: bet presets + difficulty pills */}
+        <div className="grid grid-cols-8 gap-1.5">
+          {BET_PRESETS.map((bet) => {
+            const active = selectedBet === bet;
+            return (
+              <button
+                key={bet}
+                onClick={() => setSelectedBet(bet)}
+                className="h-10 rounded-xl text-[12px] font-black"
+                style={{
+                  background: "#0d0f14",
+                  border: active ? "1.5px solid #ffd84a" : "1px solid #232735",
+                  color: active ? "#ffd84a" : "#cfd2dc",
+                  boxShadow: active ? "0 0 10px rgba(255,216,74,0.45)" : "none",
+                }}
+              >
+                {bet}{activeWallet === "dollar" ? "$" : "⭐"}
+              </button>
+            );
+          })}
+          {(Object.keys(DIFFICULTY_CONFIG) as Difficulty[]).map((d) => {
+            const active = difficulty === d;
+            const c = DIFFICULTY_CONFIG[d];
+            return (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                disabled={phase === "playing"}
+                className="h-10 rounded-xl text-[10px] font-black"
+                style={{
+                  background: "#0d0f14",
+                  border: active ? `1.5px solid ${c.ring}` : `1px solid ${c.color}55`,
+                  color: active ? c.ring : c.color,
+                  boxShadow: active ? `0 0 10px ${c.color}88` : "none",
+                  opacity: phase === "playing" ? 0.5 : 1,
+                }}
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Wallet toggle (small) */}
+        <div className="flex items-center justify-center gap-2 pt-0.5">
+          <button
+            onClick={() => setActiveWallet("dollar")}
+            className="px-3 h-7 rounded-full text-[10px] font-bold"
+            style={{
+              background: activeWallet === "dollar" ? "hsla(140,75%,40%,0.25)" : "#0d0f14",
+              border: `1px solid ${activeWallet === "dollar" ? "hsl(140 75% 50%)" : "#232735"}`,
+              color: activeWallet === "dollar" ? "hsl(140 80% 70%)" : "#7a8090",
+            }}
+          >
+            💲 {gameDollarBalance.toFixed(2)}
+          </button>
+          <button
+            onClick={() => setActiveWallet("star")}
+            className="px-3 h-7 rounded-full text-[10px] font-bold"
+            style={{
+              background: activeWallet === "star" ? "hsla(45,90%,50%,0.25)" : "#0d0f14",
+              border: `1px solid ${activeWallet === "star" ? "hsl(45 90% 55%)" : "#232735"}`,
+              color: activeWallet === "star" ? "hsl(45 95% 70%)" : "#7a8090",
+            }}
+          >
+            ⭐ {gameStarBalance.toLocaleString()}
+          </button>
+        </div>
+      </div>
+
+      {/* ============ HOW TO PLAY MODAL ============ */}
+      <AnimatePresence>
+        {howOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.75)" }}
+            onClick={() => setHowOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-sm w-full rounded-2xl p-4 relative"
+              style={{ background: "#101218", border: "1px solid #2a2c36", color: "#eaecf2" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={() => setHowOpen(false)} className="absolute right-3 top-3">
+                <X className="h-5 w-5" />
+              </button>
+              <h2 className="font-black text-lg mb-2">How to play</h2>
+              <ol className="text-[12px] space-y-1.5 list-decimal pl-4" style={{ color: "#cfd2dc" }}>
+                <li>Pick a bet amount and a Difficulty.</li>
+                <li>Press <b>GO</b> — the chicken hops one lane forward.</li>
+                <li>Each lane has a multiplier. Cash out before a vehicle hits!</li>
+                <li>Higher difficulty = bigger multipliers but more risk.</li>
+              </ol>
+            </motion.div>
+          </motion.div>
+        )}
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.75)" }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-sm w-full rounded-2xl p-3 relative"
+              style={{ background: "#101218", border: "1px solid #2a2c36", color: "#eaecf2" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={() => setMenuOpen(false)} className="absolute right-3 top-3">
+                <X className="h-5 w-5" />
+              </button>
+              <h2 className="font-black text-lg mb-2">Menu</h2>
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => { setSoundOn((p) => !p); }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#0d0f14", border: "1px solid #232735" }}
+                >
+                  Sound: {soundOn ? "On 🔊" : "Off 🔇"}
+                </button>
+                <button
+                  onClick={() => navigate("/")}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#0d0f14", border: "1px solid #232735" }}
+                >
+                  Back to lobby
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
+
+// ============ COMPONENTS ============
+
+const ChickenOnManhole = () => (
+  <motion.div
+    initial={{ scale: 0.6, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1, y: [0, -3, 0] }}
+    transition={{ y: { duration: 0.9, repeat: Infinity } }}
+    className="relative flex flex-col items-center"
+  >
+    {/* Chicken (emoji styled) */}
+    <div
+      className="text-[42px] leading-none relative z-10"
+      style={{ filter: "drop-shadow(0 4px 4px rgba(0,0,0,0.7))" }}
+    >
+      🐔
+    </div>
+    {/* Golden drumstick manhole */}
+    <div
+      className="-mt-3 h-5 w-12 rounded-full relative"
+      style={{
+        background: "radial-gradient(ellipse at 50% 40%, #ffe27a 0%, #d49524 60%, #7a4e10 100%)",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.65), inset 0 -2px 4px rgba(80,40,0,0.6)",
+        border: "1.5px solid #8a5818",
+      }}
+    >
+      <div
+        className="absolute inset-1 rounded-full flex items-center justify-center text-[10px]"
+        style={{
+          background: "radial-gradient(ellipse at 50% 30%, #ffd968 0%, #b87a18 100%)",
+        }}
+      >
+        🍗
+      </div>
+    </div>
+  </motion.div>
+);
+
+const Signboard = ({ value, color }: { value: string; color: string }) => (
+  <div className="relative flex flex-col items-center">
+    <div
+      className="px-2.5 py-1.5 rounded-md font-black text-[14px] relative"
+      style={{
+        background: "linear-gradient(180deg, #0b1a44 0%, #060d28 100%)",
+        border: `1.5px solid ${color}`,
+        color,
+        boxShadow: `0 0 14px ${color}88, inset 0 0 8px rgba(0,0,0,0.6)`,
+      }}
+    >
+      <span
+        className="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full"
+        style={{ background: "#e83a3a", boxShadow: "0 0 4px #e83a3a" }}
+      />
+      {value}
+    </div>
+    {/* Post */}
+    <div
+      className="w-[3px] h-4"
+      style={{ background: "linear-gradient(180deg, #6a6e78 0%, #2a2c34 100%)" }}
+    />
+    {/* Base */}
+    <div
+      className="w-6 h-1.5 rounded-sm"
+      style={{ background: "#1a1c22", border: "1px solid #2a2c34" }}
+    />
+  </div>
+);
+
+const ManholeCover = ({ label, crossed }: { label: string; crossed: boolean }) => (
+  <div
+    className="rounded-full flex items-center justify-center font-black relative"
+    style={{
+      width: 56,
+      height: 56,
+      background: crossed
+        ? "radial-gradient(circle at 35% 30%, #5cd97a 0%, #1f7a36 70%, #0a3a18 100%)"
+        : "radial-gradient(circle at 35% 30%, #4a4d55 0%, #1f2128 60%, #0d0f14 100%)",
+      border: crossed ? "2px solid #6df08a" : "2px solid #15171d",
+      boxShadow: crossed
+        ? "0 0 14px rgba(45,200,90,0.6), inset 0 -3px 6px rgba(0,0,0,0.55)"
+        : "0 4px 8px rgba(0,0,0,0.6), inset 0 -3px 6px rgba(0,0,0,0.55), inset 0 2px 4px rgba(255,255,255,0.06)",
+      color: crossed ? "#eaffea" : "#ffffff",
+      fontSize: label.length > 4 ? 11 : 13,
+      textShadow: "0 2px 4px rgba(0,0,0,0.85)",
+    }}
+  >
+    {/* texture dots */}
+    <div
+      className="absolute inset-1 rounded-full pointer-events-none opacity-60"
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1.5px)",
+        backgroundSize: "6px 6px",
+      }}
+    />
+    <span className="relative">{label}</span>
+  </div>
+);
+
+const Truck = ({ color }: { color: string }) => (
+  <div className="relative">
+    {/* headlight beams */}
+    <div
+      className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-10 h-8"
+      style={{
+        background:
+          "radial-gradient(ellipse at top, rgba(255,240,180,0.55) 0%, transparent 70%)",
+      }}
+    />
+    {/* cab */}
+    <div
+      className="w-9 h-5 rounded-sm relative mx-auto"
+      style={{
+        background: `linear-gradient(180deg, ${color} 0%, ${color}cc 100%)`,
+        border: "1px solid rgba(0,0,0,0.5)",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
+      }}
+    >
+      <div className="absolute left-1 right-1 top-1 h-1.5 rounded-sm" style={{ background: "#fff6c2" }} />
+    </div>
+    {/* body (above cab in top-down) */}
+    <div
+      className="w-9 h-10 mx-auto -mt-0.5"
+      style={{
+        background: "linear-gradient(180deg, #2a2d36 0%, #15171d 100%)",
+        border: "1px solid rgba(0,0,0,0.5)",
+        borderRadius: "2px",
+      }}
+    />
+  </div>
+);
+
+const Car = ({ color }: { color: string }) => (
+  <div className="relative">
+    <div
+      className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-9 h-7"
+      style={{
+        background:
+          "radial-gradient(ellipse at top, rgba(255,240,180,0.45) 0%, transparent 70%)",
+      }}
+    />
+    <div
+      className="w-8 h-12 rounded-md mx-auto relative"
+      style={{
+        background: `linear-gradient(180deg, ${color} 0%, ${color}aa 100%)`,
+        border: "1px solid rgba(0,0,0,0.5)",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
+      }}
+    >
+      <div className="absolute left-1 right-1 top-1.5 h-2 rounded-sm" style={{ background: "rgba(0,0,0,0.45)" }} />
+      <div className="absolute left-1 right-1 bottom-2 h-2.5 rounded-sm" style={{ background: "rgba(0,0,0,0.3)" }} />
+      <div className="absolute left-1 right-1 top-0 h-0.5 rounded-sm" style={{ background: "#fff6c2" }} />
+    </div>
+  </div>
+);
 
 export default ChickenRoadGame;
