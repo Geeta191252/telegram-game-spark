@@ -96,7 +96,7 @@ const ChickenRoadGame = () => {
   const currentBalance = activeWallet === "dollar" ? gameDollarBalance : gameStarBalance;
   const currentMultiplier = currentLane > 0 ? cfg.multipliers[currentLane - 1] : 0;
   const nextMultiplier =
-    currentLane < LANE_COUNT ? cfg.multipliers[currentLane] : cfg.multipliers[LANE_COUNT - 1];
+    currentLane < cfg.multipliers.length ? cfg.multipliers[currentLane] : cfg.multipliers[cfg.multipliers.length - 1];
 
   const startGame = useCallback(() => {
     if (currentBalance < selectedBet) {
@@ -125,11 +125,11 @@ const ChickenRoadGame = () => {
       return;
     }
     if (phase !== "playing") return;
-    if (currentLane >= LANE_COUNT) return;
+    if (currentLane >= cfg.multipliers.length) return;
 
     const stepIndex = currentLane;
     const earlyBoost = stepIndex < 2 ? 1.25 : 1.0;
-    const lateScale = stepIndex >= LANE_COUNT - 2 ? 1.4 : 1.0;
+    const lateScale = stepIndex >= cfg.multipliers.length - 2 ? 1.4 : 1.0;
     const hitProb = Math.min(0.9, cfg.crashBase * earlyBoost * lateScale);
     const isHit = Math.random() < hitProb;
 
@@ -156,8 +156,8 @@ const ChickenRoadGame = () => {
     setCurrentLane(newLane);
     if (soundRef.current) playResultReveal();
 
-    if (newLane >= LANE_COUNT) {
-      const mult = cfg.multipliers[LANE_COUNT - 1];
+    if (newLane >= cfg.multipliers.length) {
+      const mult = cfg.multipliers[cfg.multipliers.length - 1];
       const prize = Math.floor(selectedBet * mult * 100) / 100;
       setWinAmount(prize);
       setPhase("cashed");
@@ -210,7 +210,7 @@ const ChickenRoadGame = () => {
   const potentialWin = currentLane > 0 ? selectedBet * currentMultiplier : selectedBet * nextMultiplier;
 
   // Show 6 lanes window centered around chicken (chicken always visible at left)
-  const visibleStart = Math.max(0, Math.min(currentLane - 1, LANE_COUNT - 6));
+  const visibleStart = Math.max(0, Math.min(currentLane - 1, cfg.multipliers.length - 6));
   const visibleLanes = cfg.multipliers.slice(visibleStart, visibleStart + 6);
 
   return (
