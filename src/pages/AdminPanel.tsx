@@ -1117,15 +1117,9 @@ const AdminPanel = () => {
                 border: "1px solid hsla(45, 80%, 50%, 0.35)",
               }}>
                 <h2 className="font-bold text-sm mb-3" style={{ color: "hsl(45 95% 70%)" }}>🎁 Create New Offer</h2>
-
-                <input
-                  type="text"
-                  placeholder="Offer title (e.g. STAR BOOST)"
-                  value={offerForm.title}
-                  onChange={(e) => setOfferForm({ ...offerForm, title: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 mb-2 text-sm font-bold outline-none"
-                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
-                />
+                <p className="text-[11px] mb-3" style={{ color: "hsl(260 30% 75%)" }}>
+                  Title aur % VALUE auto set ho jayenge. Sirf amounts bharo.
+                </p>
 
                 <div className="flex gap-2 mb-2">
                   {(["star", "dollar"] as const).map((c) => (
@@ -1163,19 +1157,22 @@ const AdminPanel = () => {
                   />
                 </div>
 
+                {offerForm.payCurrency === "dollar" && (
+                  <input
+                    type="number"
+                    placeholder="Bonus $ amount (extra dollars)"
+                    value={offerForm.bonusDollar}
+                    onChange={(e) => setOfferForm({ ...offerForm, bonusDollar: e.target.value })}
+                    className="w-full rounded-lg px-3 py-2 mb-2 text-sm outline-none"
+                    style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
+                  />
+                )}
+
                 <input
                   type="number"
                   placeholder="Bonus ⭐ amount (extra stars)"
-                  value={offerForm.bonusAmount}
-                  onChange={(e) => setOfferForm({ ...offerForm, bonusAmount: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 mb-2 text-sm outline-none"
-                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
-                />
-                <input
-                  type="number"
-                  placeholder="Discount % (e.g. 80)"
-                  value={offerForm.discountPercent}
-                  onChange={(e) => setOfferForm({ ...offerForm, discountPercent: e.target.value })}
+                  value={offerForm.bonusStar}
+                  onChange={(e) => setOfferForm({ ...offerForm, bonusStar: e.target.value })}
                   className="w-full rounded-lg px-3 py-2 mb-3 text-sm outline-none"
                   style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
                 />
