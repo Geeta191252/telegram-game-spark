@@ -30,28 +30,28 @@ const DIFFICULTY_CONFIG: Record<
   { multipliers: number[]; crashBase: number; label: string; color: string; ring: string }
 > = {
   easy: {
-    multipliers: [1.05, 1.15, 1.30, 1.48, 1.70, 1.95, 2.25, 2.60],
-    crashBase: 0.07,
+    multipliers: [1.03, 1.07, 1.15, 1.25, 1.37, 1.52, 1.71, 1.93, 2.19, 2.51, 2.89, 3.35, 3.90, 4.57, 5.38, 6.36, 7.55, 9.01, 10.79, 12.98, 15.67, 19.00],
+    crashBase: 0.05,
     label: "Easy",
     color: "hsl(140 75% 50%)",
     ring: "hsl(140 90% 65%)",
   },
   medium: {
-    multipliers: [1.20, 1.45, 1.78, 2.20, 2.75, 3.45, 4.35, 5.50],
-    crashBase: 0.15,
+    multipliers: [1.12, 1.32, 1.93, 3.35, 6.78, 15.85, 42.33, 128.5, 440.6, 1700],
+    crashBase: 0.18,
     label: "Medium",
     color: "hsl(210 90% 55%)",
     ring: "hsl(210 95% 70%)",
   },
   hard: {
-    multipliers: [1.50, 2.10, 3.00, 4.30, 6.20, 9.00, 13.0, 19.0],
-    crashBase: 0.26,
+    multipliers: [1.23, 1.47, 2.27, 4.30, 9.80, 26.60, 85.13, 318.9, 1390.2, 7020.5, 40899],
+    crashBase: 0.28,
     label: "Hard",
     color: "hsl(28 95% 55%)",
     ring: "hsl(28 100% 68%)",
   },
   hardcore: {
-    multipliers: [2.00, 4.00, 8.00, 16.0, 32.0, 64.0, 128, 256],
+    multipliers: [1.61, 2.64, 6.72, 22.92, 99.53, 533.1, 3448.4, 26519, 239531, 2516310],
     crashBase: 0.45,
     label: "Hardcore",
     color: "hsl(0 85% 55%)",
@@ -60,7 +60,6 @@ const DIFFICULTY_CONFIG: Record<
 };
 
 const BET_PRESETS = [0.5, 1, 2, 7];
-const LANE_COUNT = 8;
 
 const ChickenRoadGame = () => {
   const navigate = useNavigate();
