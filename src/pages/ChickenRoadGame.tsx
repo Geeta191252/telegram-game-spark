@@ -399,14 +399,16 @@ const ChickenRoadGame = () => {
         </div>
 
         {/* Lane content overlay */}
-        <div className="relative h-full flex">
+        <div className="absolute inset-0 flex">
           {/* Chicken sidewalk */}
           <div
-            className="shrink-0 flex flex-col items-center justify-end pb-12"
+            className="shrink-0 relative"
             style={{ width: "16%" }}
           >
             {currentLane === 0 && phase !== "lost" && (
-              <ChickenOnManhole />
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
+                <ChickenOnManhole />
+              </div>
             )}
           </div>
 
@@ -418,68 +420,67 @@ const ChickenRoadGame = () => {
             const isCrashLane = carLane === laneNumber;
             const isNextLane = currentLane === laneNumber - 1 && phase === "playing";
             const isSignLane = i === 0 && currentLane === 0 && phase === "betting";
-            // The current "next target" gets a signboard look
             const showSignboard = (isNextLane && !isCrossed) || (isSignLane && laneNumber === 1);
 
             return (
               <div key={laneNumber} className="flex-1 relative h-full">
-                {/* Truck/car coming down (crash) */}
+                {/* Crash truck coming down */}
                 <AnimatePresence>
                   {isCrashLane && (
                     <motion.div
-                      initial={{ y: "-120%" }}
-                      animate={{ y: "60%" }}
+                      initial={{ top: "-30%" }}
+                      animate={{ top: "55%" }}
                       transition={{ duration: 0.55, ease: "easeIn" }}
-                      className="absolute left-1/2 -translate-x-1/2 top-0 z-20"
+                      className="absolute left-1/2 -translate-x-1/2 z-30"
                     >
-                      <Truck color="#f7c948" />
+                      <Truck />
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Ambient cars in distance (decoration) */}
-                {!isCrashLane && i === 2 && phase !== "lost" && (
+                {/* Ambient traffic (decorative loops) */}
+                {!isCrashLane && phase !== "lost" && i === 1 && (
                   <motion.div
-                    animate={{ y: ["-30%", "30%", "-30%"] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    className="absolute left-1/2 -translate-x-1/2 top-[15%] opacity-90"
+                    animate={{ top: ["-15%", "85%"] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                    className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
-                    <Car color="#e8e8ea" />
+                    <Car />
                   </motion.div>
                 )}
-                {!isCrashLane && i === 3 && phase !== "lost" && (
+                {!isCrashLane && phase !== "lost" && i === 2 && (
                   <motion.div
-                    animate={{ y: ["10%", "60%", "10%"] }}
-                    transition={{ duration: 7, repeat: Infinity, ease: "linear", delay: 1.5 }}
-                    className="absolute left-1/2 -translate-x-1/2 top-[8%]"
+                    animate={{ top: ["-25%", "80%"] }}
+                    transition={{ duration: 7, repeat: Infinity, ease: "linear", delay: 2.2 }}
+                    className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
-                    <Truck color="#f7c948" />
+                    <Truck />
                   </motion.div>
                 )}
 
-                {/* Chicken if standing on this lane */}
+                {/* Chicken on this lane (after crossing) */}
                 {isCurrent && (
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-12 z-20">
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
                     <ChickenOnManhole />
                   </div>
                 )}
 
-                {/* Crashed splat */}
+                {/* Crash splat */}
                 {currentLane === laneNumber - 1 && phase === "lost" && carLane === laneNumber && (
                   <motion.div
                     initial={{ scale: 1, opacity: 1 }}
                     animate={{ scale: [1, 1.4, 0.8], opacity: [1, 1, 0] }}
                     transition={{ duration: 1 }}
-                    className="absolute left-1/2 -translate-x-1/2 bottom-14 text-4xl z-20"
+                    className="absolute left-1/2 -translate-x-1/2 bottom-12 text-4xl z-30"
                   >
                     💥
                   </motion.div>
                 )}
 
                 {/* Multiplier marker at lane bottom */}
-                <div className="absolute left-0 right-0 bottom-12 flex justify-center pointer-events-none">
+                <div className="absolute left-0 right-0 bottom-10 flex justify-center pointer-events-none">
                   {showSignboard ? (
-                    <Signboard value={`${mult.toFixed(2)}x`} color={cfg.ring} />
+                    <Signboard value={`${mult.toFixed(2)}x`} />
                   ) : (
                     <ManholeCover
                       label={
