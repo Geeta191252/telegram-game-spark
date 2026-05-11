@@ -792,26 +792,31 @@ const ChickenOnManhole = () => (
     transition={{ y: { duration: 0.9, repeat: Infinity } }}
     className="relative flex flex-col items-center"
   >
-    {/* Chicken (emoji styled) */}
+    {/* 3D Chicken */}
+    <img
+      src={chickenImg}
+      alt="chicken"
+      className="w-[68px] h-auto relative z-10 -mb-3"
+      style={{ filter: "drop-shadow(0 6px 6px rgba(0,0,0,0.75))" }}
+      loading="lazy"
+    />
+    {/* Golden drumstick manhole base */}
     <div
-      className="text-[42px] leading-none relative z-10"
-      style={{ filter: "drop-shadow(0 4px 4px rgba(0,0,0,0.7))" }}
-    >
-      🐔
-    </div>
-    {/* Golden drumstick manhole */}
-    <div
-      className="-mt-3 h-5 w-12 rounded-full relative"
+      className="h-6 w-16 rounded-full relative"
       style={{
-        background: "radial-gradient(ellipse at 50% 40%, #ffe27a 0%, #d49524 60%, #7a4e10 100%)",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.65), inset 0 -2px 4px rgba(80,40,0,0.6)",
-        border: "1.5px solid #8a5818",
+        background:
+          "radial-gradient(ellipse at 50% 35%, #ffe27a 0%, #e0a02a 55%, #7a4e10 100%)",
+        boxShadow:
+          "0 6px 12px rgba(0,0,0,0.7), inset 0 -3px 6px rgba(80,40,0,0.7), inset 0 2px 3px rgba(255,240,160,0.6)",
+        border: "2px solid #8a5818",
       }}
     >
       <div
-        className="absolute inset-1 rounded-full flex items-center justify-center text-[10px]"
+        className="absolute inset-[3px] rounded-full flex items-center justify-center text-[11px]"
         style={{
-          background: "radial-gradient(ellipse at 50% 30%, #ffd968 0%, #b87a18 100%)",
+          background:
+            "radial-gradient(ellipse at 50% 25%, #ffd968 0%, #b87a18 100%)",
+          boxShadow: "inset 0 0 6px rgba(60,30,0,0.6)",
         }}
       >
         🍗
@@ -820,121 +825,99 @@ const ChickenOnManhole = () => (
   </motion.div>
 );
 
-const Signboard = ({ value, color }: { value: string; color: string }) => (
-  <div className="relative flex flex-col items-center">
-    <div
-      className="px-2.5 py-1.5 rounded-md font-black text-[14px] relative"
-      style={{
-        background: "linear-gradient(180deg, #0b1a44 0%, #060d28 100%)",
-        border: `1.5px solid ${color}`,
-        color,
-        boxShadow: `0 0 14px ${color}88, inset 0 0 8px rgba(0,0,0,0.6)`,
-      }}
-    >
-      <span
-        className="absolute -top-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full"
-        style={{ background: "#e83a3a", boxShadow: "0 0 4px #e83a3a" }}
+const Signboard = ({ value }: { value: string; color?: string }) => (
+  <div className="relative flex flex-col items-center" style={{ width: 72 }}>
+    <div className="relative" style={{ width: 72, height: 56 }}>
+      <img
+        src={signboardImg}
+        alt=""
+        className="absolute inset-0 w-full h-full object-contain"
+        style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.7))" }}
+        loading="lazy"
       />
-      {value}
+      <div
+        className="absolute inset-0 flex items-start justify-center pt-[14px]"
+      >
+        <span
+          className="font-black text-white"
+          style={{
+            fontSize: 14,
+            textShadow: "0 0 6px rgba(80,180,255,0.9), 0 2px 2px rgba(0,0,0,0.8)",
+            letterSpacing: 0.5,
+          }}
+        >
+          {value}
+        </span>
+      </div>
     </div>
-    {/* Post */}
-    <div
-      className="w-[3px] h-4"
-      style={{ background: "linear-gradient(180deg, #6a6e78 0%, #2a2c34 100%)" }}
-    />
-    {/* Base */}
-    <div
-      className="w-6 h-1.5 rounded-sm"
-      style={{ background: "#1a1c22", border: "1px solid #2a2c34" }}
-    />
   </div>
 );
 
 const ManholeCover = ({ label, crossed }: { label: string; crossed: boolean }) => (
   <div
-    className="rounded-full flex items-center justify-center font-black relative"
-    style={{
-      width: 56,
-      height: 56,
-      background: crossed
-        ? "radial-gradient(circle at 35% 30%, #5cd97a 0%, #1f7a36 70%, #0a3a18 100%)"
-        : "radial-gradient(circle at 35% 30%, #4a4d55 0%, #1f2128 60%, #0d0f14 100%)",
-      border: crossed ? "2px solid #6df08a" : "2px solid #15171d",
-      boxShadow: crossed
-        ? "0 0 14px rgba(45,200,90,0.6), inset 0 -3px 6px rgba(0,0,0,0.55)"
-        : "0 4px 8px rgba(0,0,0,0.6), inset 0 -3px 6px rgba(0,0,0,0.55), inset 0 2px 4px rgba(255,255,255,0.06)",
-      color: crossed ? "#eaffea" : "#ffffff",
-      fontSize: label.length > 4 ? 11 : 13,
-      textShadow: "0 2px 4px rgba(0,0,0,0.85)",
-    }}
+    className="relative flex items-center justify-center"
+    style={{ width: 60, height: 60 }}
   >
-    {/* texture dots */}
-    <div
-      className="absolute inset-1 rounded-full pointer-events-none opacity-60"
+    <img
+      src={manholeImg}
+      alt=""
+      className="absolute inset-0 w-full h-full object-contain"
       style={{
-        backgroundImage:
-          "radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1.5px)",
-        backgroundSize: "6px 6px",
+        filter: crossed
+          ? "drop-shadow(0 0 12px rgba(80,220,120,0.8)) hue-rotate(80deg) saturate(1.4)"
+          : "drop-shadow(0 4px 6px rgba(0,0,0,0.7))",
       }}
+      loading="lazy"
     />
-    <span className="relative">{label}</span>
+    <span
+      className="relative font-black z-10"
+      style={{
+        fontSize: label.length > 4 ? 11 : 14,
+        color: "#ffffff",
+        textShadow:
+          "0 0 6px rgba(0,0,0,0.95), 0 2px 3px rgba(0,0,0,0.9), 0 0 2px rgba(255,255,255,0.4)",
+      }}
+    >
+      {label}
+    </span>
   </div>
 );
 
-const Truck = ({ color }: { color: string }) => (
-  <div className="relative">
-    {/* headlight beams */}
+const Truck = ({ color: _color }: { color?: string }) => (
+  <div className="relative" style={{ width: 56 }}>
     <div
-      className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-10 h-8"
+      className="absolute left-1/2 -translate-x-1/2 -bottom-6 w-12 h-10 pointer-events-none"
       style={{
         background:
-          "radial-gradient(ellipse at top, rgba(255,240,180,0.55) 0%, transparent 70%)",
+          "radial-gradient(ellipse at top, rgba(255,240,180,0.7) 0%, transparent 70%)",
       }}
     />
-    {/* cab */}
-    <div
-      className="w-9 h-5 rounded-sm relative mx-auto"
-      style={{
-        background: `linear-gradient(180deg, ${color} 0%, ${color}cc 100%)`,
-        border: "1px solid rgba(0,0,0,0.5)",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
-      }}
-    >
-      <div className="absolute left-1 right-1 top-1 h-1.5 rounded-sm" style={{ background: "#fff6c2" }} />
-    </div>
-    {/* body (above cab in top-down) */}
-    <div
-      className="w-9 h-10 mx-auto -mt-0.5"
-      style={{
-        background: "linear-gradient(180deg, #2a2d36 0%, #15171d 100%)",
-        border: "1px solid rgba(0,0,0,0.5)",
-        borderRadius: "2px",
-      }}
+    <img
+      src={truckImg}
+      alt=""
+      className="w-full h-auto block"
+      style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.7))" }}
+      loading="lazy"
     />
   </div>
 );
 
-const Car = ({ color }: { color: string }) => (
-  <div className="relative">
+const Car = ({ color: _color }: { color?: string }) => (
+  <div className="relative" style={{ width: 44 }}>
     <div
-      className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-9 h-7"
+      className="absolute left-1/2 -translate-x-1/2 -bottom-5 w-10 h-8 pointer-events-none"
       style={{
         background:
-          "radial-gradient(ellipse at top, rgba(255,240,180,0.45) 0%, transparent 70%)",
+          "radial-gradient(ellipse at top, rgba(255,240,180,0.6) 0%, transparent 70%)",
       }}
     />
-    <div
-      className="w-8 h-12 rounded-md mx-auto relative"
-      style={{
-        background: `linear-gradient(180deg, ${color} 0%, ${color}aa 100%)`,
-        border: "1px solid rgba(0,0,0,0.5)",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.5)",
-      }}
-    >
-      <div className="absolute left-1 right-1 top-1.5 h-2 rounded-sm" style={{ background: "rgba(0,0,0,0.45)" }} />
-      <div className="absolute left-1 right-1 bottom-2 h-2.5 rounded-sm" style={{ background: "rgba(0,0,0,0.3)" }} />
-      <div className="absolute left-1 right-1 top-0 h-0.5 rounded-sm" style={{ background: "#fff6c2" }} />
-    </div>
+    <img
+      src={carImg}
+      alt=""
+      className="w-full h-auto block"
+      style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.7))" }}
+      loading="lazy"
+    />
   </div>
 );
 
