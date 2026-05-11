@@ -512,6 +512,27 @@ const ChickenRoadGame = () => {
                     {isCurrent && (
                       <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
                         <ChickenOnManhole jumpKey={currentLane} />
+                        {/* Barrier next to chicken (slightly touching) */}
+                        <motion.img
+                          key={`near-barrier-${currentLane}`}
+                          src={barrierImg}
+                          alt=""
+                          initial={{ scale: 0.6, opacity: 0, y: -6 }}
+                          animate={{ scale: 1, opacity: 1, y: 0 }}
+                          transition={{ type: "spring", stiffness: 220, damping: 16 }}
+                          className="absolute pointer-events-none"
+                          style={{
+                            width: 56,
+                            height: "auto",
+                            left: "50%",
+                            bottom: 38,
+                            transform: "translateX(8px)",
+                            filter:
+                              "drop-shadow(0 6px 8px rgba(0,0,0,0.7)) drop-shadow(0 0 5px rgba(255,180,40,0.35))",
+                            zIndex: 19,
+                          }}
+                          loading="lazy"
+                        />
                       </div>
                     )}
 
