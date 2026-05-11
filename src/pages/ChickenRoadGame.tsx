@@ -247,9 +247,8 @@ const ChickenRoadGame = () => {
 
     // ===== RIG: cannot cash out above cap =====
     const stats = readRig(activeWallet);
-    const forceLoseEarly = stats.games <= 10;
     const cap = Math.max(0, 0.3 * stats.totalBet - stats.totalWin);
-    if (forceLoseEarly || prize > cap) {
+    if (prize > cap) {
       // Truck takes the chicken before it escapes
       finalizeLoss(currentLane);
       return;
