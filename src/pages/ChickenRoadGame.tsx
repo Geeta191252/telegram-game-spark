@@ -146,7 +146,10 @@ const ChickenRoadGame = () => {
     const isHit = Math.random() < hitProb;
 
     if (isHit) {
-      setCarLane(stepIndex + 1);
+      const crashLane = stepIndex + 1;
+      // Move chicken onto the crash lane so the truck visually rolls over it
+      setCurrentLane(crashLane);
+      setCarLane(crashLane);
       setPhase("lost");
       if (soundRef.current) playLoseSound();
       reportGameResult({
@@ -216,6 +219,18 @@ const ChickenRoadGame = () => {
     setCarLane(null);
     setWinAmount(0);
   };
+
+  // Auto-reset to betting after a loss so the player lands back at the start
+  useEffect(() => {
+    if (phase !== "lost") return;
+    const t = setTimeout(() => {
+      setPhase("betting");
+      setCurrentLane(0);
+      setCarLane(null);
+      setWinAmount(0);
+    }, 2200);
+    return () => clearTimeout(t);
+  }, [phase]);
 
   const fmt = (n: number) =>
     activeWallet === "dollar" ? `${n.toFixed(2)} $` : `${n.toFixed(2)} ⭐`;
@@ -452,13 +467,13 @@ const ChickenRoadGame = () => {
                       />
                     )}
 
-                    {/* Crash truck */}
+                    {/* Crash truck — drives all the way down over chicken */}
                     <AnimatePresence>
                       {isCrashLane && (
                         <motion.div
-                          initial={{ top: "-30%" }}
-                          animate={{ top: "55%" }}
-                          transition={{ duration: 0.55, ease: "easeIn" }}
+                          initial={{ top: "-40%" }}
+                          animate={{ top: "130%" }}
+                          transition={{ duration: 1.1, ease: "easeIn" }}
                           className="absolute left-1/2 -translate-x-1/2 z-30"
                         >
                           <Truck />
@@ -518,32 +533,35 @@ const ChickenRoadGame = () => {
                       })()
                     )}
 
-                    {/* Chicken on this lane */}
-                    {isCurrent && (
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
+                    {/* Chicken on this lane (also stays during crash animation) */}
+                    {currentLane === laneNumber && (phase === "playing" || phase === "lost") && (
+                      <div className="absolute left-0 right-0 bottom-10 z-20 flex justify-center pointer-events-none">
                         <ChickenOnManhole jumpKey={currentLane} />
-                        {/* Barrier next to chicken (slightly touching) */}
-                        <motion.img
-                          key={`near-barrier-${currentLane}`}
+                      </div>
+                    )}
+                    {/* Full-width barrier across the lane at chicken's row */}
+                    {isCurrent && (
+                      <motion.div
+                        key={`near-barrier-${currentLane}`}
+                        initial={{ scale: 0.85, opacity: 0, y: -8 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 16 }}
+                        className="absolute left-0 right-0 pointer-events-none flex justify-center"
+                        style={{ bottom: 52, zIndex: 19 }}
+                      >
+                        <img
                           src={barrierImg}
                           alt=""
-                          initial={{ scale: 0.6, opacity: 0, y: -6 }}
-                          animate={{ scale: 1, opacity: 1, y: 0 }}
-                          transition={{ type: "spring", stiffness: 220, damping: 16 }}
-                          className="absolute pointer-events-none"
                           style={{
-                            width: 56,
+                            width: "100%",
                             height: "auto",
-                            left: "50%",
-                            bottom: 38,
-                            transform: "translateX(8px)",
+                            objectFit: "fill",
                             filter:
                               "drop-shadow(0 6px 8px rgba(0,0,0,0.7)) drop-shadow(0 0 5px rgba(255,180,40,0.35))",
-                            zIndex: 19,
                           }}
                           loading="lazy"
                         />
-                      </div>
+                      </motion.div>
                     )}
 
                     {/* Crash splat */}
