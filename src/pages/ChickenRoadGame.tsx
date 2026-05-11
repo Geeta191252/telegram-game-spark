@@ -454,7 +454,7 @@ const ChickenRoadGame = () => {
                 {!isCrashLane && phase !== "lost" && i === 1 && (
                   <motion.div
                     animate={{ top: ["-15%", "85%"] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: "linear", delay: 0.5 }}
                     className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
                     <Car />
