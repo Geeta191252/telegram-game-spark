@@ -1126,7 +1126,7 @@ const AdminPanel = () => {
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <input
                     type="number"
-                    placeholder="Pay amount"
+                    placeholder={offerForm.payCurrency === "dollar" ? "Pay $ amount" : "Pay ⭐ amount"}
                     value={offerForm.payAmount}
                     onChange={(e) => setOfferForm({ ...offerForm, payAmount: e.target.value })}
                     className="rounded-lg px-3 py-2 text-sm font-bold outline-none"
@@ -1134,7 +1134,7 @@ const AdminPanel = () => {
                   />
                   <input
                     type="number"
-                    placeholder="Get amount"
+                    placeholder={offerForm.payCurrency === "dollar" ? "Get $ amount" : "Get ⭐ amount"}
                     value={offerForm.getAmount}
                     onChange={(e) => setOfferForm({ ...offerForm, getAmount: e.target.value })}
                     className="rounded-lg px-3 py-2 text-sm font-bold outline-none"
@@ -1143,18 +1143,18 @@ const AdminPanel = () => {
                 </div>
 
                 <input
-                  type="text"
-                  placeholder="Bonus label (e.g. +100 ⭐)"
-                  value={offerForm.bonusLabel}
-                  onChange={(e) => setOfferForm({ ...offerForm, bonusLabel: e.target.value })}
+                  type="number"
+                  placeholder="Bonus ⭐ amount (extra stars)"
+                  value={offerForm.bonusAmount}
+                  onChange={(e) => setOfferForm({ ...offerForm, bonusAmount: e.target.value })}
                   className="w-full rounded-lg px-3 py-2 mb-2 text-sm outline-none"
                   style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
                 />
                 <input
-                  type="text"
-                  placeholder="Value badge (e.g. 120% VALUE)"
-                  value={offerForm.valueLabel}
-                  onChange={(e) => setOfferForm({ ...offerForm, valueLabel: e.target.value })}
+                  type="number"
+                  placeholder="Discount % (e.g. 80)"
+                  value={offerForm.discountPercent}
+                  onChange={(e) => setOfferForm({ ...offerForm, discountPercent: e.target.value })}
                   className="w-full rounded-lg px-3 py-2 mb-3 text-sm outline-none"
                   style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
                 />
