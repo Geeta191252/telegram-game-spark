@@ -23,6 +23,13 @@ import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult, getTelegram } from "@/lib/telegram";
 import { toast } from "@/hooks/use-toast";
 
+type TelegramWebApp = {
+  ready?: () => void;
+  expand?: () => void;
+  requestFullscreen?: () => void;
+  disableVerticalSwipes?: () => void;
+};
+
 // ============= RIGGING (heavy house edge, believable pattern) =============
 // Tracks lifetime bets/wins per user+currency in localStorage.
 // Rules:
@@ -45,11 +52,13 @@ const readRig = (currency: "dollar" | "star"): RigStats => {
   try {
     const raw = localStorage.getItem(rigKey(currency));
     if (raw) return { ...DEFAULT_RIG, ...JSON.parse(raw) };
-  } catch {}
+  } catch {
+    return { ...DEFAULT_RIG };
+  }
   return { ...DEFAULT_RIG };
 };
 const writeRig = (currency: "dollar" | "star", s: RigStats) => {
-  try { localStorage.setItem(rigKey(currency), JSON.stringify(s)); } catch {}
+  try { localStorage.setItem(rigKey(currency), JSON.stringify(s)); } catch { return; }
 };
 const floorMoney = (value: number) => Math.floor(value * 100) / 100;
 const getAllowedWinCap = (stats: RigStats, betAmount: number) => {
