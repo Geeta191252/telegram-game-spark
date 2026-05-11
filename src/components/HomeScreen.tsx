@@ -252,9 +252,8 @@ const HomeScreen = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="rounded-2xl p-3 flex items-center gap-3"
                 style={{
-                  background: "linear-gradient(135deg, hsla(0, 80%, 55%, 0.25), hsla(45, 80%, 50%, 0.15), hsla(280, 60%, 50%, 0.15))",
+                  background: "linear-gradient(135deg, hsl(0, 50%, 22%), hsl(45, 45%, 20%), hsl(280, 45%, 22%))",
                   border: "1px solid hsla(45, 70%, 55%, 0.2)",
-                  backdropFilter: "blur(10px)",
                 }}
               >
                 <motion.div
