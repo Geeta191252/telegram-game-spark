@@ -107,12 +107,11 @@ const AdminPanel = () => {
   // Offers state
   const [offers, setOffers] = useState<AdminOffer[]>([]);
   const [offerForm, setOfferForm] = useState({
-    title: "",
     payAmount: "",
     payCurrency: "star" as "star" | "dollar",
     getAmount: "",
-    bonusAmount: "", // always extra ⭐
-    discountPercent: "", // e.g. "80" → "80% OFF" badge + "80% VALUE" ribbon
+    bonusStar: "",   // extra ⭐ (for both star and dollar offers)
+    bonusDollar: "", // extra $ (only for dollar offers)
   });
   const [creatingOffer, setCreatingOffer] = useState(false);
   const [broadcastingId, setBroadcastingId] = useState<string | null>(null);
@@ -509,10 +508,32 @@ const AdminPanel = () => {
   const handleCreateOffer = async () => {
     const payNum = parseFloat(offerForm.payAmount);
     const getNum = parseFloat(offerForm.getAmount);
-    if (!offerForm.title.trim() || isNaN(payNum) || payNum <= 0 || isNaN(getNum) || getNum <= 0) {
-      toast({ title: "Invalid offer", description: "Fill title, pay & get amounts." });
+    if (isNaN(payNum) || payNum <= 0 || isNaN(getNum) || getNum <= 0) {
+      toast({ title: "Invalid offer", description: "Fill pay & get amounts." });
       return;
     }
+    const bonusStarNum = parseFloat(offerForm.bonusStar) || 0;
+    const bonusDollarNum = parseFloat(offerForm.bonusDollar) || 0;
+
+    // Auto title
+    const autoTitle = offerForm.payCurrency === "star" ? "STAR DEAL" : "MEGA DEAL";
+
+    // Auto bonus label
+    const bonusParts: string[] = [];
+    if (offerForm.payCurrency === "dollar" && bonusDollarNum > 0) bonusParts.push(`+$${bonusDollarNum}`);
+    if (bonusStarNum > 0) bonusParts.push(`+${bonusStarNum} ⭐`);
+    const autoBonusLabel = bonusParts.join(" ");
+
+    // Auto value % — bonus value vs pay amount (same currency basis)
+    // For ⭐ offer: % = bonusStar / payAmount * 100
+    // For $ offer: % = (bonusDollar + bonusStar/100) / payAmount * 100  (rough ⭐→$ at 100⭐=$1)
+    const bonusValue =
+      offerForm.payCurrency === "star"
+        ? bonusStarNum
+        : bonusDollarNum + bonusStarNum / 100;
+    const pct = payNum > 0 ? Math.round((bonusValue / payNum) * 100) : 0;
+    const autoValueLabel = pct > 0 ? `${pct}% OFF` : "";
+
     setCreatingOffer(true);
     try {
       const res = await fetch(`${API_BASE_URL}/admin/offers/create`, {
@@ -520,18 +541,18 @@ const AdminPanel = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ownerId: String(OWNER_ID),
-          title: offerForm.title.trim(),
+          title: autoTitle,
           payAmount: payNum,
           payCurrency: offerForm.payCurrency,
           getAmount: getNum,
-          bonusLabel: offerForm.bonusAmount.trim() ? `+${offerForm.bonusAmount.trim()} ⭐` : "",
-          valueLabel: offerForm.discountPercent.trim() ? `${offerForm.discountPercent.trim()}% OFF` : "",
+          bonusLabel: autoBonusLabel,
+          valueLabel: autoValueLabel,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      toast({ title: "Offer created ✅", description: `${offerForm.title} is now live in Market.` });
-      setOfferForm({ title: "", payAmount: "", payCurrency: "star", getAmount: "", bonusAmount: "", discountPercent: "" });
+      toast({ title: "Offer created ✅", description: `${autoTitle} is now live.` });
+      setOfferForm({ payAmount: "", payCurrency: "star", getAmount: "", bonusStar: "", bonusDollar: "" });
       fetchOffers();
     } catch (err: any) {
       toast({ title: "Error", description: err?.message || "Could not create offer." });
@@ -1096,15 +1117,9 @@ const AdminPanel = () => {
                 border: "1px solid hsla(45, 80%, 50%, 0.35)",
               }}>
                 <h2 className="font-bold text-sm mb-3" style={{ color: "hsl(45 95% 70%)" }}>🎁 Create New Offer</h2>
-
-                <input
-                  type="text"
-                  placeholder="Offer title (e.g. STAR BOOST)"
-                  value={offerForm.title}
-                  onChange={(e) => setOfferForm({ ...offerForm, title: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 mb-2 text-sm font-bold outline-none"
-                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
-                />
+                <p className="text-[11px] mb-3" style={{ color: "hsl(260 30% 75%)" }}>
+                  Title aur % VALUE auto set ho jayenge. Sirf amounts bharo.
+                </p>
 
                 <div className="flex gap-2 mb-2">
                   {(["star", "dollar"] as const).map((c) => (
@@ -1142,19 +1157,22 @@ const AdminPanel = () => {
                   />
                 </div>
 
+                {offerForm.payCurrency === "dollar" && (
+                  <input
+                    type="number"
+                    placeholder="Bonus $ amount (extra dollars)"
+                    value={offerForm.bonusDollar}
+                    onChange={(e) => setOfferForm({ ...offerForm, bonusDollar: e.target.value })}
+                    className="w-full rounded-lg px-3 py-2 mb-2 text-sm outline-none"
+                    style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(45, 60%, 50%, 0.3)" }}
+                  />
+                )}
+
                 <input
                   type="number"
                   placeholder="Bonus ⭐ amount (extra stars)"
-                  value={offerForm.bonusAmount}
-                  onChange={(e) => setOfferForm({ ...offerForm, bonusAmount: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 mb-2 text-sm outline-none"
-                  style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
-                />
-                <input
-                  type="number"
-                  placeholder="Discount % (e.g. 80)"
-                  value={offerForm.discountPercent}
-                  onChange={(e) => setOfferForm({ ...offerForm, discountPercent: e.target.value })}
+                  value={offerForm.bonusStar}
+                  onChange={(e) => setOfferForm({ ...offerForm, bonusStar: e.target.value })}
                   className="w-full rounded-lg px-3 py-2 mb-3 text-sm outline-none"
                   style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
                 />
