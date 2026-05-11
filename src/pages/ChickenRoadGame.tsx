@@ -173,6 +173,11 @@ const ChickenRoadGame = () => {
   }, [currentBalance, selectedBet, activeWallet]);
 
   const finalizeLoss = useCallback((crashLane: number) => {
+    const s = readRig(activeWallet);
+    s.lossStreak += 1;
+    s.winStreak = 0;
+    writeRig(activeWallet, s);
+
     setCurrentLane(crashLane);
     setCarLane(crashLane);
     setPhase("lost");
@@ -198,6 +203,8 @@ const ChickenRoadGame = () => {
     // ===== RIG: record win =====
     const s = readRig(activeWallet);
     s.totalWin += prize;
+    s.lossStreak = 0;
+    s.winStreak += 1;
     writeRig(activeWallet, s);
     reportGameResult({
       betAmount: selectedBet,
