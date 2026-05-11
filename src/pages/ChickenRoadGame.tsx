@@ -455,13 +455,13 @@ const ChickenRoadGame = () => {
                       />
                     )}
 
-                    {/* Crash truck */}
+                    {/* Crash truck — drives all the way down over chicken */}
                     <AnimatePresence>
                       {isCrashLane && (
                         <motion.div
-                          initial={{ top: "-30%" }}
-                          animate={{ top: "55%" }}
-                          transition={{ duration: 0.55, ease: "easeIn" }}
+                          initial={{ top: "-40%" }}
+                          animate={{ top: "130%" }}
+                          transition={{ duration: 1.1, ease: "easeIn" }}
                           className="absolute left-1/2 -translate-x-1/2 z-30"
                         >
                           <Truck />
