@@ -37,7 +37,7 @@ const DIFFICULTY_CONFIG: Record<
     ring: "hsl(140 90% 65%)",
   },
   medium: {
-    multipliers: [1.12, 1.32, 1.93, 3.35, 6.78, 15.85, 42.33, 128.5, 440.6, 1700],
+    multipliers: [1.12, 1.28, 1.46, 1.67, 2.64, 5.81, 17.79, 75.65, 447, 1700],
     crashBase: 0.18,
     label: "Medium",
     color: "hsl(210 90% 55%)",
