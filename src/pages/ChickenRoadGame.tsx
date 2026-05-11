@@ -454,7 +454,7 @@ const ChickenRoadGame = () => {
                 {!isCrashLane && phase !== "lost" && i === 1 && (
                   <motion.div
                     animate={{ top: ["-20%", "90%"] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.2 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear", delay: 0.1 }}
                     className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
                     <Car />
@@ -463,7 +463,7 @@ const ChickenRoadGame = () => {
                 {!isCrashLane && phase !== "lost" && i === 2 && (
                   <motion.div
                     animate={{ top: ["-25%", "85%"] }}
-                    transition={{ duration: 2.0, repeat: Infinity, ease: "linear", delay: 1.0 }}
+                    transition={{ duration: 1.1, repeat: Infinity, ease: "linear", delay: 0.5 }}
                     className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
                     <Truck />
@@ -472,7 +472,7 @@ const ChickenRoadGame = () => {
                 {!isCrashLane && phase !== "lost" && i === 3 && (
                   <motion.div
                     animate={{ top: ["-30%", "88%"] }}
-                    transition={{ duration: 1.7, repeat: Infinity, ease: "linear", delay: 0.6 }}
+                    transition={{ duration: 0.9, repeat: Infinity, ease: "linear", delay: 0.3 }}
                     className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
                     <Truck />
@@ -481,7 +481,7 @@ const ChickenRoadGame = () => {
                 {!isCrashLane && phase !== "lost" && i === 4 && (
                   <motion.div
                     animate={{ top: ["-15%", "92%"] }}
-                    transition={{ duration: 1.3, repeat: Infinity, ease: "linear", delay: 1.4 }}
+                    transition={{ duration: 0.7, repeat: Infinity, ease: "linear", delay: 0.8 }}
                     className="absolute left-1/2 -translate-x-1/2 z-10"
                   >
                     <Car />
