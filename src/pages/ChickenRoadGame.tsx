@@ -705,31 +705,6 @@ const ChickenRoadGame = () => {
           })}
         </div>
 
-        {/* Wallet toggle (small) */}
-        <div className="flex items-center justify-center gap-2 pt-0.5">
-          <button
-            onClick={() => setActiveWallet("dollar")}
-            className="px-3 h-7 rounded-full text-[10px] font-bold"
-            style={{
-              background: activeWallet === "dollar" ? "hsla(140,75%,40%,0.25)" : "#0d0f14",
-              border: `1px solid ${activeWallet === "dollar" ? "hsl(140 75% 50%)" : "#232735"}`,
-              color: activeWallet === "dollar" ? "hsl(140 80% 70%)" : "#7a8090",
-            }}
-          >
-            💲 {gameDollarBalance.toFixed(2)}
-          </button>
-          <button
-            onClick={() => setActiveWallet("star")}
-            className="px-3 h-7 rounded-full text-[10px] font-bold"
-            style={{
-              background: activeWallet === "star" ? "hsla(45,90%,50%,0.25)" : "#0d0f14",
-              border: `1px solid ${activeWallet === "star" ? "hsl(45 90% 55%)" : "#232735"}`,
-              color: activeWallet === "star" ? "hsl(45 95% 70%)" : "#7a8090",
-            }}
-          >
-            ⭐ {gameStarBalance.toLocaleString()}
-          </button>
-        </div>
       </div>
 
       {/* ============ HOW TO PLAY MODAL ============ */}
