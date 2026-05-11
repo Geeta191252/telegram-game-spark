@@ -212,14 +212,17 @@ const ChickenRoadGame = () => {
 
     // ===== RIG decision =====
     const stats = readRig(activeWallet);
-    // First 5 games: always lose
-    const forceLoseEarly = stats.games <= 5;
-    // Cap so lifetime win ratio stays <= 50%
-    const cap = Math.max(0, 0.5 * stats.totalBet - stats.totalWin);
+    // First 10 games: always lose
+    const forceLoseEarly = stats.games <= 10;
+    // Cap so lifetime win ratio stays <= 30% (heavy house edge, wins very rare)
+    const cap = Math.max(0, 0.3 * stats.totalBet - stats.totalWin);
     // Payout if player advances to next lane
     const nextPayout = selectedBet * cfg.multipliers[currentLane];
+    // Random crash chance per step, increasing with lane progression
+    const stepRisk = Math.min(0.85, cfg.crashBase + currentLane * 0.12);
+    const randomCrash = Math.random() < stepRisk;
 
-    const mustCrash = forceLoseEarly || nextPayout > cap;
+    const mustCrash = forceLoseEarly || nextPayout > cap || randomCrash;
 
     if (mustCrash) {
       const crashLane = currentLane + 1;
