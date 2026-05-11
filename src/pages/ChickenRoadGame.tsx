@@ -220,9 +220,16 @@ const ChickenRoadGame = () => {
     activeWallet === "dollar" ? `${n.toFixed(2)} $` : `${n.toFixed(2)} ⭐`;
   const potentialWin = currentLane > 0 ? selectedBet * currentMultiplier : selectedBet * nextMultiplier;
 
-  // Show 6 lanes window centered around chicken (chicken always visible at left)
-  const visibleStart = Math.max(0, Math.min(currentLane - 1, cfg.multipliers.length - 6));
-  const visibleLanes = cfg.multipliers.slice(visibleStart, visibleStart + 6);
+  // Smooth scrolling track: render ALL lanes, translate horizontally as chicken advances.
+  const VISIBLE_LANES = 6;
+  const totalLanes = cfg.multipliers.length;
+  const scrollIndex = Math.max(
+    0,
+    Math.min(currentLane - 1, Math.max(0, totalLanes - VISIBLE_LANES))
+  );
+  const trackWidthPct = (totalLanes / VISIBLE_LANES) * 100;
+  const laneWidthPct = 100 / totalLanes; // within track
+  const translatePct = -scrollIndex * laneWidthPct;
 
   return (
     <div
@@ -333,7 +340,10 @@ const ChickenRoadGame = () => {
       </div>
 
       {/* ============ ROAD PLAY AREA ============ */}
-      <div className="relative flex-1 overflow-hidden" style={{ background: "#1a1c1e" }}>
+      <div
+        className="relative flex-1 overflow-hidden"
+        style={{ background: "#1a1c1e", perspective: "1200px" }}
+      >
         {/* Asphalt texture */}
         <div
           className="absolute inset-0"
@@ -348,21 +358,28 @@ const ChickenRoadGame = () => {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.04), transparent 70%), linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%)",
+              "radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.06), transparent 70%), linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%)",
           }}
         />
 
-        {/* Lanes - vertical strips */}
-        <div className="absolute inset-0 flex">
-          {/* Sidewalk left */}
+        {/* Subtle 3D tilt wrapper */}
+        <div
+          className="absolute inset-0 flex"
+          style={{
+            transform: "rotateX(6deg)",
+            transformOrigin: "50% 100%",
+            transformStyle: "preserve-3d",
+          }}
+        >
+          {/* Sidewalk left (fixed) */}
           <div
-            className="shrink-0 relative"
+            className="shrink-0 relative h-full"
             style={{
               width: "16%",
-              background:
-                "linear-gradient(90deg, #1d1f22 0%, #16181b 100%)",
+              background: "linear-gradient(90deg, #1d1f22 0%, #16181b 100%)",
               borderRight: "3px solid rgba(255,255,255,0.12)",
               boxShadow: "inset -8px 0 12px rgba(0,0,0,0.4)",
+              zIndex: 5,
             }}
           >
             <div className="absolute left-0 right-0 top-[8%] flex flex-col items-center gap-3 px-1">
@@ -377,44 +394,7 @@ const ChickenRoadGame = () => {
                 />
               ))}
             </div>
-          </div>
-
-          {/* 6 visible lane strips */}
-          {visibleLanes.map((_, i) => (
-            <div
-              key={i}
-              className="flex-1 relative h-full"
-              style={{
-                borderRight:
-                  i < visibleLanes.length - 1
-                    ? "0"
-                    : "0",
-              }}
-            >
-              {/* Dashed center line */}
-              {i < visibleLanes.length - 1 && (
-                <div
-                  className="absolute top-0 bottom-0"
-                  style={{
-                    right: 0,
-                    width: "3px",
-                    backgroundImage:
-                      "linear-gradient(180deg, rgba(255,255,255,0.85) 50%, transparent 50%)",
-                    backgroundSize: "100% 36px",
-                  }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Lane content overlay */}
-        <div className="absolute inset-0 flex">
-          {/* Chicken sidewalk */}
-          <div
-            className="shrink-0 relative"
-            style={{ width: "16%" }}
-          >
+            {/* Chicken on sidewalk (before first lane) */}
             {currentLane === 0 && phase !== "lost" && (
               <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
                 <ChickenOnManhole />
@@ -422,122 +402,169 @@ const ChickenRoadGame = () => {
             )}
           </div>
 
-          {/* Visible lanes */}
-          {visibleLanes.map((mult, i) => {
-            const laneNumber = visibleStart + i + 1;
-            const isCrossed = currentLane >= laneNumber;
-            const isCurrent = currentLane === laneNumber && phase === "playing";
-            const isCrashLane = carLane === laneNumber;
-            const isNextLane = currentLane === laneNumber - 1 && phase === "playing";
-            const isSignLane = i === 0 && currentLane === 0 && phase === "betting";
-            const showSignboard = (isNextLane && !isCrossed) || (isSignLane && laneNumber === 1);
+          {/* Scrollable lanes viewport */}
+          <div className="flex-1 relative h-full overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 left-0 flex"
+              style={{ width: `${trackWidthPct}%` }}
+              animate={{ x: `${translatePct}%` }}
+              transition={{ type: "spring", stiffness: 120, damping: 22, mass: 0.7 }}
+            >
+              {cfg.multipliers.map((mult, idx) => {
+                const laneNumber = idx + 1;
+                const isCrossed = currentLane >= laneNumber;
+                const isCurrent = currentLane === laneNumber && phase === "playing";
+                const isCrashLane = carLane === laneNumber;
+                const isNextLane = currentLane === laneNumber - 1 && phase === "playing";
+                const isSignLane = idx === 0 && currentLane === 0 && phase === "betting";
+                const showSignboard = (isNextLane && !isCrossed) || (isSignLane && laneNumber === 1);
+                const isLast = idx === cfg.multipliers.length - 1;
 
-            return (
-              <div key={laneNumber} className="flex-1 relative h-full">
-                {/* Crash truck coming down */}
-                <AnimatePresence>
-                  {isCrashLane && (
-                    <motion.div
-                      initial={{ top: "-30%" }}
-                      animate={{ top: "55%" }}
-                      transition={{ duration: 0.55, ease: "easeIn" }}
-                      className="absolute left-1/2 -translate-x-1/2 z-30"
-                    >
-                      <Truck />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                return (
+                  <div
+                    key={laneNumber}
+                    className="relative h-full shrink-0"
+                    style={{ width: `${laneWidthPct}%` }}
+                  >
+                    {/* Dashed lane divider */}
+                    {!isLast && (
+                      <div
+                        className="absolute top-0 bottom-0 pointer-events-none"
+                        style={{
+                          right: 0,
+                          width: "3px",
+                          backgroundImage:
+                            "linear-gradient(180deg, rgba(255,255,255,0.85) 50%, transparent 50%)",
+                          backgroundSize: "100% 36px",
+                        }}
+                      />
+                    )}
 
-                {/* Ambient traffic (decorative loops) — varied per lane */}
-                {!isCrashLane && phase !== "lost" && i === 1 && (
-                  <motion.div
-                    animate={{ top: ["-20%", "90%"] }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: "linear", delay: 0.1 }}
-                    className="absolute left-1/2 -translate-x-1/2 z-10"
-                  >
-                    <Car />
-                  </motion.div>
-                )}
-                {!isCrashLane && phase !== "lost" && i === 2 && (
-                  <motion.div
-                    animate={{ top: ["-25%", "85%"] }}
-                    transition={{ duration: 1.1, repeat: Infinity, ease: "linear", delay: 0.5 }}
-                    className="absolute left-1/2 -translate-x-1/2 z-10"
-                  >
-                    <Truck />
-                  </motion.div>
-                )}
-                {!isCrashLane && phase !== "lost" && i === 3 && (
-                  <motion.div
-                    animate={{ top: ["-30%", "88%"] }}
-                    transition={{ duration: 0.9, repeat: Infinity, ease: "linear", delay: 0.3 }}
-                    className="absolute left-1/2 -translate-x-1/2 z-10"
-                  >
-                    <Truck />
-                  </motion.div>
-                )}
-                {!isCrashLane && phase !== "lost" && i === 4 && (
-                  <motion.div
-                    animate={{ top: ["-15%", "92%"] }}
-                    transition={{ duration: 0.7, repeat: Infinity, ease: "linear", delay: 0.8 }}
-                    className="absolute left-1/2 -translate-x-1/2 z-10"
-                  >
-                    <Car />
-                  </motion.div>
-                )}
+                    {/* Crash truck */}
+                    <AnimatePresence>
+                      {isCrashLane && (
+                        <motion.div
+                          initial={{ top: "-30%" }}
+                          animate={{ top: "55%" }}
+                          transition={{ duration: 0.55, ease: "easeIn" }}
+                          className="absolute left-1/2 -translate-x-1/2 z-30"
+                        >
+                          <Truck />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                {/* Chicken on this lane (after crossing) */}
-                {isCurrent && (
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
-                    <ChickenOnManhole />
+                    {/* Ambient traffic on non-visible-edge upcoming lanes */}
+                    {!isCrashLane && phase !== "lost" && !isCrossed && !isCurrent && (
+                      (() => {
+                        const offset = laneNumber - currentLane;
+                        if (offset === 2) {
+                          return (
+                            <motion.div
+                              animate={{ top: ["-20%", "110%"] }}
+                              transition={{ duration: 0.9, repeat: Infinity, ease: "linear", delay: 0.1 }}
+                              className="absolute left-1/2 -translate-x-1/2 z-10"
+                            >
+                              <Car />
+                            </motion.div>
+                          );
+                        }
+                        if (offset === 3) {
+                          return (
+                            <motion.div
+                              animate={{ top: ["-25%", "110%"] }}
+                              transition={{ duration: 1.1, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                              className="absolute left-1/2 -translate-x-1/2 z-10"
+                            >
+                              <Truck />
+                            </motion.div>
+                          );
+                        }
+                        if (offset === 4) {
+                          return (
+                            <motion.div
+                              animate={{ top: ["-30%", "110%"] }}
+                              transition={{ duration: 0.8, repeat: Infinity, ease: "linear", delay: 0.3 }}
+                              className="absolute left-1/2 -translate-x-1/2 z-10"
+                            >
+                              <Car />
+                            </motion.div>
+                          );
+                        }
+                        if (offset === 5) {
+                          return (
+                            <motion.div
+                              animate={{ top: ["-15%", "110%"] }}
+                              transition={{ duration: 1.0, repeat: Infinity, ease: "linear", delay: 0.8 }}
+                              className="absolute left-1/2 -translate-x-1/2 z-10"
+                            >
+                              <Truck />
+                            </motion.div>
+                          );
+                        }
+                        return null;
+                      })()
+                    )}
+
+                    {/* Chicken on this lane */}
+                    {isCurrent && (
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-10 z-20">
+                        <ChickenOnManhole />
+                      </div>
+                    )}
+
+                    {/* Crash splat */}
+                    {currentLane === laneNumber - 1 && phase === "lost" && carLane === laneNumber && (
+                      <motion.div
+                        initial={{ scale: 1, opacity: 1 }}
+                        animate={{ scale: [1, 1.4, 0.8], opacity: [1, 1, 0] }}
+                        transition={{ duration: 1 }}
+                        className="absolute left-1/2 -translate-x-1/2 bottom-12 text-4xl z-30"
+                      >
+                        💥
+                      </motion.div>
+                    )}
+
+                    {/* Barrier on crossed lanes (3D pop) */}
+                    {isCrossed && !isCurrent && (
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0, y: -10 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 15 }}
+                        className="absolute left-0 right-0 top-1/3 flex justify-center pointer-events-none z-20"
+                      >
+                        <img
+                          src={barrierImg}
+                          alt=""
+                          className="w-[68px] h-auto"
+                          style={{
+                            filter:
+                              "drop-shadow(0 8px 10px rgba(0,0,0,0.75)) drop-shadow(0 0 6px rgba(255,180,40,0.35))",
+                            transform: "translateZ(20px)",
+                          }}
+                          loading="lazy"
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* Multiplier marker at lane bottom */}
+                    <div className="absolute left-0 right-0 bottom-10 flex justify-center pointer-events-none">
+                      {isCurrent ? (
+                        <Signboard value={`${currentMultiplier.toFixed(2)}x`} />
+                      ) : showSignboard ? (
+                        <Signboard value={`${mult.toFixed(2)}x`} />
+                      ) : !isCrossed ? (
+                        <ManholeCover
+                          label={mult >= 100 ? `${mult.toFixed(0)}x` : `${mult.toFixed(2)}x`}
+                          crossed={false}
+                        />
+                      ) : null}
+                    </div>
                   </div>
-                )}
-
-                {/* Crash splat */}
-                {currentLane === laneNumber - 1 && phase === "lost" && carLane === laneNumber && (
-                  <motion.div
-                    initial={{ scale: 1, opacity: 1 }}
-                    animate={{ scale: [1, 1.4, 0.8], opacity: [1, 1, 0] }}
-                    transition={{ duration: 1 }}
-                    className="absolute left-1/2 -translate-x-1/2 bottom-12 text-4xl z-30"
-                  >
-                    💥
-                  </motion.div>
-                )}
-
-                {/* Barrier on crossed lanes */}
-                {isCrossed && !isCurrent && (
-                  <div className="absolute left-0 right-0 top-1/3 flex justify-center pointer-events-none z-20">
-                    <img
-                      src={barrierImg}
-                      alt=""
-                      className="w-[64px] h-auto"
-                      style={{ filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.7))" }}
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-
-                {/* Multiplier marker at lane bottom */}
-                <div className="absolute left-0 right-0 bottom-10 flex justify-center pointer-events-none">
-                  {isCurrent ? (
-                    <Signboard value={`${currentMultiplier.toFixed(2)}x`} />
-                  ) : showSignboard ? (
-                    <Signboard value={`${mult.toFixed(2)}x`} />
-                  ) : !isCrossed ? (
-                    <ManholeCover
-                      label={
-                        mult >= 100
-                          ? `${mult.toFixed(0)}x`
-                          : `${mult.toFixed(2)}x`
-                      }
-                      crossed={false}
-                    />
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </motion.div>
+          </div>
         </div>
 
         {/* Status overlay top */}
