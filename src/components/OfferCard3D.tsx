@@ -54,22 +54,7 @@ const OfferCard3D = ({ offer, onClaim, busy }: Props) => {
 
         return (
           <>
-          {/* Title in top banner */}
-          <div
-            className="absolute left-0 right-0 flex justify-center"
-            style={{ top: "6%" }}
-          >
-            <span
-              className="font-black text-2xl tracking-wide"
-              style={{
-                color: "hsl(45 100% 65%)",
-                textShadow: "2px 2px 0 hsla(0,0%,0%,0.7), 0 0 8px hsla(45,90%,55%,0.6)",
-                WebkitTextStroke: "1px hsl(30 80% 30%)",
-              }}
-            >
-              {title}
-            </span>
-          </div>
+          {/* Top banner intentionally left empty per design */}
           <div
             className="absolute left-0 right-0 flex flex-col items-center"
             style={{ top: "60%" }}
