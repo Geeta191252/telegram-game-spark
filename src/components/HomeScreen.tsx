@@ -21,6 +21,7 @@ import gameCarnivalSpin from "@/assets/game-carnival-spin.jpg";
 import gameMines from "@/assets/game-mines.jpg";
 import gameAviator from "@/assets/game-aviator.jpg";
 import gamePlinko from "@/assets/game-plinko.jpg";
+import gameChickenRoad from "@/assets/game-chicken-road.jpg";
 import homeBg from "@/assets/home-bg.png";
 
 interface GameTileProps {
@@ -118,6 +119,7 @@ const HomeScreen = () => {
   const goToMines = () => navigate("/mines");
   const goToAviator = () => navigate("/aviator");
   const goToPlinko = () => navigate("/plinko");
+  const goToChickenRoad = () => navigate("/chicken-road");
   const goToAdmin = () => navigate("/admin");
 
   const telegramUser = getTelegramUser();
@@ -481,6 +483,17 @@ const HomeScreen = () => {
                     glowColor="hsla(310, 80%, 55%, 0.4)"
                     delay={0.1}
                     onClick={goToAviator}
+                  />
+                  <GameTile
+                    image={gameChickenRoad}
+                    name="Chicken Road"
+                    description="Cross lanes, dodge cars!"
+                    badge="🐔 NEW"
+                    badgeGradient="linear-gradient(135deg, hsl(25 90% 50%), hsl(45 90% 55%))"
+                    borderGradient="linear-gradient(135deg, hsl(25 90% 55%), hsl(45 90% 55%), hsl(0 80% 55%))"
+                    glowColor="hsla(25, 90%, 55%, 0.4)"
+                    delay={0.15}
+                    onClick={goToChickenRoad}
                   />
                 </div>
               </section>
