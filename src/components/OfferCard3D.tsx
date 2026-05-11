@@ -39,70 +39,101 @@ const OfferCard3D = ({ offer, onClaim, busy }: Props) => {
         style={{ filter: "drop-shadow(0 14px 40px hsla(0,0%,0%,0.55))" }}
       />
 
-      {/* Dynamic info overlay placed in the empty bottom area of the hero image */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 px-4 py-3 rounded-2xl flex flex-col items-center gap-1.5"
-        style={{
-          top: "60%",
-          background: "linear-gradient(135deg, hsla(260,55%,10%,0.85), hsla(280,60%,14%,0.85))",
-          border: "2px solid hsla(45,90%,60%,0.85)",
-          boxShadow: "0 6px 18px hsla(0,0%,0%,0.55)",
-          width: "78%",
-        }}
-      >
-        {/* pay + bonus */}
-        <div className="flex items-center gap-2">
-          <span
-            className="font-black text-[26px] leading-none"
-            style={{ color: "hsl(0 0% 100%)", textShadow: "2px 2px 0 hsla(0,0%,0%,0.5)" }}
-          >
-            {offer.payAmount}
-          </span>
-          {(() => {
-            const m = (offer.bonusLabel || "").match(/\+?\s*(\d+(?:\.\d+)?)\s*⭐/);
-            const bStar = m ? parseFloat(m[1]) : 0;
-            const m2 = (offer.bonusLabel || "").match(/\+\s*\$\s*(\d+(?:\.\d+)?)/);
-            const bDol = m2 ? parseFloat(m2[1]) : 0;
-            const bonusDisp = isDollar
-              ? bDol > 0 ? `$${bDol}` : bStar > 0 ? `${bStar} ⭐` : ""
-              : bStar > 0 ? `${bStar}` : "";
-            return bonusDisp ? (
-              <>
-                <span className="font-black text-[24px] leading-none" style={{ color: "hsl(45 95% 65%)" }}>+</span>
-                <span
-                  className="font-black text-[26px] leading-none"
-                  style={{ color: "hsl(140 80% 60%)", textShadow: "2px 2px 0 hsla(0,0%,0%,0.5)" }}
-                >
-                  {bonusDisp}
-                </span>
-              </>
-            ) : null;
-          })()}
-          <span className="text-[22px] leading-none">{symbol}</span>
-        </div>
+      {/* Dynamic 3D-styled tiles + strikethrough placed in the empty area of the hero */}
+      {(() => {
+        const mStar = (offer.bonusLabel || "").match(/\+?\s*(\d+(?:\.\d+)?)\s*⭐/);
+        const bStar = mStar ? parseFloat(mStar[1]) : 0;
+        const mDol = (offer.bonusLabel || "").match(/\+\s*\$\s*(\d+(?:\.\d+)?)/);
+        const bDol = mDol ? parseFloat(mDol[1]) : 0;
+        const bonusPrimary = isDollar
+          ? bDol > 0 ? `$${bDol}` : bStar > 0 ? `${bStar}` : ""
+          : bStar > 0 ? `${bStar}` : "";
+        const showBonus = bonusPrimary !== "";
+        const tileIcon = isDollar ? "💰" : "⭐";
 
-        {/* strikethrough "regular" = getAmount */}
-        <div className="flex items-center gap-1.5">
-          <span
-            className="font-bold text-[16px] line-through decoration-[2.5px]"
-            style={{ color: "hsl(0 80% 70%)", textDecorationColor: "hsl(0 90% 55%)" }}
+        return (
+          <div
+            className="absolute left-0 right-0 flex flex-col items-center"
+            style={{ top: "58%" }}
           >
-            {offer.getAmount} {symbol}
-          </span>
-          {offer.valueLabel && (
-            <span
-              className="font-black text-[10px] px-2 py-0.5 rounded-full"
-              style={{
-                background: "linear-gradient(135deg, hsl(0 85% 55%), hsl(15 85% 48%))",
-                color: "hsl(0 0% 100%)",
-                textShadow: "1px 1px 0 hsla(0,0%,0%,0.4)",
-              }}
-            >
-              {offer.valueLabel}
-            </span>
-          )}
-        </div>
-      </div>
+            {/* Two tiles: pay + bonus */}
+            <div className="flex items-center gap-2 px-4">
+              {/* Pay tile */}
+              <div
+                className="rounded-2xl px-3 py-2 flex flex-col items-center justify-center"
+                style={{
+                  background: "linear-gradient(180deg, hsl(260 50% 20%), hsl(270 55% 14%))",
+                  border: "3px solid hsl(45 90% 55%)",
+                  boxShadow: "0 4px 0 hsla(0,0%,0%,0.4), inset 0 2px 0 hsla(45,90%,75%,0.4)",
+                  minWidth: "70px",
+                }}
+              >
+                <span className="text-3xl leading-none" style={{ filter: "drop-shadow(0 2px 2px hsla(0,0%,0%,0.5))" }}>{tileIcon}</span>
+                <span
+                  className="font-black text-xl leading-none mt-0.5"
+                  style={{ color: "hsl(0 0% 100%)", textShadow: "2px 2px 0 hsla(0,0%,0%,0.6)" }}
+                >
+                  {offer.payAmount}
+                </span>
+              </div>
+
+              {showBonus && (
+                <>
+                  <span
+                    className="font-black text-3xl"
+                    style={{ color: "hsl(45 95% 65%)", textShadow: "2px 2px 0 hsla(0,0%,0%,0.5)" }}
+                  >
+                    +
+                  </span>
+                  {/* Bonus tile */}
+                  <div
+                    className="rounded-2xl px-3 py-2 flex flex-col items-center justify-center"
+                    style={{
+                      background: "linear-gradient(180deg, hsl(260 50% 20%), hsl(270 55% 14%))",
+                      border: "3px solid hsl(45 90% 55%)",
+                      boxShadow: "0 4px 0 hsla(0,0%,0%,0.4), inset 0 2px 0 hsla(45,90%,75%,0.4)",
+                      minWidth: "70px",
+                    }}
+                  >
+                    <span className="text-3xl leading-none" style={{ filter: "drop-shadow(0 2px 2px hsla(0,0%,0%,0.5))" }}>
+                      {isDollar && bDol > 0 ? "💰" : "⭐"}
+                    </span>
+                    <span
+                      className="font-black text-xl leading-none mt-0.5"
+                      style={{ color: "hsl(0 0% 100%)", textShadow: "2px 2px 0 hsla(0,0%,0%,0.6)" }}
+                    >
+                      {bonusPrimary}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Strikethrough "regular price" + % OFF */}
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="text-base leading-none">{symbol}</span>
+              <span
+                className="font-black text-lg line-through decoration-[3px]"
+                style={{ color: "hsl(0 0% 95%)", textDecorationColor: "hsl(0 90% 55%)", textShadow: "1px 1px 0 hsla(0,0%,0%,0.5)" }}
+              >
+                {offer.getAmount}
+              </span>
+              {offer.valueLabel && (
+                <span
+                  className="font-black text-[10px] px-2 py-0.5 rounded-full ml-1"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(0 85% 55%), hsl(15 85% 48%))",
+                    color: "hsl(0 0% 100%)",
+                    textShadow: "1px 1px 0 hsla(0,0%,0%,0.4)",
+                  }}
+                >
+                  {offer.valueLabel}
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Tap-to-buy overlay button positioned over the green button area */}
       <motion.button
