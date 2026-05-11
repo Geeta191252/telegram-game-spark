@@ -1221,14 +1221,30 @@ const AdminPanel = () => {
                   style={{ background: "hsla(260, 40%, 15%, 0.8)", color: "hsl(0 0% 95%)", border: "1px solid hsla(280, 60%, 50%, 0.3)" }}
                 />
 
-                <button
-                  onClick={handleCreateOffer}
-                  disabled={creatingOffer}
-                  className="w-full py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg, hsl(140 70% 40%), hsl(160 60% 35%))", color: "white" }}
-                >
-                  {creatingOffer ? "Creating…" : "➕ Create Offer"}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCreateOffer}
+                    disabled={creatingOffer}
+                    className="flex-1 py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+                    style={{ background: editingOfferId
+                      ? "linear-gradient(135deg, hsl(35 85% 50%), hsl(20 80% 45%))"
+                      : "linear-gradient(135deg, hsl(140 70% 40%), hsl(160 60% 35%))", color: "white" }}
+                  >
+                    {creatingOffer ? (editingOfferId ? "Updating…" : "Creating…") : (editingOfferId ? "💾 Update Offer" : "➕ Create Offer")}
+                  </button>
+                  {editingOfferId && (
+                    <button
+                      onClick={() => {
+                        setEditingOfferId(null);
+                        setOfferForm({ title: "", payAmount: "", payCurrency: "star", getAmount: "", bonusStar: "", bonusDollar: "" });
+                      }}
+                      className="px-3 py-2.5 rounded-lg text-sm font-bold"
+                      style={{ background: "hsla(0, 0%, 100%, 0.1)", color: "hsl(0 0% 90%)" }}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Existing offers */}
