@@ -986,21 +986,32 @@ const ChickenOnManhole = ({ jumpKey = 0 }: { jumpKey?: number }) => (
     animate={{ scale: 1, opacity: 1 }}
     className="relative flex flex-col items-center"
   >
-    {/* 3D Chicken — jump on lane change, face forward (right) */}
+    {/* 3D Chicken — jump on lane change + idle sway + blink squash */}
     <motion.div
       key={jumpKey}
       className="relative z-10 -mb-3"
-      initial={{ y: -32, rotate: -14, scale: 1.08 }}
-      animate={{ y: [-32, -8, 0, -3, 0], rotate: [-14, -4, 0, 0, 0], scale: [1.08, 1.02, 1, 1, 1] }}
+      initial={{ y: -34, rotate: -14, scale: 1.1 }}
+      animate={{ y: [-34, -10, 0, -3, 0], rotate: [-14, -4, 0, 0, 0], scale: [1.1, 1.04, 1, 1, 1] }}
       transition={{ duration: 0.55, times: [0, 0.45, 0.7, 0.85, 1], ease: "easeOut" }}
     >
-      <img
-        src={chickenImg}
-        alt="chicken"
-        className="w-[92px] h-auto block"
-        style={{ filter: "drop-shadow(0 8px 8px rgba(0,0,0,0.8))" }}
-        loading="lazy"
-      />
+      <motion.div
+        animate={{ rotate: [-3, 3, -3], y: [0, -2, 0] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <motion.div
+          animate={{ scaleY: [1, 1, 0.85, 1, 1, 1, 0.9, 1] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", times: [0, 0.3, 0.34, 0.38, 0.6, 0.68, 0.72, 0.76] }}
+          style={{ transformOrigin: "bottom center" }}
+        >
+          <img
+            src={chickenImg}
+            alt="chicken"
+            className="w-[128px] h-auto block"
+            style={{ filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.85))" }}
+            loading="lazy"
+          />
+        </motion.div>
+      </motion.div>
     </motion.div>
     {/* Golden drumstick manhole base */}
     <div
