@@ -252,7 +252,7 @@ const ChickenRoadGame = () => {
       className="min-h-screen flex flex-col select-none"
       style={{
         background: "linear-gradient(180deg, #0a0a0f 0%, #050507 100%)",
-        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)",
       }}
     >
       {/* ============ TOP BAR ============ */}
