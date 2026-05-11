@@ -852,22 +852,40 @@ const ChickenOnManhole = ({ jumpKey = 0 }: { jumpKey?: number }) => (
   <motion.div
     initial={{ scale: 0.6, opacity: 0 }}
     animate={{ scale: 1, opacity: 1 }}
-    className="relative flex flex-col items-center"
+    className="relative flex flex-col items-center justify-end"
+    style={{ height: 130 }}
   >
+    {/* Ground contact shadow — sits under the feet so chicken looks grounded */}
+    <motion.div
+      className="absolute pointer-events-none"
+      style={{
+        bottom: 2,
+        width: 96,
+        height: 18,
+        background:
+          "radial-gradient(ellipse at center, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 75%)",
+        filter: "blur(2px)",
+        zIndex: 1,
+      }}
+      animate={{ scaleX: [1, 0.92, 1], opacity: [0.9, 0.75, 0.9] }}
+      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+    />
     {/* 3D Chicken — jump on lane change + idle sway + blink squash */}
     <motion.div
       key={jumpKey}
-      className="relative z-10 -mb-3"
+      className="relative z-10"
       initial={{ y: -34, rotate: -14, scale: 1.1 }}
       animate={{ y: [-34, -10, 0, -3, 0], rotate: [-14, -4, 0, 0, 0], scale: [1.1, 1.04, 1, 1, 1] }}
       transition={{ duration: 0.55, times: [0, 0.45, 0.7, 0.85, 1], ease: "easeOut" }}
+      style={{ transformOrigin: "bottom center" }}
     >
       <motion.div
-        animate={{ rotate: [-3, 3, -3], y: [0, -2, 0] }}
+        animate={{ rotate: [-2, 2, -2], y: [0, -1.5, 0] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "bottom center" }}
       >
         <motion.div
-          animate={{ scaleY: [1, 1, 0.85, 1, 1, 1, 0.9, 1] }}
+          animate={{ scaleY: [1, 1, 0.88, 1, 1, 1, 0.92, 1] }}
           transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", times: [0, 0.3, 0.34, 0.38, 0.6, 0.68, 0.72, 0.76] }}
           style={{ transformOrigin: "bottom center" }}
         >
@@ -875,7 +893,10 @@ const ChickenOnManhole = ({ jumpKey = 0 }: { jumpKey?: number }) => (
             src={chickenImg}
             alt="chicken"
             className="w-[128px] h-auto block"
-            style={{ filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.85))" }}
+            style={{
+              filter:
+                "drop-shadow(0 2px 1px rgba(0,0,0,0.55)) drop-shadow(0 6px 4px rgba(0,0,0,0.35))",
+            }}
             loading="lazy"
           />
         </motion.div>
