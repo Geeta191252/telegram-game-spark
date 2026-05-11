@@ -220,9 +220,16 @@ const ChickenRoadGame = () => {
     activeWallet === "dollar" ? `${n.toFixed(2)} $` : `${n.toFixed(2)} ⭐`;
   const potentialWin = currentLane > 0 ? selectedBet * currentMultiplier : selectedBet * nextMultiplier;
 
-  // Show 6 lanes window centered around chicken (chicken always visible at left)
-  const visibleStart = Math.max(0, Math.min(currentLane - 1, cfg.multipliers.length - 6));
-  const visibleLanes = cfg.multipliers.slice(visibleStart, visibleStart + 6);
+  // Smooth scrolling track: render ALL lanes, translate horizontally as chicken advances.
+  const VISIBLE_LANES = 6;
+  const totalLanes = cfg.multipliers.length;
+  const scrollIndex = Math.max(
+    0,
+    Math.min(currentLane - 1, Math.max(0, totalLanes - VISIBLE_LANES))
+  );
+  const trackWidthPct = (totalLanes / VISIBLE_LANES) * 100;
+  const laneWidthPct = 100 / totalLanes; // within track
+  const translatePct = -scrollIndex * laneWidthPct;
 
   return (
     <div
