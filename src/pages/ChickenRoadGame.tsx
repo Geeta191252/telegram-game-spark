@@ -850,21 +850,28 @@ const ChickenRoadGame = () => {
 
 // ============ COMPONENTS ============
 
-const ChickenOnManhole = () => (
+const ChickenOnManhole = ({ jumpKey = 0 }: { jumpKey?: number }) => (
   <motion.div
     initial={{ scale: 0.6, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1, y: [0, -3, 0] }}
-    transition={{ y: { duration: 0.9, repeat: Infinity } }}
+    animate={{ scale: 1, opacity: 1 }}
     className="relative flex flex-col items-center"
   >
-    {/* 3D Chicken */}
-    <img
-      src={chickenImg}
-      alt="chicken"
-      className="w-[68px] h-auto relative z-10 -mb-3"
-      style={{ filter: "drop-shadow(0 6px 6px rgba(0,0,0,0.75))" }}
-      loading="lazy"
-    />
+    {/* 3D Chicken — jump on lane change, face forward (right) */}
+    <motion.div
+      key={jumpKey}
+      className="relative z-10 -mb-3"
+      initial={{ y: -32, rotate: -14, scale: 1.08 }}
+      animate={{ y: [-32, -8, 0, -3, 0], rotate: [-14, -4, 0, 0, 0], scale: [1.08, 1.02, 1, 1, 1] }}
+      transition={{ duration: 0.55, times: [0, 0.45, 0.7, 0.85, 1], ease: "easeOut" }}
+    >
+      <img
+        src={chickenImg}
+        alt="chicken"
+        className="w-[68px] h-auto block"
+        style={{ filter: "drop-shadow(0 6px 6px rgba(0,0,0,0.75))", transform: "scaleX(-1)" }}
+        loading="lazy"
+      />
+    </motion.div>
     {/* Golden drumstick manhole base */}
     <div
       className="h-6 w-16 rounded-full relative"
