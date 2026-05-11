@@ -125,16 +125,16 @@ const OfferPopup = () => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", damping: 22, stiffness: 280 }}
-            className="w-full max-w-sm relative"
+            className="w-full max-w-sm relative pt-10"
           >
             <button
               onClick={close}
               aria-label="Close offer"
-              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center"
+              className="absolute top-0 right-1 z-20 w-10 h-10 rounded-full flex items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, hsl(0 80% 55%), hsl(15 80% 50%))",
+                background: "linear-gradient(135deg, hsl(0 85% 55%), hsl(15 85% 48%))",
                 boxShadow: "0 4px 12px hsla(0,0%,0%,0.5)",
-                border: "2px solid hsl(0 0% 100%)",
+                border: "3px solid hsl(0 0% 100%)",
               }}
             >
               <X className="h-5 w-5" style={{ color: "hsl(0 0% 100%)" }} />
