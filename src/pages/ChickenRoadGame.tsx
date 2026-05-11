@@ -683,16 +683,12 @@ const ChickenRoadGame = () => {
 
                     {/* Multiplier marker at lane bottom */}
                     <div className="absolute left-0 right-0 bottom-10 flex justify-center pointer-events-none">
-                      {isCurrent ? (
-                        <Signboard value={`${currentMultiplier.toFixed(2)}x`} />
-                      ) : showSignboard ? (
-                        <Signboard value={`${mult.toFixed(2)}x`} />
-                      ) : !isCrossed ? (
+                      {!isCrossed && (
                         <ManholeCover
                           label={mult >= 100 ? `${mult.toFixed(0)}x` : `${mult.toFixed(2)}x`}
                           crossed={false}
                         />
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 );
@@ -1001,8 +997,8 @@ const ChickenOnManhole = ({ jumpKey = 0 }: { jumpKey?: number }) => (
       <img
         src={chickenImg}
         alt="chicken"
-        className="w-[68px] h-auto block"
-        style={{ filter: "drop-shadow(0 6px 6px rgba(0,0,0,0.75))", transform: "scaleX(-1)" }}
+        className="w-[92px] h-auto block"
+        style={{ filter: "drop-shadow(0 8px 8px rgba(0,0,0,0.8))" }}
         loading="lazy"
       />
     </motion.div>
