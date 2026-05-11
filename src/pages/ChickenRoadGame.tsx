@@ -566,7 +566,62 @@ const ChickenRoadGame = () => {
 
       {/* ============ BOTTOM CONTROL PANEL ============ */}
       <div className="px-3 pt-3 pb-3 space-y-2" style={{ background: "#0a0b10" }}>
-        {/* Difficulty pills (above MIN/MAX row) */}
+        {/* Row 1: MIN | value | MAX */}
+        <div
+          className="rounded-2xl p-1.5 flex items-center gap-1.5"
+          style={{ background: "#2b2f3d", border: "1px solid #1d2029" }}
+        >
+          <button
+            onClick={() => setSelectedBet(0.5)}
+            className="h-12 px-4 rounded-xl text-[13px] font-black"
+            style={{ background: "#3a3f50", color: "#eaecf2" }}
+          >
+            MIN
+          </button>
+          <div className="flex-1 text-center text-[18px] font-black" style={{ color: "#eaecf2" }}>
+            {selectedBet < 1 ? selectedBet.toFixed(2) : selectedBet.toFixed(0)}
+          </div>
+          <button
+            onClick={() => setSelectedBet(Math.max(0.5, Math.floor(currentBalance)))}
+            className="h-12 px-4 rounded-xl text-[13px] font-black"
+            style={{ background: "#3a3f50", color: "#eaecf2" }}
+          >
+            MAX
+          </button>
+        </div>
+
+        {/* Row 2: bet presets */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {BET_PRESETS.map((bet) => {
+            const active = selectedBet === bet;
+            return (
+              <button
+                key={bet}
+                onClick={() => setSelectedBet(bet)}
+                className="h-14 rounded-2xl text-[15px] font-black flex items-center justify-center gap-1.5"
+                style={{
+                  background: "#2b2f3d",
+                  border: active ? "1.5px solid #ffd84a" : "1px solid #1d2029",
+                  color: "#eaecf2",
+                  boxShadow: active ? "0 0 10px rgba(255,216,74,0.45)" : "none",
+                }}
+              >
+                {bet}
+                <span
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-[12px] font-black"
+                  style={{
+                    background: activeWallet === "dollar" ? "#ffffff" : "#ffd84a",
+                    color: "#1a1d26",
+                  }}
+                >
+                  {activeWallet === "dollar" ? "$" : "⭐"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Row 3: Difficulty pills */}
         <div className="grid grid-cols-4 gap-1.5">
           {(Object.keys(DIFFICULTY_CONFIG) as Difficulty[]).map((d) => {
             const active = difficulty === d;
@@ -576,12 +631,12 @@ const ChickenRoadGame = () => {
                 key={d}
                 onClick={() => setDifficulty(d)}
                 disabled={phase === "playing"}
-                className="h-11 rounded-xl text-[13px] font-black"
+                className="h-12 rounded-2xl text-[13px] font-black"
                 style={{
-                  background: "#0d0f14",
-                  border: active ? `1.5px solid ${c.ring}` : `1px solid ${c.color}55`,
-                  color: active ? c.ring : c.color,
-                  boxShadow: active ? `0 0 12px ${c.color}88` : "none",
+                  background: "#2b2f3d",
+                  border: active ? `1.5px solid ${c.ring}` : "1px solid #1d2029",
+                  color: active ? c.ring : "#eaecf2",
+                  boxShadow: active ? `0 0 10px ${c.color}88` : "none",
                   opacity: phase === "playing" ? 0.5 : 1,
                 }}
               >
@@ -591,131 +646,61 @@ const ChickenRoadGame = () => {
           })}
         </div>
 
-        {/* Row 1: bet stepper | difficulty label | CASH OUT / GO stacked */}
-        <div className="rounded-2xl p-2.5 flex items-center gap-2" style={{ background: "#101218", border: "1px solid #1d2029" }}>
-          {/* MIN / value / MAX */}
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={() => setSelectedBet(0.5)}
-              className="h-11 px-2.5 rounded-xl text-[11px] font-bold"
-              style={{ background: "#0d0f14", border: "1px solid #232735", color: "#9aa0ab" }}
-            >
-              MIN
-            </button>
-            <div
-              className="h-11 min-w-[58px] px-2 rounded-xl flex items-center justify-center text-[15px] font-bold"
-              style={{ background: "#0d0f14", border: "1px solid #232735", color: "#eaecf2" }}
-            >
-              {selectedBet < 1 ? selectedBet.toFixed(2) : selectedBet.toFixed(0)}
-            </div>
-            <button
-              onClick={() => setSelectedBet(Math.max(0.5, Math.floor(currentBalance)))}
-              className="h-11 px-2.5 rounded-xl text-[11px] font-bold"
-              style={{ background: "#0d0f14", border: "1px solid #232735", color: "#9aa0ab" }}
-            >
-              MAX
-            </button>
-          </div>
+        {/* Row 4: Wallet toggle + Cash Out + Play */}
+        <div className="flex items-center gap-1.5">
+          {/* Wallet toggle square */}
+          <button
+            onClick={() => setActiveWallet(activeWallet === "dollar" ? "star" : "dollar")}
+            className="h-14 w-14 rounded-2xl flex items-center justify-center text-[22px] font-black shrink-0"
+            style={{
+              background: "#2b2f3d",
+              border: "1px solid #1d2029",
+              color: activeWallet === "dollar" ? "hsl(140 80% 65%)" : "hsl(45 95% 65%)",
+              boxShadow:
+                activeWallet === "dollar"
+                  ? "0 0 12px hsla(140,75%,50%,0.5)"
+                  : "0 0 12px hsla(45,90%,55%,0.5)",
+            }}
+          >
+            {activeWallet === "dollar" ? "💲" : "⭐"}
+          </button>
 
-          {/* Wallet toggle (replaces Difficulty caption) */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-1 px-1">
-            <button
-              onClick={() => setActiveWallet("dollar")}
-              className="w-full max-w-[110px] h-7 rounded-full text-[11px] font-bold flex items-center justify-center gap-1"
-              style={{
-                background: activeWallet === "dollar" ? "hsla(140,75%,40%,0.25)" : "#0d0f14",
-                border: `1px solid ${activeWallet === "dollar" ? "hsl(140 75% 50%)" : "#232735"}`,
-                color: activeWallet === "dollar" ? "hsl(140 80% 75%)" : "#7a8090",
-                boxShadow: activeWallet === "dollar" ? "0 0 8px hsla(140,75%,50%,0.4)" : "none",
-              }}
-            >
-              💲 {gameDollarBalance.toFixed(2)}
-            </button>
-            <button
-              onClick={() => setActiveWallet("star")}
-              className="w-full max-w-[110px] h-7 rounded-full text-[11px] font-bold flex items-center justify-center gap-1"
-              style={{
-                background: activeWallet === "star" ? "hsla(45,90%,50%,0.25)" : "#0d0f14",
-                border: `1px solid ${activeWallet === "star" ? "hsl(45 90% 55%)" : "#232735"}`,
-                color: activeWallet === "star" ? "hsl(45 95% 75%)" : "#7a8090",
-                boxShadow: activeWallet === "star" ? "0 0 8px hsla(45,90%,55%,0.4)" : "none",
-              }}
-            >
-              ⭐ {gameStarBalance.toLocaleString()}
-            </button>
-          </div>
-
-          {/* CASH OUT + GO stacked vertically */}
-          <div className="flex flex-col gap-1.5 shrink-0">
+          {/* Cash Out (only when playing) */}
+          {phase === "playing" && currentLane > 0 && (
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={cashOut}
-              disabled={phase !== "playing" || currentLane === 0}
-              className="h-[44px] px-2 rounded-2xl font-black text-center"
+              className="h-14 px-3 rounded-2xl font-black flex flex-col items-center justify-center shrink-0"
               style={{
                 minWidth: 96,
-                background:
-                  phase === "playing" && currentLane > 0
-                    ? "linear-gradient(180deg, #ffd84a 0%, #e89a1d 100%)"
-                    : "linear-gradient(180deg, #3a3a3f 0%, #2a2a2f 100%)",
-                color: phase === "playing" && currentLane > 0 ? "#1a120a" : "#5c606a",
-                border:
-                  phase === "playing" && currentLane > 0
-                    ? "1.5px solid #ffe87a"
-                    : "1.5px solid #2a2a2f",
-                boxShadow:
-                  phase === "playing" && currentLane > 0
-                    ? "0 0 18px rgba(232,154,29,0.55), inset 0 -3px 0 rgba(120,60,0,0.5)"
-                    : "none",
+                background: "linear-gradient(180deg, #ffd84a 0%, #e89a1d 100%)",
+                color: "#1a120a",
+                border: "1.5px solid #ffe87a",
+                boxShadow: "0 0 18px rgba(232,154,29,0.55), inset 0 -3px 0 rgba(120,60,0,0.5)",
               }}
             >
               <div className="text-[9px] tracking-wider">CASH OUT</div>
-              <div className="text-[13px] leading-tight">
-                {phase === "playing" && currentLane > 0
-                  ? `${(selectedBet * currentMultiplier).toFixed(0)} ${activeWallet === "dollar" ? "USD" : "⭐"}`
-                  : "—"}
+              <div className="text-[14px] leading-tight">
+                {(selectedBet * currentMultiplier).toFixed(0)} {activeWallet === "dollar" ? "$" : "⭐"}
               </div>
             </motion.button>
+          )}
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={phase === "betting" ? startGame : phase === "playing" ? goNext : resetToBet}
-              className="h-[44px] px-3 rounded-2xl font-black text-[18px]"
-              style={{
-                minWidth: 96,
-                background: "linear-gradient(180deg, #44d96a 0%, #1f9c3e 100%)",
-                color: "white",
-                border: "1.5px solid #6df08a",
-                boxShadow:
-                  "0 0 18px rgba(31,156,62,0.55), inset 0 -3px 0 rgba(0,60,15,0.5)",
-                textShadow: "0 2px 0 rgba(0,0,0,0.35)",
-              }}
-            >
-              GO
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Row 2: bet presets */}
-        <div className="grid grid-cols-8 gap-1.5">
-          {BET_PRESETS.map((bet) => {
-            const active = selectedBet === bet;
-            return (
-              <button
-                key={bet}
-                onClick={() => setSelectedBet(bet)}
-                className="h-10 rounded-xl text-[12px] font-black"
-                style={{
-                  background: "#0d0f14",
-                  border: active ? "1.5px solid #ffd84a" : "1px solid #232735",
-                  color: active ? "#ffd84a" : "#cfd2dc",
-                  boxShadow: active ? "0 0 10px rgba(255,216,74,0.45)" : "none",
-                }}
-              >
-                {bet}{activeWallet === "dollar" ? "$" : "⭐"}
-              </button>
-            );
-          })}
+          {/* Play / Go */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={phase === "betting" ? startGame : phase === "playing" ? goNext : resetToBet}
+            className="flex-1 h-14 rounded-2xl font-black text-[22px]"
+            style={{
+              background: "linear-gradient(180deg, #44d96a 0%, #1f9c3e 100%)",
+              color: "white",
+              border: "1.5px solid #6df08a",
+              boxShadow: "0 0 18px rgba(31,156,62,0.55), inset 0 -3px 0 rgba(0,60,15,0.5)",
+              textShadow: "0 2px 0 rgba(0,0,0,0.35)",
+            }}
+          >
+            {phase === "playing" ? "Go" : phase === "betting" ? "Play" : "Reset"}
+          </motion.button>
         </div>
 
       </div>
