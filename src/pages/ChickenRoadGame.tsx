@@ -230,14 +230,17 @@ const ChickenRoadGame = () => {
 
     // ===== RIG decision =====
     const stats = readRig(activeWallet);
-    // Cap so lifetime win ratio stays <= 30% (heavy house edge)
-    const cap = Math.max(0, 0.3 * stats.totalBet - stats.totalWin);
+    // Cap keeps lifetime RTP low, with a small mercy window after loss streaks.
+    const cap = getAllowedWinCap(stats, selectedBet);
     // Payout if player advances to next lane
-    const nextPayout = selectedBet * cfg.multipliers[currentLane];
+    const nextPayout = floorMoney(selectedBet * cfg.multipliers[currentLane]);
     // Per-step random crash chance, rises sharply with lane progression.
     // Lane 0→1 fairly safe (small win possible), deeper lanes very risky.
-    const stepRisk = Math.min(0.9, cfg.crashBase + currentLane * 0.18);
-    const randomCrash = Math.random() < stepRisk;
+    const streakRelief = stats.lossStreak >= 2 && currentLane === 0 ? 0.5 : 0;
+    const winCooldown = stats.winStreak > 0 ? 0.14 : 0;
+    const stepRisk = Math.min(0.92, Math.max(0.03, cfg.crashBase + currentLane * 0.18 + winCooldown - streakRelief));
+    const forceMercyStep = stats.lossStreak >= 3 && currentLane === 0 && nextPayout <= cap;
+    const randomCrash = !forceMercyStep && Math.random() < stepRisk;
 
     const mustCrash = nextPayout > cap || randomCrash;
 
@@ -253,7 +256,7 @@ const ChickenRoadGame = () => {
 
     if (newLane >= cfg.multipliers.length) {
       const mult = cfg.multipliers[cfg.multipliers.length - 1];
-      const prize = Math.floor(selectedBet * mult * 100) / 100;
+      const prize = floorMoney(selectedBet * mult);
       finalizeWin(prize);
     }
   }, [phase, currentLane, cfg, selectedBet, activeWallet, startGame, finalizeLoss, finalizeWin]);
@@ -261,11 +264,11 @@ const ChickenRoadGame = () => {
   const cashOut = useCallback(() => {
     if (phase !== "playing" || currentLane === 0) return;
     const mult = cfg.multipliers[currentLane - 1];
-    const prize = Math.floor(selectedBet * mult * 100) / 100;
+    const prize = floorMoney(selectedBet * mult);
 
     // ===== RIG: cannot cash out above cap =====
     const stats = readRig(activeWallet);
-    const cap = Math.max(0, 0.3 * stats.totalBet - stats.totalWin);
+    const cap = getAllowedWinCap(stats, selectedBet);
     if (prize > cap) {
       // Truck takes the chicken before it escapes
       finalizeLoss(currentLane);
