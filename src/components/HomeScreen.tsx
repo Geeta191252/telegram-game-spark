@@ -90,9 +90,13 @@ const HomeScreen = () => {
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
+    // Only tick the countdown clock when there are tournaments with endsAt.
+    // Without this gate, every HomeScreen child re-renders every second on Android → flicker.
+    const hasTimedTournament = tournaments.some((t) => !!t.endsAt);
+    if (!hasTimedTournament) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [tournaments]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/tournaments/active`)
