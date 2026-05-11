@@ -21,9 +21,8 @@ interface BottomNavProps {
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40" style={{
-      background: "linear-gradient(180deg, hsla(265, 55%, 18%, 0.95), hsla(270, 50%, 12%, 0.98))",
+      background: "linear-gradient(180deg, hsl(265, 55%, 16%), hsl(270, 50%, 11%))",
       borderTop: "1px solid hsla(280, 50%, 40%, 0.2)",
-      backdropFilter: "blur(20px)",
       boxShadow: "0 -4px 20px hsla(260, 50%, 10%, 0.5)",
     }}>
       <div className="mx-auto flex max-w-md items-center justify-around py-1">
