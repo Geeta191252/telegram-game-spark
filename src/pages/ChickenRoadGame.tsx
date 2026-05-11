@@ -116,12 +116,12 @@ const ChickenRoadGame = () => {
 
   // Auto full-screen inside Telegram Mini App
   useEffect(() => {
-    const tg: any = (window as any).Telegram?.WebApp;
+    const tg = (window as Window & { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp;
     if (tg) {
-      try { tg.ready?.(); } catch {}
-      try { tg.expand?.(); } catch {}
-      try { tg.requestFullscreen?.(); } catch {}
-      try { tg.disableVerticalSwipes?.(); } catch {}
+      try { tg.ready?.(); } catch { return; }
+      try { tg.expand?.(); } catch { return; }
+      try { tg.requestFullscreen?.(); } catch { return; }
+      try { tg.disableVerticalSwipes?.(); } catch { return; }
     }
   }, []);
 
