@@ -553,7 +553,32 @@ const ChickenRoadGame = () => {
 
       {/* ============ BOTTOM CONTROL PANEL ============ */}
       <div className="px-3 pt-3 pb-3 space-y-2" style={{ background: "#0a0b10" }}>
-        {/* Row 1: bet stepper | difficulty label | CASH OUT | GO */}
+        {/* Difficulty pills (above MIN/MAX row) */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {(Object.keys(DIFFICULTY_CONFIG) as Difficulty[]).map((d) => {
+            const active = difficulty === d;
+            const c = DIFFICULTY_CONFIG[d];
+            return (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                disabled={phase === "playing"}
+                className="h-11 rounded-xl text-[13px] font-black"
+                style={{
+                  background: "#0d0f14",
+                  border: active ? `1.5px solid ${c.ring}` : `1px solid ${c.color}55`,
+                  color: active ? c.ring : c.color,
+                  boxShadow: active ? `0 0 12px ${c.color}88` : "none",
+                  opacity: phase === "playing" ? 0.5 : 1,
+                }}
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Row 1: bet stepper | difficulty label | CASH OUT / GO stacked */}
         <div className="rounded-2xl p-2.5 flex items-center gap-2" style={{ background: "#101218", border: "1px solid #1d2029" }}>
           {/* MIN / value / MAX */}
           <div className="flex items-center gap-1 shrink-0">
@@ -568,7 +593,7 @@ const ChickenRoadGame = () => {
               className="h-11 min-w-[58px] px-2 rounded-xl flex items-center justify-center text-[15px] font-bold"
               style={{ background: "#0d0f14", border: "1px solid #232735", color: "#eaecf2" }}
             >
-              {selectedBet < 1 ? selectedBet.toFixed(2) : selectedBet >= 100 ? selectedBet.toFixed(0) : selectedBet.toFixed(0)}
+              {selectedBet < 1 ? selectedBet.toFixed(2) : selectedBet.toFixed(0)}
             </div>
             <button
               onClick={() => setSelectedBet(Math.max(0.5, Math.floor(currentBalance)))}
@@ -587,57 +612,58 @@ const ChickenRoadGame = () => {
             </div>
           </div>
 
-          {/* CASH OUT */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={cashOut}
-            disabled={phase !== "playing" || currentLane === 0}
-            className="h-[58px] px-2 rounded-2xl font-black text-center shrink-0"
-            style={{
-              minWidth: 86,
-              background:
-                phase === "playing" && currentLane > 0
-                  ? "linear-gradient(180deg, #ffd84a 0%, #e89a1d 100%)"
-                  : "linear-gradient(180deg, #3a3a3f 0%, #2a2a2f 100%)",
-              color: phase === "playing" && currentLane > 0 ? "#1a120a" : "#5c606a",
-              border:
-                phase === "playing" && currentLane > 0
-                  ? "1.5px solid #ffe87a"
-                  : "1.5px solid #2a2a2f",
-              boxShadow:
-                phase === "playing" && currentLane > 0
-                  ? "0 0 18px rgba(232,154,29,0.55), inset 0 -3px 0 rgba(120,60,0,0.5)"
-                  : "none",
-            }}
-          >
-            <div className="text-[9px] tracking-wider">CASH OUT</div>
-            <div className="text-[15px] leading-tight">
-              {phase === "playing" && currentLane > 0
-                ? `${(selectedBet * currentMultiplier).toFixed(0)} ${activeWallet === "dollar" ? "USD" : "⭐"}`
-                : "—"}
-            </div>
-          </motion.button>
+          {/* CASH OUT + GO stacked vertically */}
+          <div className="flex flex-col gap-1.5 shrink-0">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={cashOut}
+              disabled={phase !== "playing" || currentLane === 0}
+              className="h-[44px] px-2 rounded-2xl font-black text-center"
+              style={{
+                minWidth: 96,
+                background:
+                  phase === "playing" && currentLane > 0
+                    ? "linear-gradient(180deg, #ffd84a 0%, #e89a1d 100%)"
+                    : "linear-gradient(180deg, #3a3a3f 0%, #2a2a2f 100%)",
+                color: phase === "playing" && currentLane > 0 ? "#1a120a" : "#5c606a",
+                border:
+                  phase === "playing" && currentLane > 0
+                    ? "1.5px solid #ffe87a"
+                    : "1.5px solid #2a2a2f",
+                boxShadow:
+                  phase === "playing" && currentLane > 0
+                    ? "0 0 18px rgba(232,154,29,0.55), inset 0 -3px 0 rgba(120,60,0,0.5)"
+                    : "none",
+              }}
+            >
+              <div className="text-[9px] tracking-wider">CASH OUT</div>
+              <div className="text-[13px] leading-tight">
+                {phase === "playing" && currentLane > 0
+                  ? `${(selectedBet * currentMultiplier).toFixed(0)} ${activeWallet === "dollar" ? "USD" : "⭐"}`
+                  : "—"}
+              </div>
+            </motion.button>
 
-          {/* GO */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={phase === "betting" ? startGame : phase === "playing" ? goNext : resetToBet}
-            className="h-[58px] px-3 rounded-2xl font-black text-[22px] shrink-0"
-            style={{
-              minWidth: 78,
-              background: "linear-gradient(180deg, #44d96a 0%, #1f9c3e 100%)",
-              color: "white",
-              border: "1.5px solid #6df08a",
-              boxShadow:
-                "0 0 18px rgba(31,156,62,0.55), inset 0 -3px 0 rgba(0,60,15,0.5)",
-              textShadow: "0 2px 0 rgba(0,0,0,0.35)",
-            }}
-          >
-            GO
-          </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={phase === "betting" ? startGame : phase === "playing" ? goNext : resetToBet}
+              className="h-[44px] px-3 rounded-2xl font-black text-[18px]"
+              style={{
+                minWidth: 96,
+                background: "linear-gradient(180deg, #44d96a 0%, #1f9c3e 100%)",
+                color: "white",
+                border: "1.5px solid #6df08a",
+                boxShadow:
+                  "0 0 18px rgba(31,156,62,0.55), inset 0 -3px 0 rgba(0,60,15,0.5)",
+                textShadow: "0 2px 0 rgba(0,0,0,0.35)",
+              }}
+            >
+              GO
+            </motion.button>
+          </div>
         </div>
 
-        {/* Row 2: bet presets + difficulty pills */}
+        {/* Row 2: bet presets */}
         <div className="grid grid-cols-8 gap-1.5">
           {BET_PRESETS.map((bet) => {
             const active = selectedBet === bet;
@@ -654,27 +680,6 @@ const ChickenRoadGame = () => {
                 }}
               >
                 {bet}{activeWallet === "dollar" ? "$" : "⭐"}
-              </button>
-            );
-          })}
-          {(Object.keys(DIFFICULTY_CONFIG) as Difficulty[]).map((d) => {
-            const active = difficulty === d;
-            const c = DIFFICULTY_CONFIG[d];
-            return (
-              <button
-                key={d}
-                onClick={() => setDifficulty(d)}
-                disabled={phase === "playing"}
-                className="h-10 rounded-xl text-[10px] font-black"
-                style={{
-                  background: "#0d0f14",
-                  border: active ? `1.5px solid ${c.ring}` : `1px solid ${c.color}55`,
-                  color: active ? c.ring : c.color,
-                  boxShadow: active ? `0 0 10px ${c.color}88` : "none",
-                  opacity: phase === "playing" ? 0.5 : 1,
-                }}
-              >
-                {c.label}
               </button>
             );
           })}
