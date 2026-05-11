@@ -517,7 +517,7 @@ const AdminPanel = () => {
     const bonusDollarNum = parseFloat(offerForm.bonusDollar) || 0;
 
     // Auto title
-    const autoTitle = offerForm.payCurrency === "star" ? "STAR DEAL" : "MEGA DEAL";
+    const autoTitle = (offerForm.title || (offerForm.payCurrency === "star" ? "SPECIAL OFFER" : "MEGA DEAL")).trim();
 
     // Auto bonus label
     const bonusParts: string[] = [];
