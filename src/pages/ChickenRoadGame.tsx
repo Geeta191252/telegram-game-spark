@@ -914,7 +914,7 @@ const Signboard = ({ value }: { value: string; color?: string }) => (
           className="font-black text-white"
           style={{
             fontSize: 14,
-            textShadow: "0 0 6px rgba(80,180,255,0.9), 0 2px 2px rgba(0,0,0,0.8)",
+            textShadow: "0 2px 2px rgba(0,0,0,0.85)",
             letterSpacing: 0.5,
           }}
         >
