@@ -258,10 +258,12 @@ const ChickenRoadGame = () => {
     const nextPayout = floorMoney(selectedBet * cfg.multipliers[currentLane]);
     // Per-step random crash chance, rises sharply with lane progression.
     // Lane 0→1 fairly safe (small win possible), deeper lanes very risky.
-    const streakRelief = stats.lossStreak >= 2 && currentLane === 0 ? 0.5 : 0;
-    const winCooldown = stats.winStreak > 0 ? 0.14 : 0;
-    const stepRisk = Math.min(0.92, Math.max(0.03, cfg.crashBase + currentLane * 0.18 + winCooldown - streakRelief));
-    const forceMercyStep = stats.lossStreak >= 3 && currentLane === 0 && nextPayout <= cap;
+    const streakRelief = stats.lossStreak >= 2 ? 0.55 : stats.lossStreak >= 1 ? 0.2 : 0;
+    const winCooldown = stats.winStreak >= 2 ? 0.25 : stats.winStreak === 1 ? 0.1 : 0;
+    const stepRisk = Math.min(0.9, Math.max(0.04, cfg.crashBase + currentLane * 0.14 + winCooldown - streakRelief));
+    // After losses, give the user a guaranteed mercy step (up to lane 1-2) as long as payout fits the cap
+    const mercyLanes = stats.lossStreak >= 5 ? 2 : stats.lossStreak >= 2 ? 1 : 0;
+    const forceMercyStep = currentLane < mercyLanes && nextPayout <= cap;
     const randomCrash = !forceMercyStep && Math.random() < stepRisk;
 
     const mustCrash = nextPayout > cap || randomCrash;
