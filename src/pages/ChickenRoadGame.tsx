@@ -62,8 +62,18 @@ const writeRig = (currency: "dollar" | "star", s: RigStats) => {
 };
 const floorMoney = (value: number) => Math.floor(value * 100) / 100;
 const getAllowedWinCap = (stats: RigStats, betAmount: number) => {
-  const rtpCap = Math.max(0, 0.3 * stats.totalBet - stats.totalWin);
-  const mercyCap = stats.lossStreak >= 5 ? betAmount * 1.65 : stats.lossStreak >= 2 ? betAmount * 1.12 : 0;
+  // Admin keeps ~50% of net losses; user can win back the other half as payouts.
+  // i.e. cumulative payouts <= 0.5 * totalBet  =>  remaining allowed = 0.5*totalBet - totalWin
+  const rtpCap = Math.max(0, 0.5 * stats.totalBet - stats.totalWin);
+  // Mercy: after losses, ensure the user actually sees a meaningful win
+  // 2+ losses -> up to 2x bet payout, 5+ losses -> up to 2.5x bet payout
+  const mercyCap = stats.lossStreak >= 5
+    ? betAmount * 2.5
+    : stats.lossStreak >= 3
+      ? betAmount * 2.2
+      : stats.lossStreak >= 2
+        ? betAmount * 2.0
+        : 0;
   return Math.max(rtpCap, mercyCap);
 };
 
