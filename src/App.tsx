@@ -69,7 +69,7 @@ const App = () => (
               <Route path="/aviator" element={<AviatorGame />} />
               <Route path="/plinko" element={<PlinkoGame />} />
               <Route path="/chicken-road" element={<ChickenRoadGame />} />
-              <Route path="/dragon-tiger" element={<DragonTigerGame />} />
+              
               <Route path="/admin" element={<AdminPanel />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
