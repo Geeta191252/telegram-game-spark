@@ -575,9 +575,6 @@ const DragonTigerGame = () => {
               {sym}{bets.dragon}
             </div>
           )}
-          {phase === "result" && winner === "dragon" && (
-            <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 0 3px hsl(220 90% 60%), 0 0 25px hsl(220 90% 60%)" }} />
-          )}
         </button>
 
         {/* TIGER PANEL (right half of bowl) */}
@@ -592,9 +589,6 @@ const DragonTigerGame = () => {
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
               {sym}{bets.tiger}
             </div>
-          )}
-          {phase === "result" && winner === "tiger" && (
-            <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 0 3px hsl(28 95% 55%), 0 0 25px hsl(28 95% 55%)" }} />
           )}
         </button>
 
