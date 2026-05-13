@@ -46,7 +46,7 @@ const DragonTigerGame = () => {
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
   const [chip, setChip] = useState(10);
-  const [doubleMode, setDoubleMode] = useState(false);
+  const [betTimer, setBetTimer] = useState(15);
 
   const [phase, setPhase] = useState<Phase>("betting");
   const [dragonCard, setDragonCard] = useState<CardData | null>(null);
