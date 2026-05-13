@@ -493,41 +493,6 @@ const DragonTigerGame = () => {
               }} />
             </motion.div>
           )}
-                style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
-              />
-              <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse 80% 60% at 60% 50%, hsla(210,100%,55%,0.35), transparent 70%)",
-                mixBlendMode: "screen",
-              }} />
-            </motion.div>
-          )}
-          {phase === "result" && winner === "tiger" && (
-            <motion.div
-              key={`tiger-win-video-${winEffectKey}`}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              className="absolute pointer-events-none"
-              style={{
-                left: "54%", top: "56%", width: "32%", height: "22%",
-                zIndex: 7,
-                clipPath: "ellipse(100% 100% at 0% 50%)",
-                WebkitClipPath: "ellipse(100% 100% at 0% 50%)",
-                filter: "drop-shadow(0 0 22px hsla(20,100%,55%,0.85))",
-              }}
-            >
-              <video
-                src={orangeFireAsset.url}
-                autoPlay loop muted playsInline preload="auto"
-                ref={replayWinVideo}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
-              />
-              <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse 80% 60% at 40% 50%, hsla(20,100%,55%,0.35), transparent 70%)",
-                mixBlendMode: "screen",
-              }} />
-            </motion.div>
-          )}
           {phase === "result" && winner === "tie" && (
             <motion.div
               key={`tie-win-video-${winEffectKey}`}
@@ -543,7 +508,7 @@ const DragonTigerGame = () => {
               }}
             >
               <video
-                src={orangeFireAsset.url}
+                src={TIGER_WIN_EFFECT_SRC}
                 autoPlay loop muted playsInline preload="auto"
                 ref={replayWinVideo}
                 className="absolute inset-0 w-full h-full object-cover"
