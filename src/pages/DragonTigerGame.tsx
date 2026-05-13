@@ -60,19 +60,22 @@ const DragonTigerGame = () => {
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
-  // Betting countdown — only ticks while in betting phase with bets placed; auto-deals at 0
+  // Betting countdown — always ticks during betting; auto-deals if bets placed at 0
   useEffect(() => {
     if (phase !== "betting") return;
-    if (bets.dragon + bets.tiger + bets.tie === 0) { setBetTimer(15); return; }
     const id = setInterval(() => {
       setBetTimer((t) => {
-        if (t <= 1) { clearInterval(id); deal(); return 0; }
+        if (t <= 1) {
+          clearInterval(id);
+          if (bets.dragon + bets.tiger + bets.tie > 0) deal();
+          return 15;
+        }
         return t - 1;
       });
     }, 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, bets.dragon, bets.tiger, bets.tie]);
+  }, [phase]);
 
   const totalBet = bets.dragon + bets.tiger + bets.tie;
   const sym = activeWallet === "dollar" ? "$" : "⭐";
