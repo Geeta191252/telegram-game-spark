@@ -379,11 +379,19 @@ const DragonTigerGame = () => {
         <button
           onClick={() => addBet("tie")}
           disabled={phase !== "betting"}
-          className="absolute"
+          className="absolute flex flex-col items-center justify-start pt-1"
           style={{ left: "30%", top: "37%", width: "40%", height: "12%", borderRadius: "50% 50% 0 0" }}
         >
+          <div className="font-black tracking-wider"
+            style={{ color: "hsl(140 70% 30%)", fontSize: "min(4vw, 20px)", textShadow: "0 1px 0 hsla(140,80%,80%,0.6), 0 -1px 0 hsla(140,90%,15%,0.6)", letterSpacing: "0.12em" }}>
+            TIE
+          </div>
+          <div className="font-black"
+            style={{ color: "hsl(140 70% 28%)", fontSize: "min(2.8vw, 13px)", marginTop: "-2px" }}>
+            8:1
+          </div>
           {bets.tie > 0 && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-0.5 rounded-full font-black"
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)" }}>
               {sym}{bets.tie}
             </div>
@@ -397,11 +405,25 @@ const DragonTigerGame = () => {
         <button
           onClick={() => addBet("dragon")}
           disabled={phase !== "betting"}
-          className="absolute"
+          className="absolute flex flex-col items-center justify-center"
           style={{ left: "13%", top: "49%", width: "37%", height: "32%" }}
         >
+          <div className="font-black tracking-widest"
+            style={{
+              color: "hsl(220 80% 35%)",
+              fontSize: "min(6.5vw, 32px)",
+              letterSpacing: "0.15em",
+              textShadow: "0 2px 0 hsla(220,90%,75%,0.55), 0 -1px 0 hsla(220,95%,15%,0.7), 0 0 14px hsla(220,90%,55%,0.45)",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+            }}>
+            DRAGON
+          </div>
+          <div className="font-black"
+            style={{ color: "hsl(220 80% 38%)", fontSize: "min(3.5vw, 17px)", marginTop: "2px", textShadow: "0 1px 0 hsla(220,90%,80%,0.5)" }}>
+            1:1
+          </div>
           {bets.dragon > 0 && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
               {sym}{bets.dragon}
             </div>
@@ -415,11 +437,25 @@ const DragonTigerGame = () => {
         <button
           onClick={() => addBet("tiger")}
           disabled={phase !== "betting"}
-          className="absolute"
+          className="absolute flex flex-col items-center justify-center"
           style={{ left: "50%", top: "49%", width: "37%", height: "32%" }}
         >
+          <div className="font-black tracking-widest"
+            style={{
+              color: "hsl(20 85% 38%)",
+              fontSize: "min(6.5vw, 32px)",
+              letterSpacing: "0.15em",
+              textShadow: "0 2px 0 hsla(35,95%,75%,0.55), 0 -1px 0 hsla(15,95%,18%,0.7), 0 0 14px hsla(20,90%,55%,0.45)",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+            }}>
+            TIGER
+          </div>
+          <div className="font-black"
+            style={{ color: "hsl(20 85% 38%)", fontSize: "min(3.5vw, 17px)", marginTop: "2px", textShadow: "0 1px 0 hsla(35,95%,80%,0.5)" }}>
+            1:1
+          </div>
           {bets.tiger > 0 && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
               {sym}{bets.tiger}
             </div>
