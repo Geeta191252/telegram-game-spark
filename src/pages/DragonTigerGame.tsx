@@ -179,7 +179,7 @@ const DragonTigerGame = () => {
       }
 
       setPhase("result");
-      setResultTimer(4);
+      setResultTimer(3);
       timerRef.current = setInterval(() => {
         setResultTimer((p) => {
           if (p <= 1) {
