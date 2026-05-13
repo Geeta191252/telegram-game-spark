@@ -233,7 +233,7 @@ const DragonTigerGame = () => {
       }}
     >
       {/* Full backdrop image — exact reference (kept as sizing anchor, invisible) */}
-      <div className="relative w-full mx-auto" style={{ maxWidth: 480 }}>
+      <div className="relative w-full mx-auto" style={{ maxWidth: 380 }}>
         <img
           src={arenaBg}
           alt="Dragon vs Tiger arena"
