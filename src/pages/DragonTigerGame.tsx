@@ -60,10 +60,12 @@ const DragonTigerGame = () => {
   const [tigerCard, setTigerCard] = useState<CardData | null>(null);
   const [winner, setWinner] = useState<Side | null>(null);
   const [winAmount, setWinAmount] = useState(0);
+  const [winEffectKey, setWinEffectKey] = useState(0);
   const [resultTimer, setResultTimer] = useState(15);
   const [history, setHistory] = useState<Side[]>(["dragon","tiger","tiger","tiger","tiger","tiger","dragon","tiger","dragon","dragon"]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const roundTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const dealLockedRef = useRef(false);
   const latestRoundRef = useRef({ phase, bets, activeWallet, currentBalance });
   latestRoundRef.current = { phase, bets, activeWallet, currentBalance };
 
@@ -74,6 +76,17 @@ const DragonTigerGame = () => {
 
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); clearRoundTimeouts(); }, []);
+  useEffect(() => {
+    [blueFireAsset.url, orangeFireAsset.url].forEach((src) => {
+      const video = document.createElement("video");
+      video.src = src;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.load();
+    });
+  }, []);
+  useEffect(() => { if (phase === "betting") dealLockedRef.current = false; }, [phase]);
 
   useEffect(() => {
     if (phase !== "betting") return;
@@ -128,12 +141,14 @@ const DragonTigerGame = () => {
   };
 
   const deal = () => {
+    if (dealLockedRef.current) return;
     const snapshot = latestRoundRef.current;
     const roundBets = snapshot.bets;
     const roundTotalBet = roundBets.dragon + roundBets.tiger + roundBets.tie;
     const roundWallet = snapshot.activeWallet;
     if (snapshot.phase !== "betting") return;
     if (roundTotalBet > 0 && snapshot.currentBalance < roundTotalBet) return;
+    dealLockedRef.current = true;
     if (roundTotalBet > 0) {
       if (roundWallet === "dollar") setLocalDollarAdj((p) => p - roundTotalBet); else setLocalStarAdj((p) => p - roundTotalBet);
     }
@@ -180,6 +195,7 @@ const DragonTigerGame = () => {
       const profit = payout - roundTotalBet;
 
       setWinner(outcome);
+      setWinEffectKey((k) => k + 1);
       setHistory((h) => [outcome, ...h].slice(0, 10));
 
       if (payout > 0) {
