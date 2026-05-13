@@ -14,8 +14,6 @@ import {
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult } from "@/lib/telegram";
 import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
-import blueFireAsset from "@/assets/dt-blue-fire.mp4.asset.json";
-import orangeFireAsset from "@/assets/dt-orange-fire.mp4.asset.json";
 
 type Side = "dragon" | "tiger" | "tie";
 type Phase = "betting" | "dealing" | "result";
@@ -35,6 +33,8 @@ const CHIP_VALUES = [1, 10, 50, 100, 500];
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
 const BG_H = 1376;
+const DRAGON_WIN_EFFECT_SRC = "/effects/dt-blue-keyed.webm";
+const TIGER_WIN_EFFECT_SRC = "/effects/dt-orange-keyed.webm";
 
 const DragonTigerGame = () => {
   const navigate = useNavigate();
@@ -77,7 +77,7 @@ const DragonTigerGame = () => {
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); clearRoundTimeouts(); }, []);
   useEffect(() => {
-    [blueFireAsset.url, orangeFireAsset.url].forEach((src) => {
+    [DRAGON_WIN_EFFECT_SRC, TIGER_WIN_EFFECT_SRC].forEach((src) => {
       const video = document.createElement("video");
       video.src = src;
       video.muted = true;
@@ -446,22 +446,22 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "14%", top: "56%", width: "32%", height: "22%",
+                left: "10.7%", top: "48.1%", width: "39.6%", height: "33.6%",
                 zIndex: 7,
-                clipPath: "ellipse(100% 100% at 100% 50%)",
-                WebkitClipPath: "ellipse(100% 100% at 100% 50%)",
+                clipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
+                WebkitClipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
                 filter: "drop-shadow(0 0 22px hsla(210,100%,60%,0.85))",
               }}
             >
               <video
-                src={blueFireAsset.url}
+                src={DRAGON_WIN_EFFECT_SRC}
                 autoPlay loop muted playsInline preload="auto"
                 ref={replayWinVideo}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
+                className="absolute w-full h-full object-contain"
+                style={{ left: "-5%", top: "6%", width: "94%", height: "78%", mixBlendMode: "screen", filter: "saturate(1.45) brightness(1.12)" }}
               />
               <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse 80% 60% at 60% 50%, hsla(210,100%,55%,0.35), transparent 70%)",
+                background: "radial-gradient(ellipse 70% 55% at 50% 56%, hsla(210,100%,55%,0.24), transparent 72%)",
                 mixBlendMode: "screen",
               }} />
             </motion.div>
@@ -473,22 +473,22 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "54%", top: "56%", width: "32%", height: "22%",
+                left: "49.7%", top: "48.1%", width: "39.6%", height: "33.6%",
                 zIndex: 7,
-                clipPath: "ellipse(100% 100% at 0% 50%)",
-                WebkitClipPath: "ellipse(100% 100% at 0% 50%)",
+                clipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
+                WebkitClipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
                 filter: "drop-shadow(0 0 22px hsla(20,100%,55%,0.85))",
               }}
             >
               <video
-                src={orangeFireAsset.url}
+                src={TIGER_WIN_EFFECT_SRC}
                 autoPlay loop muted playsInline preload="auto"
                 ref={replayWinVideo}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
+                className="absolute w-full h-full object-contain"
+                style={{ right: "-5%", top: "6%", width: "94%", height: "78%", mixBlendMode: "screen", filter: "saturate(1.45) brightness(1.12)" }}
               />
               <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse 80% 60% at 40% 50%, hsla(20,100%,55%,0.35), transparent 70%)",
+                background: "radial-gradient(ellipse 70% 55% at 50% 56%, hsla(20,100%,55%,0.24), transparent 72%)",
                 mixBlendMode: "screen",
               }} />
             </motion.div>
@@ -508,7 +508,7 @@ const DragonTigerGame = () => {
               }}
             >
               <video
-                src={orangeFireAsset.url}
+                src={TIGER_WIN_EFFECT_SRC}
                 autoPlay loop muted playsInline preload="auto"
                 ref={replayWinVideo}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -575,9 +575,6 @@ const DragonTigerGame = () => {
               {sym}{bets.dragon}
             </div>
           )}
-          {phase === "result" && winner === "dragon" && (
-            <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 0 3px hsl(220 90% 60%), 0 0 25px hsl(220 90% 60%)" }} />
-          )}
         </button>
 
         {/* TIGER PANEL (right half of bowl) */}
@@ -592,9 +589,6 @@ const DragonTigerGame = () => {
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
               {sym}{bets.tiger}
             </div>
-          )}
-          {phase === "result" && winner === "tiger" && (
-            <div className="absolute inset-0" style={{ boxShadow: "inset 0 0 0 3px hsl(28 95% 55%), 0 0 25px hsl(28 95% 55%)" }} />
           )}
         </button>
 
