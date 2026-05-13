@@ -446,18 +446,53 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "14%", top: "56%", width: "32%", height: "22%",
+                left: "10.7%", top: "48.1%", width: "39.6%", height: "33.6%",
                 zIndex: 7,
-                clipPath: "ellipse(100% 100% at 100% 50%)",
-                WebkitClipPath: "ellipse(100% 100% at 100% 50%)",
+                clipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
+                WebkitClipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
                 filter: "drop-shadow(0 0 22px hsla(210,100%,60%,0.85))",
               }}
             >
               <video
-                src={blueFireAsset.url}
+                src={DRAGON_WIN_EFFECT_SRC}
                 autoPlay loop muted playsInline preload="auto"
                 ref={replayWinVideo}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute w-full h-full object-contain"
+                style={{ left: "-5%", top: "6%", width: "94%", height: "78%", mixBlendMode: "screen", filter: "saturate(1.45) brightness(1.12)" }}
+              />
+              <div className="absolute inset-0" style={{
+                background: "radial-gradient(ellipse 70% 55% at 50% 56%, hsla(210,100%,55%,0.24), transparent 72%)",
+                mixBlendMode: "screen",
+              }} />
+            </motion.div>
+          )}
+          {phase === "result" && winner === "tiger" && (
+            <motion.div
+              key={`tiger-win-video-${winEffectKey}`}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="absolute pointer-events-none"
+              style={{
+                left: "49.7%", top: "48.1%", width: "39.6%", height: "33.6%",
+                zIndex: 7,
+                clipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
+                WebkitClipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
+                filter: "drop-shadow(0 0 22px hsla(20,100%,55%,0.85))",
+              }}
+            >
+              <video
+                src={TIGER_WIN_EFFECT_SRC}
+                autoPlay loop muted playsInline preload="auto"
+                ref={replayWinVideo}
+                className="absolute w-full h-full object-contain"
+                style={{ right: "-5%", top: "6%", width: "94%", height: "78%", mixBlendMode: "screen", filter: "saturate(1.45) brightness(1.12)" }}
+              />
+              <div className="absolute inset-0" style={{
+                background: "radial-gradient(ellipse 70% 55% at 50% 56%, hsla(20,100%,55%,0.24), transparent 72%)",
+                mixBlendMode: "screen",
+              }} />
+            </motion.div>
+          )}
                 style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
               />
               <div className="absolute inset-0" style={{
