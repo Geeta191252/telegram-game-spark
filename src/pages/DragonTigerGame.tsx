@@ -69,7 +69,7 @@ const DragonTigerGame = () => {
       setBetTimer((t) => {
         if (t <= 1) {
           clearInterval(id);
-          if (bets.dragon + bets.tiger + bets.tie > 0) deal();
+          deal();
           return 15;
         }
         return t - 1;
