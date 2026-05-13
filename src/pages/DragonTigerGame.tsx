@@ -200,15 +200,21 @@ const DragonTigerGame = () => {
 
   return (
     <div
-      className="min-h-screen w-full relative overflow-hidden"
-      style={{ background: "hsl(220 40% 5%)" }}
+      className="min-h-screen w-full relative overflow-hidden flex items-center justify-center"
+      style={{
+        backgroundImage: `url(${arenaBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundColor: "hsl(220 40% 5%)",
+      }}
     >
-      {/* Full backdrop image — exact reference */}
+      {/* Full backdrop image — exact reference (kept as sizing anchor, invisible) */}
       <div className="relative w-full mx-auto" style={{ maxWidth: 480 }}>
         <img
           src={arenaBg}
           alt="Dragon vs Tiger arena"
-          className="block w-full h-auto select-none pointer-events-none"
+          className="block w-full h-auto select-none pointer-events-none invisible"
           draggable={false}
         />
 
