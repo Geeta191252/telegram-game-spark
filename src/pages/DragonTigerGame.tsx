@@ -299,16 +299,16 @@ const DragonTigerGame = () => {
           aria-label="Settings"
         />
 
-        {/* CENTER TIMER (over the painted "12" badge) */}
+        {/* CENTER TIMER (inside the empty golden badge) */}
         <div
           className="absolute flex items-center justify-center font-black"
           style={{
-            left: "50%", top: "12.5%", transform: "translateX(-50%)",
-            width: "10%", aspectRatio: "1/1",
+            left: "50%", top: "21%", transform: "translate(-50%, -50%)",
+            width: "16%", aspectRatio: "1/1",
             borderRadius: "50%",
             color: "hsl(50 95% 75%)",
-            fontSize: "min(4.5vw, 22px)",
-            textShadow: "0 0 8px hsla(45,95%,70%,0.95), 0 2px 0 hsla(0,0%,0%,0.6)",
+            fontSize: "min(7vw, 36px)",
+            textShadow: "0 0 10px hsla(45,95%,70%,0.95), 0 2px 0 hsla(0,0%,0%,0.7)",
             pointerEvents: "none",
             zIndex: 5,
           }}
@@ -319,13 +319,13 @@ const DragonTigerGame = () => {
         {/* DRAGON & TIGER CARDS — over painted card backs */}
         <div
           className="absolute"
-          style={{ left: "23%", top: "17%", width: "18%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
+          style={{ left: "32%", top: "33%", width: "12%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
         >
           {renderCard(dragonCard)}
         </div>
         <div
           className="absolute"
-          style={{ left: "59%", top: "17%", width: "18%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
+          style={{ left: "56%", top: "33%", width: "12%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
         >
           {renderCard(tigerCard)}
         </div>
@@ -333,7 +333,7 @@ const DragonTigerGame = () => {
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
           className="absolute flex items-center justify-between"
-          style={{ left: "16%", right: "27%", top: "29.2%", height: "3.6%" }}
+          style={{ left: "16%", right: "20%", top: "47%", height: "3%" }}
         >
           {history.map((h, i) => (
             <div
