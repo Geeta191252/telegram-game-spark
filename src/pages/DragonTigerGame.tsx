@@ -271,8 +271,8 @@ const DragonTigerGame = () => {
         <div
           className="absolute flex items-center justify-center font-black"
           style={{
-            left: "50%", top: "11%", transform: "translateX(-50%)",
-            width: "11%", aspectRatio: "1/1",
+            left: "50%", top: "4%", transform: "translateX(-50%)",
+            width: "10%", aspectRatio: "1/1",
             background: "radial-gradient(circle, hsla(45,95%,25%,0.98), hsla(0,0%,5%,0.98))",
             borderRadius: "50%",
             color: "hsl(50 95% 70%)",
