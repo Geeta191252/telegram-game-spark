@@ -381,7 +381,148 @@ const DragonTigerGame = () => {
             0%, 100% { box-shadow: 0 0 14px 3px hsla(20,100%,55%,0.95), 0 0 36px 8px hsla(15,100%,50%,0.8), inset 0 0 12px hsla(30,100%,65%,0.6); }
             50% { box-shadow: 0 0 22px 6px hsla(20,100%,60%,1), 0 0 60px 14px hsla(10,100%,50%,1), inset 0 0 18px hsla(30,100%,70%,0.85); }
           }
+          @keyframes dt-fire-breath-r {
+            0%   { transform: translateY(-50%) scaleX(0.15) scaleY(0.4); opacity: 0; filter: blur(6px) hue-rotate(0deg); }
+            15%  { transform: translateY(-50%) scaleX(0.55) scaleY(0.85); opacity: 1; filter: blur(2px) hue-rotate(-5deg); }
+            55%  { transform: translateY(-50%) scaleX(1.05) scaleY(1.15); opacity: 1; filter: blur(1px) hue-rotate(8deg); }
+            100% { transform: translateY(-50%) scaleX(1.25) scaleY(0.55); opacity: 0; filter: blur(4px) hue-rotate(15deg); }
+          }
+          @keyframes dt-fire-breath-l {
+            0%   { transform: translateY(-50%) scaleX(-0.15) scaleY(0.4); opacity: 0; filter: blur(6px) hue-rotate(0deg); }
+            15%  { transform: translateY(-50%) scaleX(-0.55) scaleY(0.85); opacity: 1; filter: blur(2px) hue-rotate(-5deg); }
+            55%  { transform: translateY(-50%) scaleX(-1.05) scaleY(1.15); opacity: 1; filter: blur(1px) hue-rotate(8deg); }
+            100% { transform: translateY(-50%) scaleX(-1.25) scaleY(0.55); opacity: 0; filter: blur(4px) hue-rotate(15deg); }
+          }
+          @keyframes dt-ember {
+            0%   { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--ex,0px), var(--ey,-40px)) scale(0.2); opacity: 0; }
+          }
+          @keyframes dt-flicker {
+            0%, 100% { opacity: 0.95; filter: brightness(1.05); }
+            50%      { opacity: 0.7;  filter: brightness(1.4); }
+          }
+          @keyframes dt-shockwave {
+            0%   { transform: translate(-50%,-50%) scale(0.2); opacity: 0.9; }
+            100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; }
+          }
+          @keyframes dt-screen-flash {
+            0%   { opacity: 0; }
+            20%  { opacity: 0.85; }
+            100% { opacity: 0; }
+          }
         `}</style>
+
+        {/* WIN FIRE BREATH VIDEO EFFECT */}
+        <AnimatePresence>
+          {phase === "result" && (winner === "dragon" || winner === "tiger") && (
+            <motion.div
+              key={winner}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 8 }}
+            >
+              {/* Fullscreen warm flash */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: winner === "dragon"
+                    ? "radial-gradient(ellipse 70% 50% at 35% 45%, hsla(20,100%,55%,0.55), transparent 65%)"
+                    : "radial-gradient(ellipse 70% 50% at 65% 45%, hsla(15,100%,55%,0.55), transparent 65%)",
+                  mixBlendMode: "screen",
+                  animation: "dt-screen-flash 1.6s ease-out forwards",
+                }}
+              />
+
+              {/* Shockwave ring at the mouth */}
+              <div
+                className="absolute rounded-full"
+                style={{
+                  left: winner === "dragon" ? "40%" : "60%",
+                  top: "60%",
+                  width: "12%", aspectRatio: "1/1",
+                  border: "3px solid hsla(40,100%,70%,0.9)",
+                  boxShadow: "0 0 30px hsla(25,100%,55%,0.95)",
+                  animation: "dt-shockwave 0.9s ease-out forwards",
+                }}
+              />
+
+              {/* The fire stream */}
+              <div
+                className="absolute"
+                style={{
+                  left: winner === "dragon" ? "38%" : "32%",
+                  top: "60%",
+                  width: "30%",
+                  height: "14%",
+                  transformOrigin: winner === "dragon" ? "0% 50%" : "100% 50%",
+                  animation: `${winner === "dragon" ? "dt-fire-breath-r" : "dt-fire-breath-l"} 1.6s ease-out forwards`,
+                  mixBlendMode: "screen",
+                  filter: "drop-shadow(0 0 18px hsla(25,100%,55%,0.95)) drop-shadow(0 0 38px hsla(40,100%,60%,0.7))",
+                }}
+              >
+                {/* Layered flame body */}
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 60% 50% at 50% 50%, hsla(60,100%,90%,1) 0%, hsla(45,100%,65%,0.95) 18%, hsla(25,100%,55%,0.85) 38%, hsla(10,100%,45%,0.55) 60%, transparent 80%)",
+                    animation: "dt-flicker 0.18s ease-in-out infinite",
+                  }}
+                />
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 80% 30% at 50% 50%, hsla(50,100%,80%,0.9) 0%, hsla(20,100%,55%,0.6) 40%, transparent 75%)",
+                    animation: "dt-flicker 0.11s ease-in-out infinite reverse",
+                    transform: "scaleY(0.6)",
+                  }}
+                />
+                {/* Embers */}
+                {Array.from({ length: 14 }).map((_, i) => {
+                  const dir = winner === "dragon" ? 1 : -1;
+                  const ex = (40 + Math.random() * 90) * dir;
+                  const ey = -30 - Math.random() * 60;
+                  const size = 4 + Math.random() * 6;
+                  const delay = Math.random() * 0.6;
+                  const startX = winner === "dragon" ? 5 + Math.random() * 60 : 35 + Math.random() * 60;
+                  return (
+                    <span
+                      key={i}
+                      className="absolute rounded-full"
+                      style={{
+                        left: `${startX}%`,
+                        top: `${30 + Math.random() * 40}%`,
+                        width: size, height: size,
+                        background: "radial-gradient(circle, hsla(50,100%,85%,1), hsla(20,100%,55%,0.9) 60%, transparent 100%)",
+                        boxShadow: "0 0 8px hsla(30,100%,60%,0.95)",
+                        // @ts-ignore custom CSS vars
+                        ["--ex" as any]: `${ex}px`,
+                        ["--ey" as any]: `${ey}px`,
+                        animation: `dt-ember 1.2s ease-out ${delay}s forwards`,
+                      } as any}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Smoke trail */}
+              <div
+                className="absolute"
+                style={{
+                  left: winner === "dragon" ? "55%" : "20%",
+                  top: "58%",
+                  width: "25%", height: "16%",
+                  background: "radial-gradient(ellipse 70% 50% at 50% 50%, hsla(0,0%,80%,0.25), transparent 70%)",
+                  filter: "blur(8px)",
+                  animation: "dt-screen-flash 1.6s ease-out forwards",
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
