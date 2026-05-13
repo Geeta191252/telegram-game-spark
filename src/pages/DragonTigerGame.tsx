@@ -429,64 +429,6 @@ const DragonTigerGame = () => {
           )}
         </button>
 
-        {/* TABLE FIRE BREATH — from painted dragon/tiger mouth in the bowl */}
-        {phase === "result" && winner === "dragon" && (
-          <div className="absolute pointer-events-none" style={{ left: "32%", top: "55%", width: "30%", height: "10%", zIndex: 4 }} aria-hidden>
-            <div className="dt-breath dt-breath-r">
-              <span className="dt-breath-core" />
-              <span className="dt-spark s1" /><span className="dt-spark s2" /><span className="dt-spark s3" /><span className="dt-spark s4" /><span className="dt-spark s5" />
-            </div>
-          </div>
-        )}
-        {phase === "result" && winner === "tiger" && (
-          <div className="absolute pointer-events-none" style={{ left: "38%", top: "55%", width: "30%", height: "10%", zIndex: 4 }} aria-hidden>
-            <div className="dt-breath dt-breath-l">
-              <span className="dt-breath-core" />
-              <span className="dt-spark s1" /><span className="dt-spark s2" /><span className="dt-spark s3" /><span className="dt-spark s4" /><span className="dt-spark s5" />
-            </div>
-          </div>
-        )}
-        <style>{`
-          .dt-breath { position: absolute; inset: 0; mix-blend-mode: screen;
-            filter: drop-shadow(0 0 10px hsla(20,100%,55%,0.95)) drop-shadow(0 0 22px hsla(45,100%,55%,0.7)); }
-          .dt-breath-core { position: absolute; left: 0; right: 0; top: 50%; height: 70%;
-            border-radius: 50% 60% 60% 50% / 50% 50% 50% 50%;
-            background: radial-gradient(ellipse at 0% 50%,
-              hsla(55,100%,90%,0.95) 0%, hsla(45,100%,65%,0.95) 18%, hsla(25,100%,55%,0.9) 38%, hsla(10,100%,45%,0.7) 65%, hsla(0,90%,30%,0) 100%); }
-          .dt-breath-r .dt-breath-core { transform: translateY(-50%); transform-origin: 0% 50%; animation: dt-breath-r 0.9s ease-out infinite; }
-          .dt-breath-l .dt-breath-core { transform: translateY(-50%) scaleX(-1); transform-origin: 100% 50%; animation: dt-breath-l 0.9s ease-out infinite; }
-          @keyframes dt-breath-r {
-            0%   { transform: translateY(-50%) scale(0.4, 0.4); opacity: 0.5; }
-            40%  { transform: translateY(-52%) scale(1.05, 1.15); opacity: 1; }
-            70%  { transform: translateY(-48%) scale(1.0, 1.0); opacity: 0.95; }
-            100% { transform: translateY(-50%) scale(0.5, 0.5); opacity: 0.5; }
-          }
-          @keyframes dt-breath-l {
-            0%   { transform: translateY(-50%) scaleX(-1) scale(0.4, 0.4); opacity: 0.5; }
-            40%  { transform: translateY(-52%) scaleX(-1) scale(1.05, 1.15); opacity: 1; }
-            70%  { transform: translateY(-48%) scaleX(-1) scale(1.0, 1.0); opacity: 0.95; }
-            100% { transform: translateY(-50%) scaleX(-1) scale(0.5, 0.5); opacity: 0.5; }
-          }
-          .dt-spark { position: absolute; top: 50%; width: 6px; height: 6px; border-radius: 50%;
-            background: radial-gradient(circle, hsla(55,100%,85%,1) 0%, hsla(25,100%,55%,0.9) 60%, transparent 100%);
-            animation: dt-spark-fly 1.1s linear infinite; }
-          .dt-breath-l .dt-spark { animation-name: dt-spark-fly-l; left: auto; right: 5%; }
-          .dt-breath-r .dt-spark { left: 5%; }
-          .s2 { top: 30%; animation-delay: 0.25s; width: 4px; height: 4px; }
-          .s3 { top: 70%; animation-delay: 0.5s; width: 5px; height: 5px; }
-          .s4 { top: 40%; animation-delay: 0.75s; width: 3px; height: 3px; }
-          .s5 { top: 60%; animation-delay: 0.4s; width: 4px; height: 4px; }
-          @keyframes dt-spark-fly {
-            0%   { transform: translate(0, 0) scale(1); opacity: 0; }
-            15%  { opacity: 1; }
-            100% { transform: translate(120px, -10px) scale(0.3); opacity: 0; }
-          }
-          @keyframes dt-spark-fly-l {
-            0%   { transform: translate(0, 0) scale(1); opacity: 0; }
-            15%  { opacity: 1; }
-            100% { transform: translate(-120px, -10px) scale(0.3); opacity: 0; }
-          }
-        `}</style>
         <button
           onClick={() => { if (phase === "betting" && totalBet === 0) setActiveWallet((w) => w === "dollar" ? "star" : "dollar"); }}
           className="absolute flex flex-col items-center justify-center font-black text-white"
