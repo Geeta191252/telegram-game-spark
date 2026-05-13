@@ -411,17 +411,18 @@ const DragonTigerGame = () => {
           </AnimatePresence>
         </button>
 
-        {/* x2 DOUBLE chip toggle */}
+        {/* x2 DOUBLE — instantly doubles all current bets */}
         <button
-          onClick={() => phase === "betting" && setDoubleMode((d) => !d)}
+          onClick={doubleAllBets}
+          disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet * 2}
           className="absolute"
           style={{ right: "8%", top: "92.6%", width: "11%", aspectRatio: "1/1", borderRadius: "50%" }}
-          aria-label="Toggle double bet"
+          aria-label="Double bet"
         >
-          {doubleMode && (
+          {phase === "betting" && totalBet > 0 && currentBalance >= totalBet * 2 && (
             <div
-              className="absolute inset-0 rounded-full"
-              style={{ boxShadow: "0 0 0 3px hsl(45 95% 60%), 0 0 18px hsla(45,95%,60%,0.9)" }}
+              className="absolute inset-0 rounded-full animate-pulse"
+              style={{ boxShadow: "0 0 0 3px hsl(140 80% 50%), 0 0 18px hsla(140,80%,50%,0.9)" }}
             />
           )}
         </button>
