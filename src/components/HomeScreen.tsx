@@ -126,6 +126,7 @@ const HomeScreen = () => {
   const goToAviator = () => navigate("/aviator");
   const goToPlinko = () => navigate("/plinko");
   const goToChickenRoad = () => navigate("/chicken-road");
+  const goToDragonTiger = () => navigate("/dragon-tiger");
   
   const goToAdmin = () => navigate("/admin");
 
