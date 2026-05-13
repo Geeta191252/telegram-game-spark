@@ -14,7 +14,7 @@ import MinesGame from "./pages/MinesGame";
 import AviatorGame from "./pages/AviatorGame";
 import PlinkoGame from "./pages/PlinkoGame";
 import ChickenRoadGame from "./pages/ChickenRoadGame";
-import DragonTigerGame from "./pages/DragonTigerGame";
+
 import AdminPanel from "./pages/AdminPanel";
 
 import NotFound from "./pages/NotFound";
