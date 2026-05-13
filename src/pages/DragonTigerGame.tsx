@@ -473,7 +473,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "51%", top: "52%", width: "34%", height: "27%",
+                left: "54%", top: "56%", width: "32%", height: "22%",
                 zIndex: 7,
                 clipPath: "ellipse(100% 100% at 0% 50%)",
                 WebkitClipPath: "ellipse(100% 100% at 0% 50%)",
