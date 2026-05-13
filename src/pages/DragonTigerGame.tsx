@@ -223,21 +223,21 @@ const DragonTigerGame = () => {
 
   return (
     <div
-      className="min-h-screen w-full relative overflow-hidden flex items-center justify-center"
-      style={{
-        backgroundImage: `url(${arenaBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundColor: "hsl(220 40% 5%)",
-      }}
+      className="fixed inset-0 w-full h-full overflow-hidden flex items-center justify-center"
+      style={{ backgroundColor: "hsl(220 40% 5%)" }}
     >
-      {/* Full backdrop image — exact reference (kept as sizing anchor, invisible) */}
-      <div className="relative w-full mx-auto" style={{ maxWidth: "100vw" }}>
+      {/* Game stage — sized to fit the viewport while preserving artwork aspect ratio */}
+      <div
+        className="relative"
+        style={{
+          height: "min(100vh, calc(100vw * 1390 / 859))",
+          width: "min(100vw, calc(100vh * 859 / 1390))",
+        }}
+      >
         <img
           src={arenaBg}
           alt="Dragon vs Tiger arena"
-          className="block w-full h-auto select-none pointer-events-none invisible"
+          className="absolute inset-0 w-full h-full object-fill select-none pointer-events-none"
           draggable={false}
         />
 
