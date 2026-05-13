@@ -270,12 +270,46 @@ const DragonTigerGame = () => {
           width: `min(100vw, calc(100vh * ${BG_W} / ${BG_H}))`,
         }}
       >
-        <img
-          src={arenaBg}
-          alt="Dragon vs Tiger arena"
-          className="absolute inset-0 w-full h-full object-fill select-none pointer-events-none"
-          draggable={false}
-        />
+        {/* 3D TABLE BACKGROUND with perspective tilt + ambient glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ perspective: "1400px", perspectiveOrigin: "50% 30%" }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              transform: "rotateX(8deg) translateZ(0)",
+              transformStyle: "preserve-3d",
+              transformOrigin: "50% 40%",
+              filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.75)) drop-shadow(0 0 60px rgba(255,170,40,0.18))",
+            }}
+          >
+            <img
+              src={arenaBg}
+              alt="Dragon vs Tiger arena"
+              className="absolute inset-0 w-full h-full object-fill select-none"
+              draggable={false}
+            />
+            {/* Top vignette / ambient highlight */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(ellipse 70% 35% at 50% 18%, hsla(45,95%,70%,0.18), transparent 70%), radial-gradient(ellipse 90% 55% at 50% 95%, hsla(0,0%,0%,0.55), transparent 60%)",
+                mixBlendMode: "screen",
+              }}
+            />
+            {/* Specular sheen sweep */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(120deg, transparent 35%, hsla(45,90%,80%,0.10) 50%, transparent 65%)",
+                mixBlendMode: "overlay",
+              }}
+            />
+          </div>
+        </div>
 
         {/* TOP-LEFT BACK BUTTON */}
         <button
