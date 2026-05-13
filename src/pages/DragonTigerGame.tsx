@@ -60,19 +60,22 @@ const DragonTigerGame = () => {
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
-  // Betting countdown — only ticks while in betting phase with bets placed; auto-deals at 0
+  // Betting countdown — always ticks during betting; auto-deals if bets placed at 0
   useEffect(() => {
     if (phase !== "betting") return;
-    if (bets.dragon + bets.tiger + bets.tie === 0) { setBetTimer(15); return; }
     const id = setInterval(() => {
       setBetTimer((t) => {
-        if (t <= 1) { clearInterval(id); deal(); return 0; }
+        if (t <= 1) {
+          clearInterval(id);
+          if (bets.dragon + bets.tiger + bets.tie > 0) deal();
+          return 15;
+        }
         return t - 1;
       });
     }, 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, bets.dragon, bets.tiger, bets.tie]);
+  }, [phase]);
 
   const totalBet = bets.dragon + bets.tiger + bets.tie;
   const sym = activeWallet === "dollar" ? "$" : "⭐";
@@ -264,27 +267,28 @@ const DragonTigerGame = () => {
           {renderCard(tigerCard)}
         </div>
 
-        {/* Timer disc on VS — shows betting countdown / dealing / result */}
+        {/* Timer disc ABOVE VS — golden crown style, always shows 15s countdown */}
         <div
           className="absolute flex items-center justify-center font-black"
           style={{
-            left: "46%", top: "22.5%", width: "8%", aspectRatio: "1/1",
-            background: phase === "betting"
-              ? (totalBet > 0 ? "radial-gradient(circle, hsla(140,80%,45%,0.95), hsla(140,80%,25%,0.95))" : "transparent")
-              : "radial-gradient(circle, hsla(0,80%,50%,0.95), hsla(0,80%,30%,0.95))",
+            left: "50%", top: "18%", transform: "translateX(-50%)",
+            width: "13%", aspectRatio: "1/1",
+            background: "radial-gradient(circle, hsla(45,95%,20%,0.95), hsla(0,0%,5%,0.95))",
             borderRadius: "50%",
-            color: "white",
-            border: phase === "betting" && totalBet === 0 ? "none" : "2px solid hsl(45 95% 65%)",
-            boxShadow: phase === "betting" && totalBet === 0 ? "none" : "0 0 14px hsla(0,80%,50%,0.7)",
-            fontSize: 12,
+            color: "hsl(50 95% 65%)",
+            border: "2px solid hsl(45 95% 55%)",
+            boxShadow: "0 0 16px hsla(45,95%,55%,0.85), inset 0 0 8px hsla(45,95%,55%,0.4)",
+            fontSize: 16,
+            textShadow: "0 0 6px hsla(45,95%,65%,0.9)",
             pointerEvents: "none",
+            zIndex: 5,
           }}
         >
-          {phase === "dealing" ? "…" : phase === "result" ? resultTimer : (totalBet > 0 ? betTimer : "")}
+          {phase === "dealing" ? "…" : phase === "result" ? resultTimer : betTimer}
         </div>
 
-        {/* HISTORY overlay (over painted pills) */}
-        <div className="absolute flex items-center gap-[2px] justify-center" style={{ left: "20%", right: "20%", top: "32.4%", height: "3.2%" }}>
+        {/* HISTORY overlay (over painted pills) — compact */}
+        <div className="absolute flex items-center gap-[1px] justify-center" style={{ left: "26%", right: "26%", top: "33%", height: "2.2%" }}>
           {history.slice(0, 11).map((h, i) => {
             const c = h === "dragon" ? "hsl(220 80% 55%)" : h === "tiger" ? "hsl(28 90% 52%)" : "hsl(140 70% 45%)";
             const letter = h === "dragon" ? "D" : h === "tiger" ? "T" : "Tie";
@@ -293,11 +297,11 @@ const DragonTigerGame = () => {
                 key={i}
                 className="rounded-full flex items-center justify-center font-black shrink-0 text-white"
                 style={{
-                  width: "8.2%", aspectRatio: "1/1",
+                  width: "5.5%", aspectRatio: "1/1",
                   background: c,
-                  fontSize: 9,
-                  boxShadow: `inset 0 1px 0 hsla(0,0%,100%,0.4), 0 0 4px ${c}`,
-                  border: "1px solid hsla(45,90%,60%,0.7)",
+                  fontSize: 6,
+                  boxShadow: `inset 0 1px 0 hsla(0,0%,100%,0.4), 0 0 2px ${c}`,
+                  border: "1px solid hsla(45,90%,60%,0.6)",
                 }}
               >
                 {letter}
