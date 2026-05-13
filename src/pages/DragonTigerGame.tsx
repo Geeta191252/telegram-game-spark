@@ -60,6 +60,20 @@ const DragonTigerGame = () => {
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
+  // Betting countdown — only ticks while in betting phase with bets placed; auto-deals at 0
+  useEffect(() => {
+    if (phase !== "betting") return;
+    if (bets.dragon + bets.tiger + bets.tie === 0) { setBetTimer(15); return; }
+    const id = setInterval(() => {
+      setBetTimer((t) => {
+        if (t <= 1) { clearInterval(id); deal(); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, bets.dragon, bets.tiger, bets.tie]);
+
   const totalBet = bets.dragon + bets.tiger + bets.tie;
   const sym = activeWallet === "dollar" ? "$" : "⭐";
 
