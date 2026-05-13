@@ -150,6 +150,7 @@ const DragonTigerGame = () => {
             if (timerRef.current) clearInterval(timerRef.current);
             setBets({ dragon: 0, tiger: 0, tie: 0 });
             setDragonCard(null); setTigerCard(null); setWinner(null);
+            setBetTimer(15);
             setPhase("betting");
             return 15;
           }
