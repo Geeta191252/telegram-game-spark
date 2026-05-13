@@ -14,6 +14,7 @@ import MinesGame from "./pages/MinesGame";
 import AviatorGame from "./pages/AviatorGame";
 import PlinkoGame from "./pages/PlinkoGame";
 import ChickenRoadGame from "./pages/ChickenRoadGame";
+import DragonTigerGame from "./pages/DragonTigerGame";
 import AdminPanel from "./pages/AdminPanel";
 
 import NotFound from "./pages/NotFound";
@@ -31,6 +32,7 @@ const STARTAPP_GAME_ROUTES: Record<string, string> = {
   g_greedy: "/greedy-king",
   g_plinko: "/plinko",
   g_chicken: "/chicken-road",
+  g_dragontiger: "/dragon-tiger",
 };
 
 const StartParamNavigator = () => {
@@ -67,6 +69,7 @@ const App = () => (
               <Route path="/aviator" element={<AviatorGame />} />
               <Route path="/plinko" element={<PlinkoGame />} />
               <Route path="/chicken-road" element={<ChickenRoadGame />} />
+              <Route path="/dragon-tiger" element={<DragonTigerGame />} />
               <Route path="/admin" element={<AdminPanel />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
