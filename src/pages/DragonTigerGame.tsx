@@ -503,7 +503,7 @@ const DragonTigerGame = () => {
                   ? { scale: [1, 1.08, 1], rotate: [0, -4, 0] }
                   : winner === "dragon"
                     ? { scale: [1, 1.15, 1.1], y: [0, -4, 0] }
-                    : winner && winner !== "dragon"
+                    : winner && (winner as Side) !== "dragon"
                       ? { scale: 0.85, opacity: 0.5 }
                       : { scale: 1 }
               }
@@ -583,7 +583,7 @@ const DragonTigerGame = () => {
                   ? { scale: [1, 1.08, 1], rotate: [0, 4, 0] }
                   : winner === "tiger"
                     ? { scale: [1, 1.15, 1.1], y: [0, -4, 0] }
-                    : winner && winner !== "tiger"
+                    : winner && (winner as Side) !== "tiger"
                       ? { scale: 0.85, opacity: 0.5 }
                       : { scale: 1 }
               }
