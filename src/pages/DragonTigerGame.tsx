@@ -115,8 +115,11 @@ const DragonTigerGame = () => {
   };
 
   const deal = () => {
-    if (phase !== "betting" || totalBet <= 0 || currentBalance < totalBet) return;
-    if (activeWallet === "dollar") setLocalDollarAdj((p) => p - totalBet); else setLocalStarAdj((p) => p - totalBet);
+    if (phase !== "betting") return;
+    if (totalBet > 0 && currentBalance < totalBet) return;
+    if (totalBet > 0) {
+      if (activeWallet === "dollar") setLocalDollarAdj((p) => p - totalBet); else setLocalStarAdj((p) => p - totalBet);
+    }
     if (soundRef.current) playSpinSound();
     setLastBets(bets);
     setPhase("dealing");
