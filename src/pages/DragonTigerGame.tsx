@@ -437,18 +437,20 @@ const DragonTigerGame = () => {
           }
         `}</style>
 
-        {/* WIN VIDEO EFFECT OVERLAY ON BOWL PANELS */}
+        {/* WIN VIDEO EFFECT OVERLAY ON BOWL PANELS — clipped to bowl-half shape */}
         <AnimatePresence>
           {phase === "result" && winner === "dragon" && (
             <motion.div
               key={`dragon-win-video-${winEffectKey}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
-              className="absolute overflow-hidden pointer-events-none"
+              className="absolute pointer-events-none"
               style={{
-                left: "13%", top: "49%", width: "37%", height: "32%",
-                zIndex: 7, borderRadius: "8px",
-                boxShadow: "inset 0 0 40px hsla(210,100%,60%,0.9), 0 0 30px hsla(210,100%,55%,0.7)",
+                left: "15%", top: "52%", width: "34%", height: "27%",
+                zIndex: 7,
+                clipPath: "ellipse(100% 100% at 100% 50%)",
+                WebkitClipPath: "ellipse(100% 100% at 100% 50%)",
+                filter: "drop-shadow(0 0 22px hsla(210,100%,60%,0.85))",
               }}
             >
               <video
@@ -459,7 +461,7 @@ const DragonTigerGame = () => {
                 style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
               />
               <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse 80% 60% at 50% 60%, hsla(210,100%,55%,0.35), transparent 70%)",
+                background: "radial-gradient(ellipse 80% 60% at 60% 50%, hsla(210,100%,55%,0.35), transparent 70%)",
                 mixBlendMode: "screen",
               }} />
             </motion.div>
@@ -469,11 +471,13 @@ const DragonTigerGame = () => {
               key={`tiger-win-video-${winEffectKey}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
-              className="absolute overflow-hidden pointer-events-none"
+              className="absolute pointer-events-none"
               style={{
-                left: "50%", top: "49%", width: "37%", height: "32%",
-                zIndex: 7, borderRadius: "8px",
-                boxShadow: "inset 0 0 40px hsla(20,100%,55%,0.9), 0 0 30px hsla(15,100%,55%,0.7)",
+                left: "51%", top: "52%", width: "34%", height: "27%",
+                zIndex: 7,
+                clipPath: "ellipse(100% 100% at 0% 50%)",
+                WebkitClipPath: "ellipse(100% 100% at 0% 50%)",
+                filter: "drop-shadow(0 0 22px hsla(20,100%,55%,0.85))",
               }}
             >
               <video
@@ -484,7 +488,7 @@ const DragonTigerGame = () => {
                 style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
               />
               <div className="absolute inset-0" style={{
-                background: "radial-gradient(ellipse 80% 60% at 50% 60%, hsla(20,100%,55%,0.35), transparent 70%)",
+                background: "radial-gradient(ellipse 80% 60% at 40% 50%, hsla(20,100%,55%,0.35), transparent 70%)",
                 mixBlendMode: "screen",
               }} />
             </motion.div>
@@ -494,11 +498,13 @@ const DragonTigerGame = () => {
               key={`tie-win-video-${winEffectKey}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
-              className="absolute overflow-hidden pointer-events-none"
+              className="absolute pointer-events-none"
               style={{
-                left: "30%", top: "37%", width: "40%", height: "12%",
-                borderRadius: "50% 50% 8px 8px", zIndex: 7,
-                boxShadow: "inset 0 0 30px hsla(140,80%,55%,0.9), 0 0 25px hsla(140,80%,55%,0.7)",
+                left: "30%", top: "39%", width: "40%", height: "11%",
+                zIndex: 7,
+                clipPath: "ellipse(50% 100% at 50% 100%)",
+                WebkitClipPath: "ellipse(50% 100% at 50% 100%)",
+                filter: "drop-shadow(0 0 18px hsla(140,80%,55%,0.85))",
               }}
             >
               <video
