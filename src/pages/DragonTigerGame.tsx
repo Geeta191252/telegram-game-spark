@@ -69,7 +69,7 @@ const DragonTigerGame = () => {
       setBetTimer((t) => {
         if (t <= 1) {
           clearInterval(id);
-          if (bets.dragon + bets.tiger + bets.tie > 0) deal();
+          deal();
           return 15;
         }
         return t - 1;
@@ -115,8 +115,11 @@ const DragonTigerGame = () => {
   };
 
   const deal = () => {
-    if (phase !== "betting" || totalBet <= 0 || currentBalance < totalBet) return;
-    if (activeWallet === "dollar") setLocalDollarAdj((p) => p - totalBet); else setLocalStarAdj((p) => p - totalBet);
+    if (phase !== "betting") return;
+    if (totalBet > 0 && currentBalance < totalBet) return;
+    if (totalBet > 0) {
+      if (activeWallet === "dollar") setLocalDollarAdj((p) => p - totalBet); else setLocalStarAdj((p) => p - totalBet);
+    }
     if (soundRef.current) playSpinSound();
     setLastBets(bets);
     setPhase("dealing");
@@ -169,9 +172,11 @@ const DragonTigerGame = () => {
         if (soundRef.current) playLoseSound();
       }
 
-      reportGameResult({ betAmount: totalBet, winAmount: payout, currency: activeWallet, game: "dragon-tiger" })
-        .then(() => { setLocalDollarAdj(0); setLocalStarAdj(0); refreshBalance(); })
-        .catch(console.error);
+      if (totalBet > 0) {
+        reportGameResult({ betAmount: totalBet, winAmount: payout, currency: activeWallet, game: "dragon-tiger" })
+          .then(() => { setLocalDollarAdj(0); setLocalStarAdj(0); refreshBalance(); })
+          .catch(console.error);
+      }
 
       setPhase("result");
       setResultTimer(4);
