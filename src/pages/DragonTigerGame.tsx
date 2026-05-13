@@ -31,8 +31,8 @@ const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
 
 // Image intrinsic aspect ratio (width / height)
-const BG_W = 928;
-const BG_H = 1832;
+const BG_W = 768;
+const BG_H = 1376;
 
 const DragonTigerGame = () => {
   const navigate = useNavigate();
