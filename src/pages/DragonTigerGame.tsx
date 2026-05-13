@@ -276,6 +276,13 @@ const DragonTigerGame = () => {
     </div>
   );
 
+  const replayWinVideo = (node: HTMLVideoElement | null) => {
+    if (!node) return;
+    node.currentTime = 0;
+    const playPromise = node.play();
+    if (playPromise) playPromise.catch(() => undefined);
+  };
+
   return (
     <div
       className="fixed inset-0 w-full h-full overflow-hidden flex items-center justify-center"
@@ -434,7 +441,7 @@ const DragonTigerGame = () => {
         <AnimatePresence>
           {phase === "result" && winner === "dragon" && (
             <motion.div
-              key="dragon-win-video"
+              key={`dragon-win-video-${winEffectKey}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
               className="absolute overflow-hidden pointer-events-none"
@@ -446,7 +453,8 @@ const DragonTigerGame = () => {
             >
               <video
                 src={blueFireAsset.url}
-                autoPlay loop muted playsInline
+                autoPlay loop muted playsInline preload="auto"
+                ref={replayWinVideo}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
               />
@@ -458,7 +466,7 @@ const DragonTigerGame = () => {
           )}
           {phase === "result" && winner === "tiger" && (
             <motion.div
-              key="tiger-win-video"
+              key={`tiger-win-video-${winEffectKey}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
               className="absolute overflow-hidden pointer-events-none"
@@ -470,7 +478,8 @@ const DragonTigerGame = () => {
             >
               <video
                 src={orangeFireAsset.url}
-                autoPlay loop muted playsInline
+                autoPlay loop muted playsInline preload="auto"
+                ref={replayWinVideo}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ mixBlendMode: "screen", filter: "saturate(1.4) brightness(1.15)" }}
               />
@@ -482,7 +491,7 @@ const DragonTigerGame = () => {
           )}
           {phase === "result" && winner === "tie" && (
             <motion.div
-              key="tie-win-video"
+              key={`tie-win-video-${winEffectKey}`}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
               className="absolute overflow-hidden pointer-events-none"
@@ -494,7 +503,8 @@ const DragonTigerGame = () => {
             >
               <video
                 src={orangeFireAsset.url}
-                autoPlay loop muted playsInline
+                autoPlay loop muted playsInline preload="auto"
+                ref={replayWinVideo}
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ mixBlendMode: "screen", filter: "hue-rotate(90deg) saturate(1.5) brightness(1.1)" }}
               />
