@@ -32,7 +32,7 @@ const STARTAPP_GAME_ROUTES: Record<string, string> = {
   g_greedy: "/greedy-king",
   g_plinko: "/plinko",
   g_chicken: "/chicken-road",
-  g_dragontiger: "/dragon-tiger",
+  
 };
 
 const StartParamNavigator = () => {
