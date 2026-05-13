@@ -317,16 +317,16 @@ const DragonTigerGame = () => {
           {phase === "dealing" ? "…" : phase === "result" ? resultTimer : betTimer}
         </div>
 
-        {/* DRAGON & TIGER CARDS — over painted card backs */}
+        {/* DRAGON & TIGER CARDS — fit exactly inside painted card-back frames */}
         <div
-          className="absolute"
-          style={{ left: "27%", top: "39%", width: "18%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
+          className="absolute overflow-hidden"
+          style={{ left: "29.5%", top: "39.5%", width: "15.5%", aspectRatio: "5/7.5", visibility: phase === "betting" ? "hidden" : "visible" }}
         >
           {renderCard(dragonCard)}
         </div>
         <div
-          className="absolute"
-          style={{ left: "55%", top: "39%", width: "18%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
+          className="absolute overflow-hidden"
+          style={{ left: "55%", top: "39.5%", width: "15.5%", aspectRatio: "5/7.5", visibility: phase === "betting" ? "hidden" : "visible" }}
         >
           {renderCard(tigerCard)}
         </div>
