@@ -14,8 +14,6 @@ import {
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult } from "@/lib/telegram";
 import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
-import blueFireAsset from "@/assets/dt-blue-fire.mp4.asset.json";
-import orangeFireAsset from "@/assets/dt-orange-fire.mp4.asset.json";
 
 type Side = "dragon" | "tiger" | "tie";
 type Phase = "betting" | "dealing" | "result";
@@ -35,6 +33,8 @@ const CHIP_VALUES = [1, 10, 50, 100, 500];
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
 const BG_H = 1376;
+const DRAGON_WIN_EFFECT_SRC = "/effects/dt-blue-keyed.webm";
+const TIGER_WIN_EFFECT_SRC = "/effects/dt-orange-keyed.webm";
 
 const DragonTigerGame = () => {
   const navigate = useNavigate();
@@ -77,7 +77,7 @@ const DragonTigerGame = () => {
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); clearRoundTimeouts(); }, []);
   useEffect(() => {
-    [blueFireAsset.url, orangeFireAsset.url].forEach((src) => {
+    [DRAGON_WIN_EFFECT_SRC, TIGER_WIN_EFFECT_SRC].forEach((src) => {
       const video = document.createElement("video");
       video.src = src;
       video.muted = true;
