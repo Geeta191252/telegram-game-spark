@@ -319,17 +319,35 @@ const DragonTigerGame = () => {
 
         {/* DRAGON & TIGER CARDS — fit exactly inside painted card-back frames */}
         <div
-          className="absolute overflow-hidden rounded-md"
-          style={{ left: "25.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1" }}
+          className="absolute rounded-md"
+          style={{
+            left: "25.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1",
+            boxShadow: "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75), inset 0 0 12px hsla(210, 100%, 70%, 0.6)",
+            animation: "dt-glow-blue 1.6s ease-in-out infinite",
+          }}
         >
-          {renderCard(dragonCard)}
+          <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(dragonCard)}</div>
         </div>
         <div
-          className="absolute overflow-hidden rounded-md"
-          style={{ left: "60.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1" }}
+          className="absolute rounded-md"
+          style={{
+            left: "60.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1",
+            boxShadow: "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8), inset 0 0 12px hsla(30, 100%, 65%, 0.6)",
+            animation: "dt-glow-red 1.6s ease-in-out infinite",
+          }}
         >
-          {renderCard(tigerCard)}
+          <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(tigerCard)}</div>
         </div>
+        <style>{`
+          @keyframes dt-glow-blue {
+            0%, 100% { box-shadow: 0 0 14px 3px hsla(210,100%,60%,0.95), 0 0 36px 8px hsla(210,100%,55%,0.75), inset 0 0 12px hsla(210,100%,70%,0.6); }
+            50% { box-shadow: 0 0 22px 6px hsla(210,100%,65%,1), 0 0 60px 14px hsla(210,100%,55%,0.95), inset 0 0 18px hsla(210,100%,75%,0.8); }
+          }
+          @keyframes dt-glow-red {
+            0%, 100% { box-shadow: 0 0 14px 3px hsla(20,100%,55%,0.95), 0 0 36px 8px hsla(15,100%,50%,0.8), inset 0 0 12px hsla(30,100%,65%,0.6); }
+            50% { box-shadow: 0 0 22px 6px hsla(20,100%,60%,1), 0 0 60px 14px hsla(10,100%,50%,1), inset 0 0 18px hsla(30,100%,70%,0.85); }
+          }
+        `}</style>
 
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
