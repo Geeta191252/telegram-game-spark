@@ -236,11 +236,11 @@ const DragonTigerGame = () => {
           <span className="sr-only"><BookOpen /></span>
         </button>
 
-        {/* CARDS overlay (over the painted card slots) */}
-        <div className="absolute" style={{ left: "33%", top: "20.5%", width: "13%", aspectRatio: "5/7" }}>
+        {/* CARDS overlay — only shown during dealing/result, betting shows painted cards */}
+        <div className="absolute" style={{ left: "33%", top: "20.5%", width: "13%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}>
           {renderCard(dragonCard)}
         </div>
-        <div className="absolute" style={{ left: "54%", top: "20.5%", width: "13%", aspectRatio: "5/7" }}>
+        <div className="absolute" style={{ left: "54%", top: "20.5%", width: "13%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}>
           {renderCard(tigerCard)}
         </div>
 
