@@ -320,13 +320,13 @@ const DragonTigerGame = () => {
         {/* DRAGON & TIGER CARDS — fit exactly inside painted card-back frames */}
         <div
           className="absolute overflow-hidden rounded-md"
-          style={{ left: "25.5%", top: "30.2%", width: "15%", aspectRatio: "3/4.6" }}
+          style={{ left: "25.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1" }}
         >
           {renderCard(dragonCard)}
         </div>
         <div
           className="absolute overflow-hidden rounded-md"
-          style={{ left: "60.5%", top: "30.2%", width: "15%", aspectRatio: "3/4.6" }}
+          style={{ left: "60.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1" }}
         >
           {renderCard(tigerCard)}
         </div>
