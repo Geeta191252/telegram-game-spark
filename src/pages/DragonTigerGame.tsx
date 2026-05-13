@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   playBetSound,
   playSpinSound,
@@ -82,21 +83,33 @@ const DragonTigerGame = () => {
   const sym = activeWallet === "dollar" ? "$" : "⭐";
 
   const addBet = (side: Side) => {
-    if (phase !== "betting") return;
-    if (currentBalance < totalBet + chip) return;
+    if (phase !== "betting") {
+      toast.error("Round in progress, wait for next round");
+      return;
+    }
+    if (currentBalance < totalBet + chip) {
+      toast.error(`Insufficient ${activeWallet === "dollar" ? "$" : "⭐"} balance — please deposit`);
+      return;
+    }
     setBets((p) => ({ ...p, [side]: p[side] + chip }));
     if (soundRef.current) playBetSound();
   };
   const doubleAllBets = () => {
     if (phase !== "betting" || totalBet === 0) return;
-    if (currentBalance < totalBet * 2) return;
+    if (currentBalance < totalBet * 2) {
+      toast.error("Insufficient balance to double");
+      return;
+    }
     setBets((p) => ({ dragon: p.dragon * 2, tiger: p.tiger * 2, tie: p.tie * 2 }));
     if (soundRef.current) playBetSound();
   };
   const repeatBets = () => {
     if (phase !== "betting" || !lastBets) return;
     const total = lastBets.dragon + lastBets.tiger + lastBets.tie;
-    if (currentBalance < total) return;
+    if (currentBalance < total) {
+      toast.error("Insufficient balance to repeat");
+      return;
+    }
     setBets(lastBets);
     if (soundRef.current) playBetSound();
   };
