@@ -264,23 +264,24 @@ const DragonTigerGame = () => {
           {renderCard(tigerCard)}
         </div>
 
-        {/* Timer disc on VS */}
-        {(phase === "dealing" || phase === "result") && (
-          <div
-            className="absolute flex items-center justify-center font-black"
-            style={{
-              left: "47%", top: "23%", width: "6%", aspectRatio: "1/1",
-              background: "radial-gradient(circle, hsla(0,80%,50%,0.95), hsla(0,80%,30%,0.95))",
-              borderRadius: "50%",
-              color: "white",
-              border: "2px solid hsl(45 95% 65%)",
-              boxShadow: "0 0 14px hsla(0,80%,50%,0.7)",
-              fontSize: 11,
-            }}
-          >
-            {phase === "dealing" ? "…" : resultTimer}
-          </div>
-        )}
+        {/* Timer disc on VS — shows betting countdown / dealing / result */}
+        <div
+          className="absolute flex items-center justify-center font-black"
+          style={{
+            left: "46%", top: "22.5%", width: "8%", aspectRatio: "1/1",
+            background: phase === "betting"
+              ? (totalBet > 0 ? "radial-gradient(circle, hsla(140,80%,45%,0.95), hsla(140,80%,25%,0.95))" : "transparent")
+              : "radial-gradient(circle, hsla(0,80%,50%,0.95), hsla(0,80%,30%,0.95))",
+            borderRadius: "50%",
+            color: "white",
+            border: phase === "betting" && totalBet === 0 ? "none" : "2px solid hsl(45 95% 65%)",
+            boxShadow: phase === "betting" && totalBet === 0 ? "none" : "0 0 14px hsla(0,80%,50%,0.7)",
+            fontSize: 12,
+            pointerEvents: "none",
+          }}
+        >
+          {phase === "dealing" ? "…" : phase === "result" ? resultTimer : (totalBet > 0 ? betTimer : "")}
+        </div>
 
         {/* HISTORY overlay (over painted pills) */}
         <div className="absolute flex items-center gap-[2px] justify-center" style={{ left: "20%", right: "20%", top: "32.4%", height: "3.2%" }}>
