@@ -327,6 +327,17 @@ const DragonTigerGame = () => {
           }}
         >
           <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(dragonCard)}</div>
+          {phase === "result" && winner === "dragon" && (
+            <div className="dt-fire-wrap" aria-hidden>
+              <div className="dt-flame dt-flame-a" />
+              <div className="dt-flame dt-flame-b" />
+              <div className="dt-flame dt-flame-c" />
+              <div className="dt-ember dt-ember-1" />
+              <div className="dt-ember dt-ember-2" />
+              <div className="dt-ember dt-ember-3" />
+              <div className="dt-ember dt-ember-4" />
+            </div>
+          )}
         </div>
         <div
           className="absolute rounded-md"
@@ -337,6 +348,17 @@ const DragonTigerGame = () => {
           }}
         >
           <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(tigerCard)}</div>
+          {phase === "result" && winner === "tiger" && (
+            <div className="dt-fire-wrap" aria-hidden>
+              <div className="dt-flame dt-flame-a" />
+              <div className="dt-flame dt-flame-b" />
+              <div className="dt-flame dt-flame-c" />
+              <div className="dt-ember dt-ember-1" />
+              <div className="dt-ember dt-ember-2" />
+              <div className="dt-ember dt-ember-3" />
+              <div className="dt-ember dt-ember-4" />
+            </div>
+          )}
         </div>
         <style>{`
           @keyframes dt-glow-blue {
@@ -346,6 +368,57 @@ const DragonTigerGame = () => {
           @keyframes dt-glow-red {
             0%, 100% { box-shadow: 0 0 14px 3px hsla(20,100%,55%,0.95), 0 0 36px 8px hsla(15,100%,50%,0.8), inset 0 0 12px hsla(30,100%,65%,0.6); }
             50% { box-shadow: 0 0 22px 6px hsla(20,100%,60%,1), 0 0 60px 14px hsla(10,100%,50%,1), inset 0 0 18px hsla(30,100%,70%,0.85); }
+          }
+          .dt-fire-wrap {
+            position: absolute;
+            left: -20%;
+            right: -20%;
+            bottom: -10%;
+            height: 130%;
+            pointer-events: none;
+            filter: drop-shadow(0 0 14px hsla(20,100%,55%,0.95)) drop-shadow(0 0 28px hsla(45,100%,55%,0.75));
+            mix-blend-mode: screen;
+            z-index: 4;
+          }
+          .dt-flame {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 70%;
+            height: 110%;
+            transform: translateX(-50%);
+            border-radius: 50% 50% 35% 35% / 60% 60% 40% 40%;
+            background:
+              radial-gradient(ellipse at 50% 90%, hsla(55,100%,85%,0.95) 0%, hsla(45,100%,60%,0.9) 25%, hsla(25,100%,50%,0.85) 50%, hsla(10,100%,45%,0.7) 70%, hsla(0,90%,30%,0) 100%);
+            transform-origin: 50% 100%;
+            animation: dt-fire-rise 0.85s ease-out infinite;
+          }
+          .dt-flame-a { animation-delay: 0s; opacity: 0.95; }
+          .dt-flame-b { width: 50%; animation-delay: 0.18s; opacity: 0.85; filter: blur(1px); }
+          .dt-flame-c { width: 35%; height: 130%; animation-delay: 0.34s; opacity: 0.95; }
+          @keyframes dt-fire-rise {
+            0%   { transform: translateX(-50%) scale(0.85, 0.7) skewX(-4deg); opacity: 0.7; }
+            30%  { transform: translateX(-52%) scale(1.05, 1.1) skewX(3deg); opacity: 1; }
+            55%  { transform: translateX(-48%) scale(0.95, 1.25) skewX(-2deg); opacity: 0.95; }
+            80%  { transform: translateX(-51%) scale(1.0, 1.1) skewX(2deg); opacity: 0.85; }
+            100% { transform: translateX(-50%) scale(0.9, 0.85) skewX(0); opacity: 0.7; }
+          }
+          .dt-ember {
+            position: absolute;
+            bottom: 10%;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, hsla(50,100%,80%,1) 0%, hsla(25,100%,55%,0.9) 60%, transparent 100%);
+            animation: dt-ember-up 1.4s linear infinite;
+          }
+          .dt-ember-1 { left: 30%; animation-delay: 0s; }
+          .dt-ember-2 { left: 55%; animation-delay: 0.4s; }
+          .dt-ember-3 { left: 70%; animation-delay: 0.8s; width: 4px; height: 4px; }
+          .dt-ember-4 { left: 42%; animation-delay: 1.1s; width: 5px; height: 5px; }
+          @keyframes dt-ember-up {
+            0%   { transform: translateY(0) scale(1); opacity: 0; }
+            15%  { opacity: 1; }
+            100% { transform: translateY(-180%) scale(0.4); opacity: 0; }
           }
         `}</style>
 
