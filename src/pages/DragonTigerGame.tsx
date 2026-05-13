@@ -17,6 +17,8 @@ import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
 
 type Side = "dragon" | "tiger" | "tie";
 type Phase = "betting" | "dealing" | "result";
+const BETTING_SECONDS = 15;
+const RESULT_SECONDS = 3;
 
 interface CardData { rank: number; suit: number; }
 const SUITS = [
@@ -59,18 +61,27 @@ const DragonTigerGame = () => {
   const [resultTimer, setResultTimer] = useState(15);
   const [history, setHistory] = useState<Side[]>(["dragon","tiger","tiger","tiger","tiger","tiger","dragon","tiger","dragon","dragon"]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const roundTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const latestRoundRef = useRef({ phase, bets, activeWallet, currentBalance });
+  latestRoundRef.current = { phase, bets, activeWallet, currentBalance };
+
+  const clearRoundTimeouts = () => {
+    roundTimeoutsRef.current.forEach(clearTimeout);
+    roundTimeoutsRef.current = [];
+  };
 
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); clearRoundTimeouts(); }, []);
 
   useEffect(() => {
     if (phase !== "betting") return;
+    setBetTimer(BETTING_SECONDS);
     const id = setInterval(() => {
       setBetTimer((t) => {
         if (t <= 1) {
           clearInterval(id);
-          deal();
-          return 15;
+          setTimeout(() => deal(), 0);
+          return 0;
         }
         return t - 1;
       });
@@ -115,22 +126,27 @@ const DragonTigerGame = () => {
   };
 
   const deal = () => {
-    if (phase !== "betting") return;
-    if (totalBet > 0 && currentBalance < totalBet) return;
-    if (totalBet > 0) {
-      if (activeWallet === "dollar") setLocalDollarAdj((p) => p - totalBet); else setLocalStarAdj((p) => p - totalBet);
+    const snapshot = latestRoundRef.current;
+    const roundBets = snapshot.bets;
+    const roundTotalBet = roundBets.dragon + roundBets.tiger + roundBets.tie;
+    const roundWallet = snapshot.activeWallet;
+    if (snapshot.phase !== "betting") return;
+    if (roundTotalBet > 0 && snapshot.currentBalance < roundTotalBet) return;
+    if (roundTotalBet > 0) {
+      if (roundWallet === "dollar") setLocalDollarAdj((p) => p - roundTotalBet); else setLocalStarAdj((p) => p - roundTotalBet);
     }
+    clearRoundTimeouts();
     if (soundRef.current) playSpinSound();
-    setLastBets(bets);
+    setLastBets(roundBets);
     setPhase("dealing");
     setDragonCard(null); setTigerCard(null); setWinner(null);
 
     let wDragon = 47, wTiger = 47, wTie = 6;
-    if (bets.dragon > 0) wDragon *= 0.45;
-    if (bets.tiger > 0) wTiger *= 0.45;
-    if (bets.tie > 0) wTie *= 0.3;
-    if (bets.dragon > 0 && bets.tiger === 0 && bets.tie === 0) wTiger *= 1.6;
-    if (bets.tiger > 0 && bets.dragon === 0 && bets.tie === 0) wDragon *= 1.6;
+    if (roundBets.dragon > 0) wDragon *= 0.45;
+    if (roundBets.tiger > 0) wTiger *= 0.45;
+    if (roundBets.tie > 0) wTie *= 0.3;
+    if (roundBets.dragon > 0 && roundBets.tiger === 0 && roundBets.tie === 0) wTiger *= 1.6;
+    if (roundBets.tiger > 0 && roundBets.dragon === 0 && roundBets.tie === 0) wDragon *= 1.6;
 
     let r = Math.random() * (wDragon + wTiger + wTie);
     let outcome: Side = "dragon";
@@ -150,15 +166,16 @@ const DragonTigerGame = () => {
     const finalDragon = { rank: dRank, suit: Math.floor(Math.random() * 4) };
     const finalTiger = { rank: tRank, suit: Math.floor(Math.random() * 4) };
 
-    setTimeout(() => { setDragonCard(finalDragon); if (soundRef.current) playResultReveal(); }, 700);
-    setTimeout(() => { setTigerCard(finalTiger); if (soundRef.current) playResultReveal(); }, 1500);
-    setTimeout(() => {
+    roundTimeoutsRef.current = [
+      setTimeout(() => { setDragonCard(finalDragon); if (soundRef.current) playResultReveal(); }, 700),
+      setTimeout(() => { setTigerCard(finalTiger); if (soundRef.current) playResultReveal(); }, 1500),
+      setTimeout(() => {
       let payout = 0;
-      if (outcome === "dragon") payout = bets.dragon * 2;
-      else if (outcome === "tiger") payout = bets.tiger * 2;
-      else payout = bets.tie * 9 + (bets.dragon + bets.tiger) * 0.5;
+      if (outcome === "dragon") payout = roundBets.dragon * 2;
+      else if (outcome === "tiger") payout = roundBets.tiger * 2;
+      else payout = roundBets.tie * 9 + (roundBets.dragon + roundBets.tiger) * 0.5;
       payout = Math.round(payout * 100) / 100;
-      const profit = payout - totalBet;
+      const profit = payout - roundTotalBet;
 
       setWinner(outcome);
       setHistory((h) => [outcome, ...h].slice(0, 10));
@@ -172,28 +189,29 @@ const DragonTigerGame = () => {
         if (soundRef.current) playLoseSound();
       }
 
-      if (totalBet > 0) {
-        reportGameResult({ betAmount: totalBet, winAmount: payout, currency: activeWallet, game: "dragon-tiger" })
+      if (roundTotalBet > 0) {
+        reportGameResult({ betAmount: roundTotalBet, winAmount: payout, currency: roundWallet, game: "dragon-tiger" })
           .then(() => { setLocalDollarAdj(0); setLocalStarAdj(0); refreshBalance(); })
           .catch(console.error);
       }
 
       setPhase("result");
-      setResultTimer(3);
+      setResultTimer(RESULT_SECONDS);
+      if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         setResultTimer((p) => {
           if (p <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
             setBets({ dragon: 0, tiger: 0, tie: 0 });
             setDragonCard(null); setTigerCard(null); setWinner(null);
-            setBetTimer(15);
             setPhase("betting");
-            return 15;
+            return 0;
           }
           return p - 1;
         });
       }, 1000);
-    }, 2400);
+      }, 2400),
+    ];
   };
 
   const renderCard = (card: CardData | null) => (
