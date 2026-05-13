@@ -303,12 +303,13 @@ const DragonTigerGame = () => {
         <div
           className="absolute flex items-center justify-center font-black"
           style={{
-            left: "50%", top: "21%", transform: "translate(-50%, -50%)",
-            width: "16%", aspectRatio: "1/1",
+            left: "50%", top: "24%", transform: "translate(-50%, -50%)",
+            width: "20%", aspectRatio: "1/1",
             borderRadius: "50%",
             color: "hsl(50 95% 75%)",
-            fontSize: "min(7vw, 36px)",
-            textShadow: "0 0 10px hsla(45,95%,70%,0.95), 0 2px 0 hsla(0,0%,0%,0.7)",
+            fontSize: "min(13vw, 64px)",
+            lineHeight: 1,
+            textShadow: "0 0 14px hsla(45,95%,70%,0.95), 0 3px 0 hsla(0,0%,0%,0.75)",
             pointerEvents: "none",
             zIndex: 5,
           }}
@@ -319,13 +320,13 @@ const DragonTigerGame = () => {
         {/* DRAGON & TIGER CARDS — over painted card backs */}
         <div
           className="absolute"
-          style={{ left: "32%", top: "33%", width: "12%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
+          style={{ left: "27%", top: "39%", width: "18%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
         >
           {renderCard(dragonCard)}
         </div>
         <div
           className="absolute"
-          style={{ left: "56%", top: "33%", width: "12%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
+          style={{ left: "55%", top: "39%", width: "18%", aspectRatio: "5/7", visibility: phase === "betting" ? "hidden" : "visible" }}
         >
           {renderCard(tigerCard)}
         </div>
