@@ -172,9 +172,11 @@ const DragonTigerGame = () => {
         if (soundRef.current) playLoseSound();
       }
 
-      reportGameResult({ betAmount: totalBet, winAmount: payout, currency: activeWallet, game: "dragon-tiger" })
-        .then(() => { setLocalDollarAdj(0); setLocalStarAdj(0); refreshBalance(); })
-        .catch(console.error);
+      if (totalBet > 0) {
+        reportGameResult({ betAmount: totalBet, winAmount: payout, currency: activeWallet, game: "dragon-tiger" })
+          .then(() => { setLocalDollarAdj(0); setLocalStarAdj(0); refreshBalance(); })
+          .catch(console.error);
+      }
 
       setPhase("result");
       setResultTimer(4);
