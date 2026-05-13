@@ -405,16 +405,13 @@ const DragonTigerGame = () => {
           {sym}{totalBet.toFixed(2)}
         </div>
 
-        {/* + button → DEAL when bets present, else add chip to dragon (default action visual) */}
+        {/* + button → DEAL */}
         <button
-          onClick={() => {
-            if (totalBet > 0) deal();
-            else addBet("dragon");
-          }}
-          disabled={phase !== "betting"}
+          onClick={deal}
+          disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet}
           className="absolute"
           style={{ left: "65%", top: "92.6%", width: "10%", aspectRatio: "1/1", borderRadius: "50%" }}
-          aria-label={totalBet > 0 ? "Deal" : "Add chip"}
+          aria-label="Deal cards"
         >
           <AnimatePresence>
             {phase === "betting" && totalBet > 0 && (
