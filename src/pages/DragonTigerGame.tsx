@@ -65,9 +65,14 @@ const DragonTigerGame = () => {
 
   const addBet = (side: Side) => {
     if (phase !== "betting") return;
-    const amt = doubleMode ? chip * 2 : chip;
-    if (currentBalance < totalBet + amt) return;
-    setBets((p) => ({ ...p, [side]: p[side] + amt }));
+    if (currentBalance < totalBet + chip) return;
+    setBets((p) => ({ ...p, [side]: p[side] + chip }));
+    if (soundRef.current) playBetSound();
+  };
+  const doubleAllBets = () => {
+    if (phase !== "betting" || totalBet === 0) return;
+    if (currentBalance < totalBet * 2) return;
+    setBets((p) => ({ dragon: p.dragon * 2, tiger: p.tiger * 2, tie: p.tie * 2 }));
     if (soundRef.current) playBetSound();
   };
   const repeatBets = () => {
