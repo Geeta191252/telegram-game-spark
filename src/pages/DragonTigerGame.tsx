@@ -342,56 +342,6 @@ const DragonTigerGame = () => {
           )}
         </button>
 
-        {/* PLAYER AVATARS — left & right of betting panels */}
-        {(() => {
-          const players = [
-            { name: "Kahn", badge: "Winner", side: "left", top: "40%" },
-            { name: "Kapil", side: "left", top: "52%" },
-            { name: "Avasa", side: "left", top: "64%" },
-            { name: "Arun", badge: "Lucky", side: "right", top: "40%" },
-            { name: "Sumanth", side: "right", top: "52%" },
-            { name: "Cyrus", side: "right", top: "64%" },
-          ];
-          const colors = ["hsl(15 80% 55%)","hsl(280 70% 60%)","hsl(190 80% 55%)","hsl(45 90% 55%)","hsl(140 70% 50%)","hsl(330 75% 60%)"];
-          return players.map((p, i) => {
-            const isLeft = p.side === "left";
-            return (
-              <div
-                key={p.name}
-                className="absolute flex flex-col items-center"
-                style={{ [isLeft ? "left" : "right"]: "1.5%", top: p.top, width: "11%", pointerEvents: "none" }}
-              >
-                {p.badge && (
-                  <div
-                    className="px-1 py-[1px] rounded-sm font-black text-white text-[7px] mb-[1px]"
-                    style={{
-                      background: p.badge === "Winner" ? "linear-gradient(135deg, hsl(45 95% 55%), hsl(25 85% 45%))" : "linear-gradient(135deg, hsl(280 75% 60%), hsl(220 80% 50%))",
-                      boxShadow: "0 1px 3px hsla(0,0%,0%,0.6)",
-                    }}
-                  >
-                    {p.badge}
-                  </div>
-                )}
-                <div
-                  className="rounded-full flex items-center justify-center font-black text-white text-[10px]"
-                  style={{
-                    width: "100%", aspectRatio: "1/1",
-                    background: `radial-gradient(circle at 30% 30%, ${colors[i]}, hsla(0,0%,10%,0.9))`,
-                    border: "2px solid hsl(45 90% 55%)",
-                    boxShadow: "0 2px 6px hsla(0,0%,0%,0.6), inset 0 1px 0 hsla(0,0%,100%,0.3)",
-                  }}
-                >
-                  {p.name[0]}
-                </div>
-                <div className="text-[7px] font-bold text-white mt-[1px] truncate w-full text-center"
-                  style={{ textShadow: "0 1px 2px hsla(0,0%,0%,0.9)" }}>
-                  {p.name}
-                </div>
-              </div>
-            );
-          });
-        })()}
-
         {/* Player count clickable (wallet toggle) */}
         <button
           onClick={() => { if (phase === "betting" && totalBet === 0) setActiveWallet((w) => w === "dollar" ? "star" : "dollar"); }}
