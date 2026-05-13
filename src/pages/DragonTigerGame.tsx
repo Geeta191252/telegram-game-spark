@@ -14,6 +14,8 @@ import {
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult } from "@/lib/telegram";
 import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
+import blueFireAsset from "@/assets/dt-blue-fire.mp4.asset.json";
+import orangeFireAsset from "@/assets/dt-orange-fire.mp4.asset.json";
 
 type Side = "dragon" | "tiger" | "tie";
 type Phase = "betting" | "dealing" | "result";
