@@ -46,7 +46,7 @@ const DragonTigerGame = () => {
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
   const [chip, setChip] = useState(10);
-  const [doubleMode, setDoubleMode] = useState(false);
+  const [betTimer, setBetTimer] = useState(15);
 
   const [phase, setPhase] = useState<Phase>("betting");
   const [dragonCard, setDragonCard] = useState<CardData | null>(null);
@@ -60,14 +60,33 @@ const DragonTigerGame = () => {
   useEffect(() => { if (soundOn) startBgMusic(); else stopBgMusic(); return () => stopBgMusic(); }, [soundOn]);
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
+  // Betting countdown — only ticks while in betting phase with bets placed; auto-deals at 0
+  useEffect(() => {
+    if (phase !== "betting") return;
+    if (bets.dragon + bets.tiger + bets.tie === 0) { setBetTimer(15); return; }
+    const id = setInterval(() => {
+      setBetTimer((t) => {
+        if (t <= 1) { clearInterval(id); deal(); return 0; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, bets.dragon, bets.tiger, bets.tie]);
+
   const totalBet = bets.dragon + bets.tiger + bets.tie;
   const sym = activeWallet === "dollar" ? "$" : "⭐";
 
   const addBet = (side: Side) => {
     if (phase !== "betting") return;
-    const amt = doubleMode ? chip * 2 : chip;
-    if (currentBalance < totalBet + amt) return;
-    setBets((p) => ({ ...p, [side]: p[side] + amt }));
+    if (currentBalance < totalBet + chip) return;
+    setBets((p) => ({ ...p, [side]: p[side] + chip }));
+    if (soundRef.current) playBetSound();
+  };
+  const doubleAllBets = () => {
+    if (phase !== "betting" || totalBet === 0) return;
+    if (currentBalance < totalBet * 2) return;
+    setBets((p) => ({ dragon: p.dragon * 2, tiger: p.tiger * 2, tie: p.tie * 2 }));
     if (soundRef.current) playBetSound();
   };
   const repeatBets = () => {
@@ -145,6 +164,7 @@ const DragonTigerGame = () => {
             if (timerRef.current) clearInterval(timerRef.current);
             setBets({ dragon: 0, tiger: 0, tie: 0 });
             setDragonCard(null); setTigerCard(null); setWinner(null);
+            setBetTimer(15);
             setPhase("betting");
             return 15;
           }
@@ -244,23 +264,24 @@ const DragonTigerGame = () => {
           {renderCard(tigerCard)}
         </div>
 
-        {/* Timer disc on VS */}
-        {(phase === "dealing" || phase === "result") && (
-          <div
-            className="absolute flex items-center justify-center font-black"
-            style={{
-              left: "47%", top: "23%", width: "6%", aspectRatio: "1/1",
-              background: "radial-gradient(circle, hsla(0,80%,50%,0.95), hsla(0,80%,30%,0.95))",
-              borderRadius: "50%",
-              color: "white",
-              border: "2px solid hsl(45 95% 65%)",
-              boxShadow: "0 0 14px hsla(0,80%,50%,0.7)",
-              fontSize: 11,
-            }}
-          >
-            {phase === "dealing" ? "…" : resultTimer}
-          </div>
-        )}
+        {/* Timer disc on VS — shows betting countdown / dealing / result */}
+        <div
+          className="absolute flex items-center justify-center font-black"
+          style={{
+            left: "46%", top: "22.5%", width: "8%", aspectRatio: "1/1",
+            background: phase === "betting"
+              ? (totalBet > 0 ? "radial-gradient(circle, hsla(140,80%,45%,0.95), hsla(140,80%,25%,0.95))" : "transparent")
+              : "radial-gradient(circle, hsla(0,80%,50%,0.95), hsla(0,80%,30%,0.95))",
+            borderRadius: "50%",
+            color: "white",
+            border: phase === "betting" && totalBet === 0 ? "none" : "2px solid hsl(45 95% 65%)",
+            boxShadow: phase === "betting" && totalBet === 0 ? "none" : "0 0 14px hsla(0,80%,50%,0.7)",
+            fontSize: 12,
+            pointerEvents: "none",
+          }}
+        >
+          {phase === "dealing" ? "…" : phase === "result" ? resultTimer : (totalBet > 0 ? betTimer : "")}
+        </div>
 
         {/* HISTORY overlay (over painted pills) */}
         <div className="absolute flex items-center gap-[2px] justify-center" style={{ left: "20%", right: "20%", top: "32.4%", height: "3.2%" }}>
@@ -384,16 +405,13 @@ const DragonTigerGame = () => {
           {sym}{totalBet.toFixed(2)}
         </div>
 
-        {/* + button → DEAL when bets present, else add chip to dragon (default action visual) */}
+        {/* + button → DEAL */}
         <button
-          onClick={() => {
-            if (totalBet > 0) deal();
-            else addBet("dragon");
-          }}
-          disabled={phase !== "betting"}
+          onClick={deal}
+          disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet}
           className="absolute"
           style={{ left: "65%", top: "92.6%", width: "10%", aspectRatio: "1/1", borderRadius: "50%" }}
-          aria-label={totalBet > 0 ? "Deal" : "Add chip"}
+          aria-label="Deal cards"
         >
           <AnimatePresence>
             {phase === "betting" && totalBet > 0 && (
@@ -406,17 +424,18 @@ const DragonTigerGame = () => {
           </AnimatePresence>
         </button>
 
-        {/* x2 DOUBLE chip toggle */}
+        {/* x2 DOUBLE — instantly doubles all current bets */}
         <button
-          onClick={() => phase === "betting" && setDoubleMode((d) => !d)}
+          onClick={doubleAllBets}
+          disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet * 2}
           className="absolute"
           style={{ right: "8%", top: "92.6%", width: "11%", aspectRatio: "1/1", borderRadius: "50%" }}
-          aria-label="Toggle double bet"
+          aria-label="Double bet"
         >
-          {doubleMode && (
+          {phase === "betting" && totalBet > 0 && currentBalance >= totalBet * 2 && (
             <div
-              className="absolute inset-0 rounded-full"
-              style={{ boxShadow: "0 0 0 3px hsl(45 95% 60%), 0 0 18px hsla(45,95%,60%,0.9)" }}
+              className="absolute inset-0 rounded-full animate-pulse"
+              style={{ boxShadow: "0 0 0 3px hsl(140 80% 50%), 0 0 18px hsla(140,80%,50%,0.9)" }}
             />
           )}
         </button>
