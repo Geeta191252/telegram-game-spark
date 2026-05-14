@@ -54,6 +54,7 @@ const DragonTigerGame = () => {
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
   const [chip, setChip] = useState(10);
+  const [chipFeedbackKey, setChipFeedbackKey] = useState(0);
   const [betTimer, setBetTimer] = useState(15);
 
   const [phase, setPhase] = useState<Phase>("betting");
@@ -127,6 +128,7 @@ const DragonTigerGame = () => {
       return;
     }
     setChip(value);
+    setChipFeedbackKey((key) => key + 1);
     if (soundRef.current) playBetSound();
   };
   const doubleAllBets = () => {
@@ -624,20 +626,42 @@ const DragonTigerGame = () => {
                 key={v}
                 type="button"
                 onPointerDown={(event) => { event.preventDefault(); selectChip(v); }}
-                className="absolute rounded-full touch-manipulation transition-transform"
+                className="absolute rounded-full touch-manipulation transition-transform flex items-center justify-center"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
                   top: "50%",
                   width: "16.5%",
                   aspectRatio: "1/1",
-                  background: "transparent",
+                  background: isActive ? "hsla(140, 80%, 45%, 0.18)" : "transparent",
                   transform: isActive ? "translate(-50%, -54%) scale(1.08)" : "translate(-50%, -50%)",
-                  filter: isActive ? "drop-shadow(0 0 12px hsla(45,95%,60%,0.95))" : "none",
+                  boxShadow: isActive ? "0 0 0 3px hsl(140 90% 55%), 0 0 22px hsl(140 90% 55%), inset 0 0 18px hsla(140,90%,55%,0.35)" : "none",
+                  filter: isActive ? "drop-shadow(0 0 12px hsla(140,90%,55%,0.95))" : "none",
                   WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
                 aria-pressed={isActive}
-              />
+              >
+                {isActive && (
+                  <motion.span
+                    key={chipFeedbackKey}
+                    initial={{ scale: 0.35, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="absolute flex items-center justify-center rounded-full font-black"
+                    style={{
+                      right: "-4%",
+                      top: "-9%",
+                      width: "38%",
+                      aspectRatio: "1/1",
+                      background: "hsl(140 90% 45%)",
+                      color: "hsl(0 0% 100%)",
+                      fontSize: "min(3.2vw, 15px)",
+                      boxShadow: "0 0 10px hsla(140,90%,55%,0.9), 0 2px 4px hsla(0,0%,0%,0.55)",
+                    }}
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </button>
             );
           })}
         </div>
@@ -653,7 +677,7 @@ const DragonTigerGame = () => {
           className="absolute flex items-center justify-center font-black text-white"
           style={{ left: "20%", right: "32%", top: "96.4%", height: "3.5%", fontSize: "min(4vw, 18px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsla(0,0%,0%,0.6)" }}
         >
-          {totalBet.toFixed(2)}
+          {totalBet > 0 ? totalBet.toFixed(2) : `${sym}${chip}`}
         </div>
         <button
           onClick={deal}
