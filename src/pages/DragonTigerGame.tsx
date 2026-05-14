@@ -628,7 +628,7 @@ const DragonTigerGame = () => {
               animate={{ scale: 1.04, opacity: 0 }}
               transition={{ duration: 0.45 }}
               className="absolute inset-0 rounded-r-full pointer-events-none"
-              style={{ boxShadow: "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" }}
+              style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" : "inset 0 0 0 5px hsl(0 85% 60%), 0 0 30px hsl(0 85% 60%)" }}
             />
           )}
           {bets.tiger > 0 && (
@@ -713,7 +713,7 @@ const DragonTigerGame = () => {
           className="absolute flex items-center justify-center font-black text-white"
           style={{ left: "20%", right: "32%", top: "96.4%", height: "3.5%", fontSize: "min(4vw, 18px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsla(0,0%,0%,0.6)" }}
         >
-          {totalBet > 0 ? totalBet.toFixed(2) : phase === "betting" ? `${sym}${chip}` : "0.00"}
+          {betStatus || (totalBet > 0 ? totalBet.toFixed(2) : phase === "betting" ? `${sym}${chip}` : "0.00")}
         </div>
         <button
           onClick={deal}
