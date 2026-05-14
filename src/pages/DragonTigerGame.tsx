@@ -29,7 +29,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [20.5, 35.4, 50, 64.6, 79.5];
+const CHIP_HIT_POSITIONS = [19.2, 35.4, 50.8, 66.2, 81.5];
 const CHIP_LOOK: Record<number, { face: string; rim: string; label: string }> = {
   1: { face: "radial-gradient(circle at 32% 28%, hsl(48 55% 92%), hsl(43 52% 62%) 62%, hsl(35 48% 42%))", rim: "hsl(43 88% 58%)", label: "hsl(42 48% 42%)" },
   10: { face: "radial-gradient(circle at 32% 28%, hsl(165 78% 68%), hsl(164 76% 42%) 62%, hsl(170 72% 28%))", rim: "hsl(43 88% 58%)", label: "hsl(158 58% 25%)" },
@@ -666,6 +666,7 @@ const DragonTigerGame = () => {
           {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
             const look = CHIP_LOOK[v];
+            const activeXOffset = v === 500 ? "18%" : v === 1 ? "-18%" : "0%";
             return (
               <button
                 key={v}
@@ -675,7 +676,7 @@ const DragonTigerGame = () => {
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
                   top: "50%",
-                  width: "16.5%",
+                  width: "13.5%",
                   aspectRatio: "1/1",
                   background: "transparent",
                   border: 0,
@@ -694,8 +695,8 @@ const DragonTigerGame = () => {
                 {isActive && (
                   <motion.div
                     key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.9, y: "0%", opacity: 0.6 }}
-                    animate={{ scale: 1.55, y: "-26%", opacity: 1 }}
+                    initial={{ scale: 0.9, x: "0%", y: "0%", opacity: 0.6 }}
+                    animate={{ scale: 1.34, x: activeXOffset, y: "-30%", opacity: 1 }}
                     transition={{ type: "spring", stiffness: 380, damping: 22 }}
                     className="absolute inset-0 rounded-full pointer-events-none"
                   >
