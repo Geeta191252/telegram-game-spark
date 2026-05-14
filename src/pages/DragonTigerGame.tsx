@@ -135,6 +135,7 @@ const DragonTigerGame = () => {
     }
     setChip(value);
     setChipFeedbackKey((key) => key + 1);
+    setBetStatus(`${sym}${value}`);
     if (soundRef.current) playBetSound();
   };
   const doubleAllBets = () => {
