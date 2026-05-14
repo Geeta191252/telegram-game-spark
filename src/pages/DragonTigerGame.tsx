@@ -694,36 +694,34 @@ const DragonTigerGame = () => {
                 {isActive && (
                   <motion.div
                     key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 1.06, y: "0%" }}
-                    animate={{ scale: 1.42, y: "-18%" }}
-                    transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                    initial={{ scale: 0.9, y: "0%", opacity: 0.6 }}
+                    animate={{ scale: 1.55, y: "-26%", opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 22 }}
                     className="absolute inset-0 rounded-full pointer-events-none"
-                    style={{
-                      filter: "drop-shadow(0 0 10px hsla(50, 100%, 74%, 1)) drop-shadow(0 0 24px hsla(45, 100%, 56%, 0.95))",
-                    }}
                   >
+                    {/* soft golden halo behind chip */}
                     <div
-                      className="absolute inset-0 rounded-full flex items-center justify-center font-black"
+                      className="absolute rounded-full"
                       style={{
-                        background: `conic-gradient(from 12deg, ${look.rim}, hsl(48 98% 74%) 10%, hsl(34 72% 38%) 20%, ${look.rim} 30%, hsl(50 95% 72%) 42%, hsl(35 76% 40%) 54%, ${look.rim} 70%, hsl(48 98% 74%) 84%, ${look.rim})`,
-                        boxShadow: "inset 0 2px 4px hsla(0, 0%, 100%, 0.5), inset 0 -4px 6px hsla(0, 0%, 0%, 0.35), 0 5px 10px hsla(0, 0%, 0%, 0.55)",
+                        inset: "-22%",
+                        background: "radial-gradient(circle, hsla(48,100%,70%,0.85) 0%, hsla(45,100%,55%,0.55) 35%, hsla(40,100%,50%,0.18) 60%, transparent 72%)",
+                      }}
+                    />
+                    {/* chip face */}
+                    <div
+                      className="absolute inset-0 rounded-full flex items-center justify-center"
+                      style={{
+                        background: `radial-gradient(circle at 35% 30%, hsla(0,0%,100%,0.55), transparent 55%), ${look.face}`,
+                        border: "3px solid hsl(45 92% 70%)",
+                        boxShadow: "inset 0 3px 5px hsla(0,0%,100%,0.55), inset 0 -4px 6px hsla(0,0%,0%,0.4), 0 6px 14px hsla(0,0%,0%,0.55), 0 0 18px hsla(48,100%,65%,0.9)",
                       }}
                     >
-                      <div
-                        className="absolute rounded-full"
-                        style={{
-                          inset: "17%",
-                          background: look.face,
-                          border: "2px solid hsla(45, 88%, 78%, 0.9)",
-                          boxShadow: "inset 0 2px 3px hsla(0, 0%, 100%, 0.5), inset 0 -3px 5px hsla(0, 0%, 0%, 0.35)",
-                        }}
-                      />
                       <span
-                        className="relative leading-none"
+                        className="font-black leading-none"
                         style={{
                           color: look.label,
-                          fontSize: "min(4.8vw, 23px)",
-                          textShadow: "0 1px 0 hsla(0, 0%, 100%, 0.55), 0 2px 2px hsla(0, 0%, 0%, 0.45)",
+                          fontSize: "min(5vw, 24px)",
+                          textShadow: "0 1px 0 hsla(0,0%,100%,0.55), 0 2px 3px hsla(0,0%,0%,0.5)",
                         }}
                       >
                         {v}
