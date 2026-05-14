@@ -607,7 +607,7 @@ const DragonTigerGame = () => {
         </button>
 
         {/* CHIP SELECTOR ROW — over painted golden chip rack */}
-        <div className="absolute flex items-center justify-between" style={{ left: "8%", right: "8%", top: "87.5%", height: "8%" }}>
+        <div className="absolute flex items-center justify-between" style={{ left: "10%", right: "10%", top: "84%", height: "7.5%" }}>
           {CHIP_VALUES.map((v) => {
             const isActive = chip === v;
             return (
@@ -620,17 +620,16 @@ const DragonTigerGame = () => {
                   }
                   setChip(v);
                 }}
-                className="relative rounded-full"
-                style={{ width: "16%", aspectRatio: "1/1", background: "transparent" }}
+                className="relative rounded-full transition-transform"
+                style={{
+                  width: "15%",
+                  aspectRatio: "1/1",
+                  background: "transparent",
+                  transform: isActive ? "translateY(-8%) scale(1.08)" : "none",
+                  filter: isActive ? "drop-shadow(0 0 12px hsla(45,95%,60%,0.95))" : "none",
+                }}
                 aria-label={`Chip ${v}`}
-              >
-                {isActive && (
-                  <div
-                    className="absolute inset-0 rounded-full pointer-events-none"
-                    style={{ boxShadow: "0 0 0 3px hsl(45 95% 60%), 0 0 18px hsla(45,95%,60%,0.85)" }}
-                  />
-                )}
-              </button>
+              />
             );
           })}
         </div>
