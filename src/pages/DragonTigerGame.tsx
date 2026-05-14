@@ -619,7 +619,6 @@ const DragonTigerGame = () => {
                     return;
                   }
                   setChip(v);
-                  addBet("dragon" as Side === ("dragon" as Side) ? (bets.dragon >= bets.tiger ? "dragon" : "tiger") : "dragon");
                 }}
                 className="relative rounded-full flex items-center justify-center font-black"
                 style={{
