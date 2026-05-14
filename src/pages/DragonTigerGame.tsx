@@ -676,7 +676,6 @@ const DragonTigerGame = () => {
         >
           {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
-            const look = CHIP_LOOK[v];
             return (
               <button
                 key={v}
@@ -705,9 +704,9 @@ const DragonTigerGame = () => {
                 {isActive && (
                   <motion.div
                     key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.98, y: "0%" }}
-                    animate={{ scale: 1.1, y: "-8%" }}
-                    transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                    initial={{ scale: 0.96, opacity: 0.82 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 480, damping: 30 }}
                     className="absolute inset-0 rounded-full pointer-events-none"
                   >
                     <motion.div
@@ -717,29 +716,18 @@ const DragonTigerGame = () => {
                       transition={{ duration: 0.16 }}
                       className="absolute rounded-full"
                       style={{
-                        inset: "-16%",
-                        background: "radial-gradient(circle, hsla(48,100%,72%,0.7) 0%, hsla(45,100%,56%,0.42) 46%, transparent 70%)",
+                        inset: "-7%",
+                        background: "radial-gradient(circle, transparent 42%, hsla(48,100%,72%,0.72) 55%, hsla(45,100%,56%,0.32) 68%, transparent 78%)",
                       }}
                     />
                     <div
-                      className="absolute inset-0 rounded-full flex items-center justify-center"
+                      className="absolute rounded-full"
                       style={{
-                        background: `radial-gradient(circle at 35% 30%, hsla(0,0%,100%,0.55), transparent 55%), ${look.face}`,
-                        border: "3px solid hsl(45 92% 70%)",
-                        boxShadow: "inset 0 3px 5px hsla(0,0%,100%,0.55), inset 0 -4px 6px hsla(0,0%,0%,0.4), 0 5px 12px hsla(0,0%,0%,0.55), 0 0 14px hsla(48,100%,65%,0.82)",
+                        inset: "5%",
+                        border: "2.5px solid hsl(45 95% 68%)",
+                        boxShadow: "0 0 0 2px hsla(48,100%,72%,0.28), 0 0 14px hsla(48,100%,64%,0.82), inset 0 0 10px hsla(48,100%,70%,0.45)",
                       }}
-                    >
-                      <span
-                        className="font-black leading-none"
-                        style={{
-                          color: look.label,
-                          fontSize: v >= 100 ? "min(3.25vw, 15px)" : "min(4.4vw, 20px)",
-                          textShadow: "0 1px 0 hsla(0,0%,100%,0.55), 0 2px 3px hsla(0,0%,0%,0.5)",
-                        }}
-                      >
-                        {v}
-                      </span>
-                    </div>
+                    />
                   </motion.div>
                 )}
               </button>
