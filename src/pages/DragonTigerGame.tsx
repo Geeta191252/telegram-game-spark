@@ -29,6 +29,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
+const CHIP_HIT_POSITIONS = [20.5, 35.4, 50, 64.6, 79.5];
 
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
@@ -118,6 +119,14 @@ const DragonTigerGame = () => {
       return;
     }
     setBets((p) => ({ ...p, [side]: p[side] + chip }));
+    if (soundRef.current) playBetSound();
+  };
+  const selectChip = (value: number) => {
+    if (phase !== "betting") {
+      toast.error("Round in progress, wait for next round");
+      return;
+    }
+    setChip(value);
     if (soundRef.current) playBetSound();
   };
   const doubleAllBets = () => {
