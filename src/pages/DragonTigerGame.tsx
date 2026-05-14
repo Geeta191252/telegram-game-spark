@@ -620,23 +620,16 @@ const DragonTigerGame = () => {
                   }
                   setChip(v);
                 }}
-                className="relative rounded-full flex items-center justify-center font-black"
-                style={{
-                  width: "16%",
-                  aspectRatio: "1/1",
-                  background: isActive
-                    ? "radial-gradient(circle at 30% 30%, hsl(45 95% 65%), hsl(35 90% 45%))"
-                    : "radial-gradient(circle at 30% 30%, hsl(220 30% 35%), hsl(220 35% 18%))",
-                  color: isActive ? "hsl(20 30% 15%)" : "hsl(45 90% 75%)",
-                  fontSize: "min(3.2vw, 13px)",
-                  textShadow: isActive ? "0 1px 0 hsla(0,0%,100%,0.4)" : "0 1px 0 hsla(0,0%,0%,0.6)",
-                  boxShadow: isActive
-                    ? "0 0 0 2px hsl(45 95% 75%), 0 0 18px hsla(45,95%,60%,0.9), inset 0 -2px 4px hsla(0,0%,0%,0.3)"
-                    : "0 0 0 2px hsl(45 80% 50%), inset 0 -2px 4px hsla(0,0%,0%,0.5)",
-                }}
+                className="relative rounded-full"
+                style={{ width: "16%", aspectRatio: "1/1", background: "transparent" }}
                 aria-label={`Chip ${v}`}
               >
-                {v}
+                {isActive && (
+                  <div
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{ boxShadow: "0 0 0 3px hsl(45 95% 60%), 0 0 18px hsla(45,95%,60%,0.85)" }}
+                  />
+                )}
               </button>
             );
           })}
