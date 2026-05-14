@@ -561,9 +561,19 @@ const DragonTigerGame = () => {
         <button
           onClick={() => addBet("tie")}
           disabled={phase !== "betting"}
-          className="absolute"
-          style={{ left: "30%", top: "37%", width: "40%", height: "12%", borderRadius: "50% 50% 0 0" }}
+          className="absolute overflow-visible"
+          style={{ left: "30%", top: "37%", width: "40%", height: "12%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
         >
+          {phase === "betting" && betFeedback?.side === "tie" && (
+            <motion.div
+              key={`tie-${betFeedback.key}`}
+              initial={{ scale: 0.75, opacity: 0.9 }}
+              animate={{ scale: 1.08, opacity: 0 }}
+              transition={{ duration: 0.45 }}
+              className="absolute inset-0 rounded-t-full pointer-events-none"
+              style={{ boxShadow: "inset 0 0 0 4px hsl(140 90% 55%), 0 0 28px hsl(140 90% 55%)" }}
+            />
+          )}
           {bets.tie > 0 && (
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-0.5 rounded-full font-black"
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)" }}>
@@ -579,9 +589,19 @@ const DragonTigerGame = () => {
         <button
           onClick={() => addBet("dragon")}
           disabled={phase !== "betting"}
-          className="absolute"
-          style={{ left: "13%", top: "49%", width: "37%", height: "32%" }}
+          className="absolute overflow-visible"
+          style={{ left: "13%", top: "49%", width: "37%", height: "32%", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
         >
+          {phase === "betting" && betFeedback?.side === "dragon" && (
+            <motion.div
+              key={`dragon-${betFeedback.key}`}
+              initial={{ scale: 0.9, opacity: 0.9 }}
+              animate={{ scale: 1.04, opacity: 0 }}
+              transition={{ duration: 0.45 }}
+              className="absolute inset-0 rounded-l-full pointer-events-none"
+              style={{ boxShadow: "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" }}
+            />
+          )}
           {bets.dragon > 0 && (
             <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
@@ -594,9 +614,19 @@ const DragonTigerGame = () => {
         <button
           onClick={() => addBet("tiger")}
           disabled={phase !== "betting"}
-          className="absolute"
-          style={{ left: "50%", top: "49%", width: "37%", height: "32%" }}
+          className="absolute overflow-visible"
+          style={{ left: "50%", top: "49%", width: "37%", height: "32%", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
         >
+          {phase === "betting" && betFeedback?.side === "tiger" && (
+            <motion.div
+              key={`tiger-${betFeedback.key}`}
+              initial={{ scale: 0.9, opacity: 0.9 }}
+              animate={{ scale: 1.04, opacity: 0 }}
+              transition={{ duration: 0.45 }}
+              className="absolute inset-0 rounded-r-full pointer-events-none"
+              style={{ boxShadow: "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" }}
+            />
+          )}
           {bets.tiger > 0 && (
             <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
               style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
