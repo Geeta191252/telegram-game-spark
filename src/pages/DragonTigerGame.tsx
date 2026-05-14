@@ -669,36 +669,14 @@ const DragonTigerGame = () => {
                   top: "50%",
                   width: "16.5%",
                   aspectRatio: "1/1",
-                  background: isActive ? "hsla(140, 80%, 45%, 0.18)" : "transparent",
-                  transform: isActive ? "translate(-50%, -54%) scale(1.08)" : "translate(-50%, -50%)",
-                  boxShadow: isActive ? "0 0 0 3px hsl(140 90% 55%), 0 0 22px hsl(140 90% 55%), inset 0 0 18px hsla(140,90%,55%,0.35)" : "none",
-                  filter: isActive ? "drop-shadow(0 0 12px hsla(140,90%,55%,0.95))" : "none",
+                  background: "transparent",
+                  transform: isActive ? "translate(-50%, -56%) scale(1.12)" : "translate(-50%, -50%)",
+                  filter: isActive ? "drop-shadow(0 0 14px hsla(48, 100%, 60%, 1)) drop-shadow(0 0 26px hsla(45, 100%, 55%, 0.9))" : "none",
                   WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
                 aria-pressed={isActive}
-              >
-                {phase === "betting" && isActive && (
-                  <motion.span
-                    key={chipFeedbackKey}
-                    initial={{ scale: 0.35, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="absolute flex items-center justify-center rounded-full font-black"
-                    style={{
-                      right: "-4%",
-                      top: "-9%",
-                      width: "38%",
-                      aspectRatio: "1/1",
-                      background: "hsl(140 90% 45%)",
-                      color: "hsl(0 0% 100%)",
-                      fontSize: "min(3.2vw, 15px)",
-                      boxShadow: "0 0 10px hsla(140,90%,55%,0.9), 0 2px 4px hsla(0,0%,0%,0.55)",
-                    }}
-                  >
-                    ✓
-                  </motion.span>
-                )}
-              </button>
+              />
             );
           })}
         </div>
