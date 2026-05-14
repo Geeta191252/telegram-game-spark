@@ -677,7 +677,7 @@ const DragonTigerGame = () => {
           className="absolute flex items-center justify-center font-black text-white"
           style={{ left: "20%", right: "32%", top: "96.4%", height: "3.5%", fontSize: "min(4vw, 18px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsla(0,0%,0%,0.6)" }}
         >
-          {totalBet.toFixed(2)}
+          {totalBet > 0 ? totalBet.toFixed(2) : `${sym}${chip}`}
         </div>
         <button
           onClick={deal}
