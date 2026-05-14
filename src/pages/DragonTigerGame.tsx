@@ -652,7 +652,7 @@ const DragonTigerGame = () => {
           </span>
         </button>
 
-        {/* CHIP SELECTOR ROW — invisible hit targets over painted chips, only selected chip gets glow */}
+        {/* CHIP SELECTOR ROW — invisible hit targets over painted 3D chips */}
         <div
           className="absolute"
           style={{
@@ -666,7 +666,6 @@ const DragonTigerGame = () => {
           }}
         >
           {CHIP_VALUES.map((v, index) => {
-            const isActive = chip === v;
             return (
               <button
                 key={v}
@@ -684,33 +683,14 @@ const DragonTigerGame = () => {
                   transform: "translate(-50%, -50%)",
                   transformOrigin: "center",
                   cursor: phase === "betting" ? "pointer" : "default",
-                  zIndex: isActive ? 36 : 28,
+                  zIndex: 28,
                   touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
                 aria-pressed={isActive}
                 disabled={phase !== "betting"}
-              >
-                {isActive && (
-                  <motion.div
-                    key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.98, opacity: 0.75 }}
-                    animate={{ scale: 1.02, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 480, damping: 30 }}
-                    className="absolute inset-0 rounded-full pointer-events-none"
-                  >
-                    <div
-                      className="absolute rounded-full"
-                      style={{
-                        inset: "3%",
-                        border: "2px solid hsl(45 95% 68%)",
-                        boxShadow: "0 0 10px 2px hsla(48,100%,64%,0.72), inset 0 0 8px hsla(48,100%,70%,0.38)",
-                      }}
-                    />
-                  </motion.div>
-                )}
-              </button>
+              />
             );
           })}
         </div>
