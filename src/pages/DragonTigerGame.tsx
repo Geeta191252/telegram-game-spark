@@ -29,6 +29,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
+const CHIP_HIT_POSITIONS = [20.5, 35.4, 50, 64.6, 79.5];
 
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
@@ -118,6 +119,14 @@ const DragonTigerGame = () => {
       return;
     }
     setBets((p) => ({ ...p, [side]: p[side] + chip }));
+    if (soundRef.current) playBetSound();
+  };
+  const selectChip = (value: number) => {
+    if (phase !== "betting") {
+      toast.error("Round in progress, wait for next round");
+      return;
+    }
+    setChip(value);
     if (soundRef.current) playBetSound();
   };
   const doubleAllBets = () => {
@@ -607,28 +616,27 @@ const DragonTigerGame = () => {
         </button>
 
         {/* CHIP SELECTOR ROW — over painted golden chip rack */}
-        <div className="absolute flex items-center justify-between" style={{ left: "10%", right: "10%", top: "84%", height: "7.5%" }}>
-          {CHIP_VALUES.map((v) => {
+        <div className="absolute" style={{ left: "4%", right: "4%", top: "83.4%", height: "8.8%", zIndex: 20, pointerEvents: "auto" }}>
+          {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
             return (
               <button
                 key={v}
-                onClick={() => {
-                  if (phase !== "betting") {
-                    toast.error("Round in progress, wait for next round");
-                    return;
-                  }
-                  setChip(v);
-                }}
-                className="relative rounded-full transition-transform"
+                type="button"
+                onPointerDown={(event) => { event.preventDefault(); selectChip(v); }}
+                className="absolute rounded-full touch-manipulation transition-transform"
                 style={{
-                  width: "15%",
+                  left: `${CHIP_HIT_POSITIONS[index]}%`,
+                  top: "50%",
+                  width: "16.5%",
                   aspectRatio: "1/1",
                   background: "transparent",
-                  transform: isActive ? "translateY(-8%) scale(1.08)" : "none",
+                  transform: isActive ? "translate(-50%, -54%) scale(1.08)" : "translate(-50%, -50%)",
                   filter: isActive ? "drop-shadow(0 0 12px hsla(45,95%,60%,0.95))" : "none",
+                  WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
+                aria-pressed={isActive}
               />
             );
           })}
