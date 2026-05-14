@@ -30,6 +30,13 @@ const SUITS = [
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
 const CHIP_HIT_POSITIONS = [20.5, 35.4, 50, 64.6, 79.5];
+const CHIP_LOOK: Record<number, { face: string; rim: string; label: string }> = {
+  1: { face: "radial-gradient(circle at 32% 28%, hsl(48 55% 92%), hsl(43 52% 62%) 62%, hsl(35 48% 42%))", rim: "hsl(43 88% 58%)", label: "hsl(42 48% 42%)" },
+  10: { face: "radial-gradient(circle at 32% 28%, hsl(165 78% 68%), hsl(164 76% 42%) 62%, hsl(170 72% 28%))", rim: "hsl(43 88% 58%)", label: "hsl(158 58% 25%)" },
+  50: { face: "radial-gradient(circle at 32% 28%, hsl(205 92% 74%), hsl(207 88% 48%) 62%, hsl(220 82% 30%))", rim: "hsl(43 88% 58%)", label: "hsl(218 68% 30%)" },
+  100: { face: "radial-gradient(circle at 32% 28%, hsl(300 82% 70%), hsl(292 82% 47%) 62%, hsl(286 78% 30%))", rim: "hsl(43 88% 58%)", label: "hsl(304 70% 24%)" },
+  500: { face: "radial-gradient(circle at 32% 28%, hsl(51 95% 76%), hsl(47 92% 52%) 62%, hsl(39 86% 34%))", rim: "hsl(43 88% 58%)", label: "hsl(42 78% 30%)" },
+};
 
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
@@ -658,28 +665,73 @@ const DragonTigerGame = () => {
         <div className="absolute" style={{ left: "4%", right: "4%", top: "83.4%", height: "8.8%", zIndex: 20, pointerEvents: "auto" }}>
           {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
+            const look = CHIP_LOOK[v];
             return (
               <button
                 key={v}
                 type="button"
-                onPointerDown={(event) => { event.preventDefault(); selectChip(v); }}
-                className="absolute rounded-full touch-manipulation transition-transform flex items-center justify-center"
+                onClick={() => selectChip(v)}
+                className="absolute rounded-full touch-manipulation flex items-center justify-center"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
                   top: "50%",
                   width: "16.5%",
                   aspectRatio: "1/1",
                   background: "transparent",
-                  transform: isActive ? "translate(-50%, -68%) scale(1.45)" : "translate(-50%, -50%) scale(1)",
+                  border: 0,
+                  padding: 0,
+                  transform: "translate(-50%, -50%)",
                   transformOrigin: "center",
-                  transition: "transform 180ms cubic-bezier(.34,1.56,.64,1), filter 180ms ease-out",
-                  filter: isActive ? "drop-shadow(0 0 16px hsla(48, 100%, 65%, 1)) drop-shadow(0 0 32px hsla(45, 100%, 55%, 0.95))" : "none",
-                  zIndex: isActive ? 30 : 20,
+                  cursor: phase === "betting" ? "pointer" : "default",
+                  zIndex: isActive ? 36 : 28,
+                  touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
                 aria-pressed={isActive}
-              />
+                disabled={phase !== "betting"}
+              >
+                {isActive && (
+                  <motion.div
+                    key={`selected-chip-${v}-${chipFeedbackKey}`}
+                    initial={{ scale: 1.06, y: "0%" }}
+                    animate={{ scale: 1.42, y: "-18%" }}
+                    transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{
+                      filter: "drop-shadow(0 0 10px hsla(50, 100%, 74%, 1)) drop-shadow(0 0 24px hsla(45, 100%, 56%, 0.95))",
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 rounded-full flex items-center justify-center font-black"
+                      style={{
+                        background: `conic-gradient(from 12deg, ${look.rim}, hsl(48 98% 74%) 10%, hsl(34 72% 38%) 20%, ${look.rim} 30%, hsl(50 95% 72%) 42%, hsl(35 76% 40%) 54%, ${look.rim} 70%, hsl(48 98% 74%) 84%, ${look.rim})`,
+                        boxShadow: "inset 0 2px 4px hsla(0, 0%, 100%, 0.5), inset 0 -4px 6px hsla(0, 0%, 0%, 0.35), 0 5px 10px hsla(0, 0%, 0%, 0.55)",
+                      }}
+                    >
+                      <div
+                        className="absolute rounded-full"
+                        style={{
+                          inset: "17%",
+                          background: look.face,
+                          border: "2px solid hsla(45, 88%, 78%, 0.9)",
+                          boxShadow: "inset 0 2px 3px hsla(0, 0%, 100%, 0.5), inset 0 -3px 5px hsla(0, 0%, 0%, 0.35)",
+                        }}
+                      />
+                      <span
+                        className="relative leading-none"
+                        style={{
+                          color: look.label,
+                          fontSize: "min(4.8vw, 23px)",
+                          textShadow: "0 1px 0 hsla(0, 0%, 100%, 0.55), 0 2px 2px hsla(0, 0%, 0%, 0.45)",
+                        }}
+                      >
+                        {v}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </button>
             );
           })}
         </div>
