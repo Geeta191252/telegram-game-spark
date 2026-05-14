@@ -55,7 +55,8 @@ const DragonTigerGame = () => {
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
   const [chip, setChip] = useState(10);
   const [chipFeedbackKey, setChipFeedbackKey] = useState(0);
-  const [betFeedback, setBetFeedback] = useState<{ side: Side; key: number } | null>(null);
+  const [betFeedback, setBetFeedback] = useState<{ side: Side; key: number; kind: "success" | "error" } | null>(null);
+  const [betStatus, setBetStatus] = useState("");
   const [betTimer, setBetTimer] = useState(15);
 
   const [phase, setPhase] = useState<Phase>("betting");
@@ -117,11 +118,14 @@ const DragonTigerGame = () => {
       return;
     }
     if (currentBalance < totalBet + chip) {
+      setBetFeedback((p) => ({ side, key: (p?.key ?? 0) + 1, kind: "error" }));
+      setBetStatus("LOW BALANCE");
       toast.error(`Insufficient ${activeWallet === "dollar" ? "$" : "⭐"} balance — please deposit`);
       return;
     }
     setBets((p) => ({ ...p, [side]: p[side] + chip }));
-    setBetFeedback((p) => ({ side, key: (p?.key ?? 0) + 1 }));
+    setBetFeedback((p) => ({ side, key: (p?.key ?? 0) + 1, kind: "success" }));
+    setBetStatus(`+${sym}${chip}`);
     if (soundRef.current) playBetSound();
   };
   const selectChip = (value: number) => {
