@@ -674,7 +674,7 @@ const DragonTigerGame = () => {
             padding: "0 1.4%",
           }}
         >
-          {CHIP_VALUES.map((v, index) => {
+          {CHIP_VALUES.map((v) => {
             const isActive = chip === v;
             const look = CHIP_LOOK[v];
             return (
@@ -741,44 +741,6 @@ const DragonTigerGame = () => {
                     </span>
                   </div>
                 </motion.div>
-                {false && isActive && (
-                  <motion.div
-                    key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.98, y: "0%", opacity: 0.72 }}
-                    animate={{ scale: 1.18, y: "-14%", opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 380, damping: 22 }}
-                    className="absolute inset-0 rounded-full pointer-events-none"
-                  >
-                    {/* soft golden halo behind chip */}
-                    <div
-                      className="absolute rounded-full"
-                      style={{
-                        inset: "-22%",
-                        background: "radial-gradient(circle, hsla(48,100%,70%,0.85) 0%, hsla(45,100%,55%,0.55) 35%, hsla(40,100%,50%,0.18) 60%, transparent 72%)",
-                      }}
-                    />
-                    {/* chip face */}
-                    <div
-                      className="absolute inset-0 rounded-full flex items-center justify-center"
-                      style={{
-                        background: `radial-gradient(circle at 35% 30%, hsla(0,0%,100%,0.55), transparent 55%), ${look.face}`,
-                        border: "3px solid hsl(45 92% 70%)",
-                        boxShadow: "inset 0 3px 5px hsla(0,0%,100%,0.55), inset 0 -4px 6px hsla(0,0%,0%,0.4), 0 6px 14px hsla(0,0%,0%,0.55), 0 0 18px hsla(48,100%,65%,0.9)",
-                      }}
-                    >
-                      <span
-                        className="font-black leading-none"
-                        style={{
-                          color: look.label,
-                          fontSize: "min(5vw, 24px)",
-                          textShadow: "0 1px 0 hsla(0,0%,100%,0.55), 0 2px 3px hsla(0,0%,0%,0.5)",
-                        }}
-                      >
-                        {v}
-                      </span>
-                    </div>
-                  </motion.div>
-                )}
               </button>
             );
           })}
