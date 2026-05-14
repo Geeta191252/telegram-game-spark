@@ -54,6 +54,7 @@ const DragonTigerGame = () => {
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
   const [chip, setChip] = useState(10);
+  const [chipFeedbackKey, setChipFeedbackKey] = useState(0);
   const [betTimer, setBetTimer] = useState(15);
 
   const [phase, setPhase] = useState<Phase>("betting");
@@ -127,6 +128,7 @@ const DragonTigerGame = () => {
       return;
     }
     setChip(value);
+    setChipFeedbackKey((key) => key + 1);
     if (soundRef.current) playBetSound();
   };
   const doubleAllBets = () => {
