@@ -660,21 +660,20 @@ const DragonTigerGame = () => {
           </span>
         </button>
 
-        {/* CHIP SELECTOR ROW — fitted inside painted golden chip rack */}
+        {/* CHIP SELECTOR ROW — invisible hit targets over painted chips, only selected chip gets glow */}
         <div
-          className="absolute flex items-center justify-between"
+          className="absolute"
           style={{
-            left: "7.4%",
-            right: "7.4%",
-            top: "84.25%",
-            height: "7.25%",
+            left: "4.8%",
+            right: "4.8%",
+            top: "83.8%",
+            height: "8.3%",
             zIndex: 20,
             pointerEvents: "auto",
             overflow: "visible",
-            padding: "0 1.4%",
           }}
         >
-          {CHIP_VALUES.map((v) => {
+          {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
             const look = CHIP_LOOK[v];
             return (
@@ -682,15 +681,16 @@ const DragonTigerGame = () => {
                 key={v}
                 type="button"
                 onClick={() => selectChip(v)}
-                className="relative rounded-full touch-manipulation flex items-center justify-center shrink-0"
+                className="absolute rounded-full touch-manipulation flex items-center justify-center"
                 style={{
-                  width: "17.25%",
-                  maxWidth: "60px",
-                  minWidth: "42px",
+                  left: `${CHIP_HIT_POSITIONS[index]}%`,
+                  top: "50%",
+                  width: "14.6%",
                   aspectRatio: "1/1",
                   background: "transparent",
                   border: 0,
                   padding: 0,
+                  transform: "translate(-50%, -50%)",
                   transformOrigin: "center",
                   cursor: phase === "betting" ? "pointer" : "default",
                   zIndex: isActive ? 36 : 28,
@@ -701,12 +701,14 @@ const DragonTigerGame = () => {
                 aria-pressed={isActive}
                 disabled={phase !== "betting"}
               >
-                <motion.div
-                  animate={{ scale: isActive ? 1.07 : 0.96, y: isActive ? "-5%" : "0%" }}
-                  transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                  className="absolute inset-0 rounded-full pointer-events-none"
-                >
-                  {isActive && (
+                {isActive && (
+                  <motion.div
+                    key={`selected-chip-${v}-${chipFeedbackKey}`}
+                    initial={{ scale: 0.98, y: "0%" }}
+                    animate={{ scale: 1.1, y: "-8%" }}
+                    transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                  >
                     <motion.div
                       key={`selected-chip-halo-${v}-${chipFeedbackKey}`}
                       initial={{ opacity: 0.65, scale: 0.94 }}
@@ -714,33 +716,31 @@ const DragonTigerGame = () => {
                       transition={{ duration: 0.16 }}
                       className="absolute rounded-full"
                       style={{
-                        inset: "-9%",
-                        background: "radial-gradient(circle, hsla(48,100%,72%,0.62) 0%, hsla(45,100%,56%,0.34) 44%, transparent 68%)",
+                        inset: "-16%",
+                        background: "radial-gradient(circle, hsla(48,100%,72%,0.7) 0%, hsla(45,100%,56%,0.42) 46%, transparent 70%)",
                       }}
                     />
-                  )}
-                  <div
-                    className="absolute inset-0 rounded-full flex items-center justify-center"
-                    style={{
-                      background: `radial-gradient(circle at 35% 30%, hsla(0,0%,100%,0.55), transparent 55%), ${look.face}`,
-                      border: isActive ? "3px solid hsl(45 92% 70%)" : "2px solid hsl(45 80% 62%)",
-                      boxShadow: isActive
-                        ? "inset 0 3px 5px hsla(0,0%,100%,0.5), inset 0 -4px 6px hsla(0,0%,0%,0.42), 0 4px 10px hsla(0,0%,0%,0.55), 0 0 12px hsla(48,100%,65%,0.7)"
-                        : "inset 0 2px 4px hsla(0,0%,100%,0.45), inset 0 -3px 5px hsla(0,0%,0%,0.38), 0 3px 7px hsla(0,0%,0%,0.48)",
-                    }}
-                  >
-                    <span
-                      className="font-black leading-none"
+                    <div
+                      className="absolute inset-0 rounded-full flex items-center justify-center"
                       style={{
-                        color: look.label,
-                        fontSize: v >= 100 ? "min(3.35vw, 16px)" : "min(4.3vw, 20px)",
-                        textShadow: "0 1px 0 hsla(0,0%,100%,0.55), 0 2px 3px hsla(0,0%,0%,0.45)",
+                        background: `radial-gradient(circle at 35% 30%, hsla(0,0%,100%,0.55), transparent 55%), ${look.face}`,
+                        border: "3px solid hsl(45 92% 70%)",
+                        boxShadow: "inset 0 3px 5px hsla(0,0%,100%,0.55), inset 0 -4px 6px hsla(0,0%,0%,0.4), 0 5px 12px hsla(0,0%,0%,0.55), 0 0 14px hsla(48,100%,65%,0.82)",
                       }}
                     >
-                      {v}
-                    </span>
-                  </div>
-                </motion.div>
+                      <span
+                        className="font-black leading-none"
+                        style={{
+                          color: look.label,
+                          fontSize: v >= 100 ? "min(3.25vw, 15px)" : "min(4.4vw, 20px)",
+                          textShadow: "0 1px 0 hsla(0,0%,100%,0.55), 0 2px 3px hsla(0,0%,0%,0.5)",
+                        }}
+                      >
+                        {v}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
               </button>
             );
           })}
