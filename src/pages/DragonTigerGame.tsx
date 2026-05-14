@@ -608,22 +608,38 @@ const DragonTigerGame = () => {
 
         {/* CHIP SELECTOR ROW — over painted golden chip rack */}
         <div className="absolute flex items-center justify-between" style={{ left: "8%", right: "8%", top: "87.5%", height: "8%" }}>
-          {CHIP_VALUES.map((v) => (
-            <button
-              key={v}
-              onClick={() => phase === "betting" && setChip(v)}
-              className="relative rounded-full"
-              style={{ width: "16%", aspectRatio: "1/1" }}
-              aria-label={`Chip ${v}`}
-            >
-              {chip === v && (
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{ boxShadow: "0 0 0 3px hsl(45 95% 60%), 0 0 18px hsla(45,95%,60%,0.85)" }}
-                />
-              )}
-            </button>
-          ))}
+          {CHIP_VALUES.map((v) => {
+            const isActive = chip === v;
+            return (
+              <button
+                key={v}
+                onClick={() => {
+                  if (phase !== "betting") {
+                    toast.error("Round in progress, wait for next round");
+                    return;
+                  }
+                  setChip(v);
+                }}
+                className="relative rounded-full flex items-center justify-center font-black"
+                style={{
+                  width: "16%",
+                  aspectRatio: "1/1",
+                  background: isActive
+                    ? "radial-gradient(circle at 30% 30%, hsl(45 95% 65%), hsl(35 90% 45%))"
+                    : "radial-gradient(circle at 30% 30%, hsl(220 30% 35%), hsl(220 35% 18%))",
+                  color: isActive ? "hsl(20 30% 15%)" : "hsl(45 90% 75%)",
+                  fontSize: "min(3.2vw, 13px)",
+                  textShadow: isActive ? "0 1px 0 hsla(0,0%,100%,0.4)" : "0 1px 0 hsla(0,0%,0%,0.6)",
+                  boxShadow: isActive
+                    ? "0 0 0 2px hsl(45 95% 75%), 0 0 18px hsla(45,95%,60%,0.9), inset 0 -2px 4px hsla(0,0%,0%,0.3)"
+                    : "0 0 0 2px hsl(45 80% 50%), inset 0 -2px 4px hsla(0,0%,0%,0.5)",
+                }}
+                aria-label={`Chip ${v}`}
+              >
+                {v}
+              </button>
+            );
+          })}
         </div>
 
         {/* BOTTOM BAR — repeat avatar / total / + (deal) / settings */}
