@@ -29,7 +29,6 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [17.8, 34.1, 50.3, 66.5, 82.8];
 const CHIP_LOOK: Record<number, { face: string; rim: string; label: string }> = {
   1: { face: "radial-gradient(circle at 32% 28%, hsl(48 55% 92%), hsl(43 52% 62%) 62%, hsl(35 48% 42%))", rim: "hsl(43 88% 58%)", label: "hsl(42 48% 42%)" },
   10: { face: "radial-gradient(circle at 32% 28%, hsl(165 78% 68%), hsl(164 76% 42%) 62%, hsl(170 72% 28%))", rim: "hsl(43 88% 58%)", label: "hsl(158 58% 25%)" },
