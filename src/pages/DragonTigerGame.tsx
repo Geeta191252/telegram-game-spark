@@ -666,12 +666,15 @@ const DragonTigerGame = () => {
           }}
         >
           {CHIP_VALUES.map((v, index) => {
+            const CHIP_BG_X = [16.98, 33.55, 50.21, 66.87, 83.43];
+            const CHIP_BG_Y = 90.97;
+            const isActive = chip === v;
             return (
               <button
                 key={v}
                 type="button"
                 onClick={() => selectChip(v)}
-                className="absolute rounded-full touch-manipulation flex items-center justify-center"
+                className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
                   top: "50%",
@@ -686,11 +689,29 @@ const DragonTigerGame = () => {
                   zIndex: 28,
                   touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
+                  overflow: "visible",
                 }}
                 aria-label={`Chip ${v}`}
-                aria-pressed={chip === v}
+                aria-pressed={isActive}
                 disabled={phase !== "betting"}
-              />
+              >
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "50%",
+                    backgroundImage: `url(${arenaBg})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "757.7% 1357.5%",
+                    backgroundPosition: `${CHIP_BG_X[index]}% ${CHIP_BG_Y}%`,
+                    transform: isActive ? "scale(1.35)" : "scale(1)",
+                    transformOrigin: "center",
+                    transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
+                    pointerEvents: "none",
+                  }}
+                />
+              </button>
             );
           })}
         </div>
