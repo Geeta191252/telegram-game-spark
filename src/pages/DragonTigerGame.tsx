@@ -666,6 +666,7 @@ const DragonTigerGame = () => {
           {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
             const look = CHIP_LOOK[v];
+            const activeXOffset = v === 500 ? "18%" : v === 1 ? "-18%" : "0%";
             return (
               <button
                 key={v}
@@ -694,8 +695,8 @@ const DragonTigerGame = () => {
                 {isActive && (
                   <motion.div
                     key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.9, y: "0%", opacity: 0.6 }}
-                    animate={{ scale: 1.55, y: "-26%", opacity: 1 }}
+                    initial={{ scale: 0.9, x: "0%", y: "0%", opacity: 0.6 }}
+                    animate={{ scale: 1.34, x: activeXOffset, y: "-30%", opacity: 1 }}
                     transition={{ type: "spring", stiffness: 380, damping: 22 }}
                     className="absolute inset-0 rounded-full pointer-events-none"
                   >
