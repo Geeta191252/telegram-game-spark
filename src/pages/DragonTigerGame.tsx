@@ -704,28 +704,17 @@ const DragonTigerGame = () => {
                 {isActive && (
                   <motion.div
                     key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.96, opacity: 0.82 }}
-                    animate={{ scale: 1, opacity: 1 }}
+                    initial={{ scale: 0.98, opacity: 0.75 }}
+                    animate={{ scale: 1.02, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 480, damping: 30 }}
                     className="absolute inset-0 rounded-full pointer-events-none"
                   >
-                    <motion.div
-                      key={`selected-chip-halo-${v}-${chipFeedbackKey}`}
-                      initial={{ opacity: 0.65, scale: 0.94 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.16 }}
-                      className="absolute rounded-full"
-                      style={{
-                        inset: "-7%",
-                        background: "radial-gradient(circle, transparent 42%, hsla(48,100%,72%,0.72) 55%, hsla(45,100%,56%,0.32) 68%, transparent 78%)",
-                      }}
-                    />
                     <div
                       className="absolute rounded-full"
                       style={{
-                        inset: "5%",
-                        border: "2.5px solid hsl(45 95% 68%)",
-                        boxShadow: "0 0 0 2px hsla(48,100%,72%,0.28), 0 0 14px hsla(48,100%,64%,0.82), inset 0 0 10px hsla(48,100%,70%,0.45)",
+                        inset: "3%",
+                        border: "2px solid hsl(45 95% 68%)",
+                        boxShadow: "0 0 10px 2px hsla(48,100%,64%,0.72), inset 0 0 8px hsla(48,100%,70%,0.38)",
                       }}
                     />
                   </motion.div>
