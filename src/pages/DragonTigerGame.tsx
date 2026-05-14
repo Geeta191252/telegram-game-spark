@@ -30,13 +30,6 @@ const SUITS = [
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
 const CHIP_HIT_POSITIONS = [18.3, 34.2, 50.2, 66.2, 82.1];
-const CHIP_LOOK: Record<number, { face: string; rim: string; label: string }> = {
-  1: { face: "radial-gradient(circle at 32% 28%, hsl(48 55% 92%), hsl(43 52% 62%) 62%, hsl(35 48% 42%))", rim: "hsl(43 88% 58%)", label: "hsl(42 48% 42%)" },
-  10: { face: "radial-gradient(circle at 32% 28%, hsl(165 78% 68%), hsl(164 76% 42%) 62%, hsl(170 72% 28%))", rim: "hsl(43 88% 58%)", label: "hsl(158 58% 25%)" },
-  50: { face: "radial-gradient(circle at 32% 28%, hsl(205 92% 74%), hsl(207 88% 48%) 62%, hsl(220 82% 30%))", rim: "hsl(43 88% 58%)", label: "hsl(218 68% 30%)" },
-  100: { face: "radial-gradient(circle at 32% 28%, hsl(300 82% 70%), hsl(292 82% 47%) 62%, hsl(286 78% 30%))", rim: "hsl(43 88% 58%)", label: "hsl(304 70% 24%)" },
-  500: { face: "radial-gradient(circle at 32% 28%, hsl(51 95% 76%), hsl(47 92% 52%) 62%, hsl(39 86% 34%))", rim: "hsl(43 88% 58%)", label: "hsl(42 78% 30%)" },
-};
 
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
@@ -61,7 +54,6 @@ const DragonTigerGame = () => {
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
   const [chip, setChip] = useState(10);
-  const [chipFeedbackKey, setChipFeedbackKey] = useState(0);
   const [betFeedback, setBetFeedback] = useState<{ side: Side; key: number; kind: "success" | "error" } | null>(null);
   const [betStatus, setBetStatus] = useState("");
   const [betTimer, setBetTimer] = useState(15);
@@ -141,7 +133,6 @@ const DragonTigerGame = () => {
       return;
     }
     setChip(value);
-    setChipFeedbackKey((key) => key + 1);
     setBetStatus(`${sym}${value}`);
     if (soundRef.current) playBetSound();
   };
