@@ -636,6 +636,7 @@ const DragonTigerGame = () => {
                   WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
+                aria-pressed={isActive}
               />
             );
           })}
