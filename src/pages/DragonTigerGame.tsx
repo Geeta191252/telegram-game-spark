@@ -575,7 +575,7 @@ const DragonTigerGame = () => {
               animate={{ scale: 1.08, opacity: 0 }}
               transition={{ duration: 0.45 }}
               className="absolute inset-0 rounded-t-full pointer-events-none"
-              style={{ boxShadow: "inset 0 0 0 4px hsl(140 90% 55%), 0 0 28px hsl(140 90% 55%)" }}
+              style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 4px hsl(140 90% 55%), 0 0 28px hsl(140 90% 55%)" : "inset 0 0 0 4px hsl(0 85% 60%), 0 0 28px hsl(0 85% 60%)" }}
             />
           )}
           {bets.tie > 0 && (
@@ -603,7 +603,7 @@ const DragonTigerGame = () => {
               animate={{ scale: 1.04, opacity: 0 }}
               transition={{ duration: 0.45 }}
               className="absolute inset-0 rounded-l-full pointer-events-none"
-              style={{ boxShadow: "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" }}
+              style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" : "inset 0 0 0 5px hsl(0 85% 60%), 0 0 30px hsl(0 85% 60%)" }}
             />
           )}
           {bets.dragon > 0 && (
