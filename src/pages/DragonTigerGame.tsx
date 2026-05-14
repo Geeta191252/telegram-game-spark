@@ -670,8 +670,11 @@ const DragonTigerGame = () => {
                   width: "16.5%",
                   aspectRatio: "1/1",
                   background: "transparent",
-                  transform: isActive ? "translate(-50%, -56%) scale(1.12)" : "translate(-50%, -50%)",
-                  filter: isActive ? "drop-shadow(0 0 14px hsla(48, 100%, 60%, 1)) drop-shadow(0 0 26px hsla(45, 100%, 55%, 0.9))" : "none",
+                  transform: isActive ? "translate(-50%, -68%) scale(1.45)" : "translate(-50%, -50%) scale(1)",
+                  transformOrigin: "center",
+                  transition: "transform 180ms cubic-bezier(.34,1.56,.64,1), filter 180ms ease-out",
+                  filter: isActive ? "drop-shadow(0 0 16px hsla(48, 100%, 65%, 1)) drop-shadow(0 0 32px hsla(45, 100%, 55%, 0.95))" : "none",
+                  zIndex: isActive ? 30 : 20,
                   WebkitTapHighlightColor: "transparent",
                 }}
                 aria-label={`Chip ${v}`}
