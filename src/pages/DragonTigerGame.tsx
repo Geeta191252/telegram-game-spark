@@ -662,11 +662,21 @@ const DragonTigerGame = () => {
         </button>
 
         {/* CHIP SELECTOR ROW — over painted golden chip rack */}
-        <div className="absolute" style={{ left: "4%", right: "4%", top: "83.4%", height: "8.8%", zIndex: 20, pointerEvents: "auto" }}>
+        <div
+          className="absolute"
+          style={{
+            left: "4%",
+            right: "4%",
+            top: "83.9%",
+            height: "8.1%",
+            zIndex: 20,
+            pointerEvents: "auto",
+            overflow: "visible",
+          }}
+        >
           {CHIP_VALUES.map((v, index) => {
             const isActive = chip === v;
             const look = CHIP_LOOK[v];
-            const activeXOffset = v === 500 ? "18%" : v === 1 ? "-18%" : "0%";
             return (
               <button
                 key={v}
@@ -676,7 +686,7 @@ const DragonTigerGame = () => {
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
                   top: "50%",
-                  width: "13.5%",
+                  width: "13.2%",
                   aspectRatio: "1/1",
                   background: "transparent",
                   border: 0,
@@ -695,8 +705,8 @@ const DragonTigerGame = () => {
                 {isActive && (
                   <motion.div
                     key={`selected-chip-${v}-${chipFeedbackKey}`}
-                    initial={{ scale: 0.9, x: "0%", y: "0%", opacity: 0.6 }}
-                    animate={{ scale: 1.34, x: activeXOffset, y: "-30%", opacity: 1 }}
+                    initial={{ scale: 0.98, y: "0%", opacity: 0.72 }}
+                    animate={{ scale: 1.18, y: "-14%", opacity: 1 }}
                     transition={{ type: "spring", stiffness: 380, damping: 22 }}
                     className="absolute inset-0 rounded-full pointer-events-none"
                   >
