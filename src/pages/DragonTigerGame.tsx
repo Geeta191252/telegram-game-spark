@@ -34,7 +34,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [12.85, 33.15, 50, 66.85, 83.55];
+const CHIP_HIT_POSITIONS = [19.7, 36.2, 50.9, 66.5, 81.9];
 const CHIP_IMAGES = [chip1Img, chip10Img, chip50Img, chip100Img, chip500Img];
 
 // Image intrinsic aspect ratio (width / height)
@@ -303,6 +303,65 @@ const DragonTigerGame = () => {
     node.currentTime = 0;
     const playPromise = node.play();
     if (playPromise) playPromise.catch(() => undefined);
+  };
+
+  const chipImageForAmount = (amount: number) => {
+    if (amount >= 500) return chip500Img;
+    if (amount >= 100) return chip100Img;
+    if (amount >= 50) return chip50Img;
+    if (amount >= 10) return chip10Img;
+    return chip1Img;
+  };
+
+  const renderPlacedBet = (side: Side, amount: number) => {
+    if (amount <= 0) return null;
+    const accent = side === "dragon" ? "210 100% 60%" : side === "tiger" ? "22 100% 56%" : "130 85% 55%";
+    return (
+      <motion.div
+        key={`${side}-${amount}`}
+        initial={{ opacity: 0, y: 12, scale: 0.72, rotateX: 42 }}
+        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ type: "spring", stiffness: 420, damping: 22 }}
+        className="absolute pointer-events-none"
+        style={{
+          left: "50%",
+          top: side === "tie" ? "48%" : "45%",
+          width: side === "tie" ? "16%" : "24%",
+          aspectRatio: "1/1",
+          transform: "translate(-50%, -50%)",
+          transformStyle: "preserve-3d",
+          zIndex: 4,
+          filter: `drop-shadow(0 0 12px hsl(${accent} / 0.75)) drop-shadow(0 12px 10px hsl(0 0% 0% / 0.58))`,
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${chipImageForAmount(amount)})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            transform: "rotateX(14deg) translateZ(14px)",
+          }}
+        />
+        <div
+          className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center font-black whitespace-nowrap"
+          style={{
+            bottom: "-16%",
+            minWidth: "150%",
+            padding: "2px 7px",
+            borderRadius: 999,
+            background: "linear-gradient(180deg, hsl(48 95% 72%), hsl(33 96% 48%))",
+            color: "hsl(28 80% 13%)",
+            fontSize: "min(3vw, 14px)",
+            textShadow: "0 1px 0 hsl(52 100% 82% / 0.7)",
+            boxShadow: "inset 0 1px 1px hsl(0 0% 100% / 0.55), 0 5px 10px hsl(0 0% 0% / 0.55)",
+          }}
+        >
+          {sym}{amount}
+        </div>
+      </motion.div>
+    );
   };
 
   return (
