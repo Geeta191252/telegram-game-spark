@@ -461,13 +461,14 @@ const DragonTigerGame = () => {
           {phase === "dealing" ? "…" : phase === "result" ? resultTimer : betTimer}
         </div>
 
-        {/* DRAGON & TIGER CARDS — fit exactly inside painted card-back frames */}
+        {/* DRAGON & TIGER CARDS — reveal only when dealt, otherwise uploaded UI card backs stay untouched */}
         <div
           className="absolute rounded-md"
           style={{
-            left: "27.2%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
-            boxShadow: "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75), inset 0 0 12px hsla(210, 100%, 70%, 0.6)",
-            animation: "dt-glow-blue 1.6s ease-in-out infinite",
+            left: "25.6%", top: "30.2%", width: "14.4%", aspectRatio: "3/5.1",
+            boxShadow: dragonCard ? "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75)" : "none",
+            animation: dragonCard ? "dt-glow-blue 1.6s ease-in-out infinite" : "none",
+            pointerEvents: "none",
           }}
         >
           <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(dragonCard)}</div>
@@ -475,9 +476,10 @@ const DragonTigerGame = () => {
         <div
           className="absolute rounded-md"
           style={{
-            left: "59.4%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
-            boxShadow: "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8), inset 0 0 12px hsla(30, 100%, 65%, 0.6)",
-            animation: "dt-glow-red 1.6s ease-in-out infinite",
+            left: "59.8%", top: "30.2%", width: "14.4%", aspectRatio: "3/5.1",
+            boxShadow: tigerCard ? "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8)" : "none",
+            animation: tigerCard ? "dt-glow-red 1.6s ease-in-out infinite" : "none",
+            pointerEvents: "none",
           }}
         >
           <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(tigerCard)}</div>
