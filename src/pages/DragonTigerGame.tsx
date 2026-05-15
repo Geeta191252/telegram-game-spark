@@ -711,7 +711,7 @@ const DragonTigerGame = () => {
           onClick={() => { if (phase === "betting" && totalBet === 0) setActiveWallet((w) => w === "dollar" ? "star" : "dollar"); }}
           className="absolute flex flex-col items-center justify-center font-black text-white"
           style={{
-            left: "2%", top: "84.4%", width: "10%", aspectRatio: "1/1.4",
+            left: "2%", top: "84.9%", width: "10%", aspectRatio: "1/1.4",
             background: "transparent",
             zIndex: 6,
           }}
@@ -728,7 +728,7 @@ const DragonTigerGame = () => {
             left: "0%",
             right: "0%",
             top: "81.9%",
-            height: "10%",
+            height: "10.4%",
             zIndex: 20,
             pointerEvents: "auto",
             overflow: "visible",
@@ -744,8 +744,8 @@ const DragonTigerGame = () => {
                 className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
-                  top: "53%",
-                  width: "12.8%",
+                  top: "53.6%",
+                  width: "12.4%",
                   aspectRatio: "1/1",
                   backgroundImage: isActive ? `url(${CHIP_IMAGES[index]})` : "none",
                   backgroundRepeat: "no-repeat",
@@ -753,7 +753,7 @@ const DragonTigerGame = () => {
                   backgroundSize: "contain",
                   border: 0,
                   padding: 0,
-                  transform: `translate(-50%, -50%) scale(${isActive ? 1.5 : 1}) translateZ(${isActive ? 28 : 0}px)`,
+                  transform: `translate(-50%, -50%) scale(${isActive ? 1.42 : 1}) translateZ(${isActive ? 28 : 0}px)`,
                   transformOrigin: "center",
                   transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
                   cursor: phase === "betting" ? "pointer" : "default",
