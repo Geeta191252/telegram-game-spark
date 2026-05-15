@@ -376,18 +376,18 @@ const DragonTigerGame = () => {
           width: `min(100vw, calc(100vh * ${BG_W} / ${BG_H}))`,
         }}
       >
-        {/* 3D TABLE BACKGROUND with perspective tilt + ambient glow */}
+        {/* 3D TABLE BACKGROUND */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ perspective: "1400px", perspectiveOrigin: "50% 30%" }}
+          style={{ perspective: "1500px", perspectiveOrigin: "50% 28%" }}
         >
           <div
             className="absolute inset-0"
             style={{
-              transform: "rotateX(8deg) translateZ(0)",
+              transform: "translateZ(0)",
               transformStyle: "preserve-3d",
               transformOrigin: "50% 40%",
-              filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.75)) drop-shadow(0 0 60px rgba(255,170,40,0.18))",
+              filter: "drop-shadow(0 34px 44px hsl(0 0% 0% / 0.72)) drop-shadow(0 0 50px hsl(38 100% 56% / 0.2))",
             }}
           >
             <img
@@ -401,7 +401,7 @@ const DragonTigerGame = () => {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(ellipse 70% 35% at 50% 18%, hsla(45,95%,70%,0.18), transparent 70%), radial-gradient(ellipse 90% 55% at 50% 95%, hsla(0,0%,0%,0.55), transparent 60%)",
+                  "radial-gradient(ellipse 62% 32% at 50% 12%, hsl(45 95% 70% / 0.16), transparent 72%), radial-gradient(ellipse 90% 48% at 50% 92%, hsl(0 0% 0% / 0.5), transparent 62%)",
                 mixBlendMode: "screen",
               }}
             />
