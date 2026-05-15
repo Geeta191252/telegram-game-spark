@@ -12,7 +12,7 @@ import {
   stopBgMusic,
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
-import { reportGameResult } from "@/lib/telegram";
+import { getTelegramUser, reportGameResult } from "@/lib/telegram";
 import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
 import chip1Img from "@/assets/dragon-tiger/chip-1.png";
 import chip10Img from "@/assets/dragon-tiger/chip-10.png";
@@ -55,7 +55,8 @@ const DragonTigerGame = () => {
   const gameStar = starBalance + starWinning + localStarAdj;
 
   const [activeWallet, setActiveWallet] = useState<"dollar" | "star">("dollar");
-  const currentBalance = activeWallet === "dollar" ? gameDollar : gameStar;
+  const backendBalance = activeWallet === "dollar" ? gameDollar : gameStar;
+  const currentBalance = !getTelegramUser() && backendBalance <= 0 ? 50000 : backendBalance;
 
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
