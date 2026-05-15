@@ -14,6 +14,11 @@ import {
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { reportGameResult } from "@/lib/telegram";
 import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
+import chip1Img from "@/assets/dragon-tiger/chip-1.png";
+import chip10Img from "@/assets/dragon-tiger/chip-10.png";
+import chip50Img from "@/assets/dragon-tiger/chip-50.png";
+import chip100Img from "@/assets/dragon-tiger/chip-100.png";
+import chip500Img from "@/assets/dragon-tiger/chip-500.png";
 
 type Side = "dragon" | "tiger" | "tie";
 type Phase = "betting" | "dealing" | "result";
@@ -29,9 +34,8 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [18.3, 34.2, 50.2, 66.2, 82.1];
-const CHIP_BG_X = [16.98, 33.55, 50.21, 66.87, 83.43];
-const CHIP_BG_Y = 88.55;
+const CHIP_HIT_POSITIONS = [12.85, 33.15, 50, 66.85, 83.55];
+const CHIP_IMAGES = [chip1Img, chip10Img, chip50Img, chip100Img, chip500Img];
 
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
@@ -658,10 +662,10 @@ const DragonTigerGame = () => {
         <div
           className="absolute"
           style={{
-            left: "4.8%",
-            right: "4.8%",
-            top: "83.8%",
-            height: "8.3%",
+            left: "0%",
+            right: "0%",
+            top: "83.15%",
+            height: "10.4%",
             zIndex: 20,
             pointerEvents: "auto",
             overflow: "visible",
@@ -677,43 +681,29 @@ const DragonTigerGame = () => {
                 className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
-                  top: "23%",
-                  width: "14.6%",
+                  top: "50%",
+                  width: "13.8%",
                   aspectRatio: "1/1",
-                  background: "transparent",
+                  backgroundImage: isActive ? `url(${CHIP_IMAGES[index]})` : "none",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  backgroundSize: "contain",
                   border: 0,
                   padding: 0,
-                  transform: "translate(-50%, -50%)",
+                  transform: `translate(-50%, -50%) scale(${isActive ? 1.42 : 1})`,
                   transformOrigin: "center",
+                  transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
                   cursor: phase === "betting" ? "pointer" : "default",
                   zIndex: 28,
                   touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
                   overflow: "visible",
+                  filter: isActive ? "drop-shadow(0 10px 10px hsla(0, 0%, 0%, 0.55))" : "none",
                 }}
                 aria-label={`Chip ${v}`}
                 aria-pressed={isActive}
                 disabled={phase !== "betting"}
-              >
-                {isActive && (
-                  <div
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: "50%",
-                      backgroundImage: `url(${arenaBg})`,
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "757.7% 1357.5%",
-                      backgroundPosition: `${CHIP_BG_X[index]}% ${CHIP_BG_Y}%`,
-                      transform: "scale(1.35)",
-                      transformOrigin: "center",
-                      transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
-              </button>
+              />
             );
           })}
         </div>
