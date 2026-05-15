@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -829,7 +829,7 @@ const DragonTigerGame = () => {
                     animation: `dt-win-coin-burst ${900 + (i % 4) * 140}ms ease-out ${i * 34}ms both`,
                     ["--r" as string]: `${i * 22.5}deg`,
                     ["--d" as string]: `${90 + (i % 5) * 22}px`,
-                  }}
+                  } as CSSProperties & Record<string, string>}
                 />
               ))}
               <motion.div
