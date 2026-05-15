@@ -516,6 +516,16 @@ const DragonTigerGame = () => {
             20%  { opacity: 0.85; }
             100% { opacity: 0; }
           }
+          @keyframes dt-win-title-shine {
+            0% { background-position: 0% 50%; transform: translate(-50%, -50%) scale(0.9) rotateX(16deg); }
+            45% { background-position: 100% 50%; transform: translate(-50%, -50%) scale(1.08) rotateX(0deg); }
+            100% { background-position: 0% 50%; transform: translate(-50%, -50%) scale(1) rotateX(0deg); }
+          }
+          @keyframes dt-win-coin-burst {
+            0% { transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translateY(0) scale(0.3); opacity: 0; }
+            18% { opacity: 1; }
+            100% { transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translateY(var(--d, -120px)) scale(1); opacity: 0; }
+          }
         `}</style>
 
         {/* WIN VIDEO EFFECT OVERLAY ON BOWL PANELS — clipped to bowl-half shape */}
