@@ -662,10 +662,10 @@ const DragonTigerGame = () => {
         <div
           className="absolute"
           style={{
-            left: "4.8%",
-            right: "4.8%",
-            top: "83.8%",
-            height: "8.3%",
+            left: "0%",
+            right: "0%",
+            top: "83.15%",
+            height: "10.4%",
             zIndex: 20,
             pointerEvents: "auto",
             overflow: "visible",
@@ -681,8 +681,8 @@ const DragonTigerGame = () => {
                 className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
-                  top: "23%",
-                  width: "14.6%",
+                  top: "50%",
+                  width: "13.8%",
                   aspectRatio: "1/1",
                   background: "transparent",
                   border: 0,
@@ -700,20 +700,23 @@ const DragonTigerGame = () => {
                 disabled={phase !== "betting"}
               >
                 {isActive && (
-                  <div
+                  <img
+                    src={CHIP_IMAGES[index]}
+                    alt=""
                     aria-hidden
                     style={{
                       position: "absolute",
-                      inset: 0,
+                      left: "50%",
+                      top: "50%",
+                      width: "100%",
+                      height: "100%",
                       borderRadius: "50%",
-                      backgroundImage: `url(${arenaBg})`,
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "757.7% 1357.5%",
-                      backgroundPosition: `${CHIP_BG_X[index]}% ${CHIP_BG_Y}%`,
-                      transform: "scale(1.35)",
+                      objectFit: "contain",
+                      transform: "translate(-50%, -50%) scale(1.42)",
                       transformOrigin: "center",
                       transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
                       pointerEvents: "none",
+                      filter: "drop-shadow(0 10px 10px hsla(0, 0%, 0%, 0.55))",
                     }}
                   />
                 )}
