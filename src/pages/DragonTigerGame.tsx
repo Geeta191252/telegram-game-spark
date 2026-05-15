@@ -13,7 +13,7 @@ import {
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { getTelegramUser, reportGameResult } from "@/lib/telegram";
-import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
+import arenaBg from "@/assets/dragon-tiger/arena-bg-upload.png";
 import chip1Img from "@/assets/dragon-tiger/chip-1.png";
 import chip10Img from "@/assets/dragon-tiger/chip-10.png";
 import chip50Img from "@/assets/dragon-tiger/chip-50.png";
@@ -34,7 +34,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [19.7, 36.2, 50.9, 66.5, 81.9];
+const CHIP_HIT_POSITIONS = [23.8, 36.85, 50, 63.15, 76.45];
 const CHIP_IMAGES = [chip1Img, chip10Img, chip50Img, chip100Img, chip500Img];
 
 // Image intrinsic aspect ratio (width / height)
@@ -255,7 +255,9 @@ const DragonTigerGame = () => {
     ];
   };
 
-  const renderCard = (card: CardData | null) => (
+  const renderCard = (card: CardData | null) => {
+    if (!card) return null;
+    return (
     <div style={{ perspective: 800, width: "100%", height: "100%" }}>
       <motion.div
         className="relative w-full h-full"
@@ -298,6 +300,7 @@ const DragonTigerGame = () => {
       </motion.div>
     </div>
   );
+  };
 
   const replayWinVideo = (node: HTMLVideoElement | null) => {
     if (!node) return;
