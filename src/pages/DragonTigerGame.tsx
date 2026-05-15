@@ -612,7 +612,7 @@ const DragonTigerGame = () => {
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
           className="absolute flex items-center justify-between"
-          style={{ left: "16%", right: "20%", top: "47%", height: "3%" }}
+          style={{ left: "17%", right: "19%", top: "42.6%", height: "3.3%", zIndex: 8 }}
         >
           {history.map((h, i) => (
             <div
@@ -640,8 +640,9 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tie")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "30%", top: "37%", width: "40%", height: "12%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "28.7%", top: "47.1%", width: "42.6%", height: "11.2%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
         >
+          {renderPlacedBet("tie", bets.tie)}
           {phase === "betting" && betFeedback?.side === "tie" && (
             <motion.div
               key={`tie-${betFeedback.key}`}
@@ -651,12 +652,6 @@ const DragonTigerGame = () => {
               className="absolute inset-0 rounded-t-full pointer-events-none"
               style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 4px hsl(140 90% 55%), 0 0 28px hsl(140 90% 55%)" : "inset 0 0 0 4px hsl(0 85% 60%), 0 0 28px hsl(0 85% 60%)" }}
             />
-          )}
-          {bets.tie > 0 && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-0.5 rounded-full font-black"
-              style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)" }}>
-              {sym}{bets.tie}
-            </div>
           )}
           {phase === "result" && winner === "tie" && (
             <div className="absolute inset-0 rounded-t-full" style={{ boxShadow: "inset 0 0 0 3px hsl(140 80% 55%), 0 0 25px hsl(140 80% 55%)" }} />
