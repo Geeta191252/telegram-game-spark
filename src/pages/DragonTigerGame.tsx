@@ -807,9 +807,100 @@ const DragonTigerGame = () => {
           )}
         </button>
 
-        {/* RESULT MESSAGE FLOATING */}
+        {/* RESULT MESSAGE + 3D WIN ANIMATION */}
         <AnimatePresence>
           {phase === "result" && winner && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 30, perspective: "1000px" }}
+            >
+              {winAmount > 0 && Array.from({ length: 16 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    left: "50%",
+                    top: "52%",
+                    width: "min(3.2vw, 16px)",
+                    aspectRatio: "1/1",
+                    background: "radial-gradient(circle at 35% 28%, hsl(53 100% 82%), hsl(38 96% 50%) 52%, hsl(28 88% 34%))",
+                    boxShadow: "inset 0 1px 1px hsl(0 0% 100% / 0.65), 0 0 10px hsl(43 100% 55% / 0.8)",
+                    animation: `dt-win-coin-burst ${900 + (i % 4) * 140}ms ease-out ${i * 34}ms both`,
+                    ["--r" as string]: `${i * 22.5}deg`,
+                    ["--d" as string]: `${90 + (i % 5) * 22}px`,
+                  }}
+                />
+              ))}
+              <motion.div
+                initial={{ scale: 0.55, rotateX: 55, y: 28 }}
+                animate={{ scale: 1, rotateX: 0, y: 0 }}
+                exit={{ scale: 0.75, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center text-center font-game"
+                style={{
+                  width: "76%",
+                  minHeight: "13%",
+                  transformStyle: "preserve-3d",
+                  transform: "translate(-50%, -50%)",
+                  borderRadius: "20px",
+                  background: "linear-gradient(180deg, hsl(42 85% 20% / 0.92), hsl(20 85% 8% / 0.95))",
+                  border: "2px solid hsl(45 95% 62% / 0.9)",
+                  boxShadow: "inset 0 2px 1px hsl(52 100% 82% / 0.45), inset 0 -6px 18px hsl(0 0% 0% / 0.45), 0 18px 38px hsl(0 0% 0% / 0.75), 0 0 36px hsl(43 100% 55% / 0.65)",
+                }}
+              >
+                <div
+                  className="absolute inset-0 rounded-[18px]"
+                  style={{ background: "linear-gradient(120deg, transparent 20%, hsl(52 100% 78% / 0.22), transparent 80%)" }}
+                />
+                <div
+                  className="relative font-black uppercase"
+                  style={{
+                    fontSize: "min(10vw, 56px)",
+                    lineHeight: 0.95,
+                    letterSpacing: 0,
+                    color: "transparent",
+                    background: winAmount > 0
+                      ? "linear-gradient(90deg, hsl(39 90% 45%), hsl(54 100% 78%), hsl(32 95% 52%), hsl(54 100% 78%))"
+                      : "linear-gradient(90deg, hsl(0 80% 58%), hsl(28 90% 70%), hsl(0 80% 58%))",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    backgroundSize: "260% 100%",
+                    animation: "dt-win-title-shine 1.15s ease-out both",
+                    textShadow: "0 5px 0 hsl(24 100% 12% / 0.75), 0 0 24px hsl(45 100% 58% / 0.65)",
+                  }}
+                >
+                  {winAmount > 0 ? "WIN" : "LOSE"}
+                </div>
+                <div
+                  className="relative font-black uppercase"
+                  style={{
+                    marginTop: 4,
+                    fontSize: "min(4.2vw, 22px)",
+                    color: winner === "dragon" ? "hsl(205 100% 72%)" : winner === "tiger" ? "hsl(27 100% 70%)" : "hsl(130 90% 68%)",
+                    textShadow: "0 2px 0 hsl(0 0% 0% / 0.8), 0 0 14px currentColor",
+                  }}
+                >
+                  {winner === "tie" ? "TIE 8:1" : `${winner} wins`}
+                </div>
+                <div
+                  className="relative font-black"
+                  style={{
+                    marginTop: 2,
+                    fontSize: "min(5.2vw, 28px)",
+                    color: winAmount > 0 ? "hsl(50 96% 72%)" : "hsl(0 78% 72%)",
+                    textShadow: "0 2px 0 hsl(0 0% 0% / 0.75)",
+                  }}
+                >
+                  {winAmount > 0 ? `+${sym}${winAmount}` : "Better luck"}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {false && (
             <motion.div
               initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               className="absolute left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full"
