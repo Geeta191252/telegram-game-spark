@@ -13,7 +13,7 @@ import {
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
 import { getTelegramUser, reportGameResult } from "@/lib/telegram";
-import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
+import arenaBg from "@/assets/dragon-tiger/arena-bg-upload.png";
 import chip1Img from "@/assets/dragon-tiger/chip-1.png";
 import chip10Img from "@/assets/dragon-tiger/chip-10.png";
 import chip50Img from "@/assets/dragon-tiger/chip-50.png";
@@ -34,7 +34,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [19.7, 36.2, 50.9, 66.5, 81.9];
+const CHIP_HIT_POSITIONS = [23.8, 36.85, 50, 63.15, 76.45];
 const CHIP_IMAGES = [chip1Img, chip10Img, chip50Img, chip100Img, chip500Img];
 
 // Image intrinsic aspect ratio (width / height)
@@ -255,7 +255,9 @@ const DragonTigerGame = () => {
     ];
   };
 
-  const renderCard = (card: CardData | null) => (
+  const renderCard = (card: CardData | null) => {
+    if (!card) return null;
+    return (
     <div style={{ perspective: 800, width: "100%", height: "100%" }}>
       <motion.div
         className="relative w-full h-full"
@@ -298,6 +300,7 @@ const DragonTigerGame = () => {
       </motion.div>
     </div>
   );
+  };
 
   const replayWinVideo = (node: HTMLVideoElement | null) => {
     if (!node) return;
@@ -458,13 +461,14 @@ const DragonTigerGame = () => {
           {phase === "dealing" ? "…" : phase === "result" ? resultTimer : betTimer}
         </div>
 
-        {/* DRAGON & TIGER CARDS — fit exactly inside painted card-back frames */}
+        {/* DRAGON & TIGER CARDS — reveal only when dealt, otherwise uploaded UI card backs stay untouched */}
         <div
           className="absolute rounded-md"
           style={{
-            left: "27.2%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
-            boxShadow: "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75), inset 0 0 12px hsla(210, 100%, 70%, 0.6)",
-            animation: "dt-glow-blue 1.6s ease-in-out infinite",
+            left: "25.6%", top: "30.2%", width: "14.4%", aspectRatio: "3/5.1",
+            boxShadow: dragonCard ? "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75)" : "none",
+            animation: dragonCard ? "dt-glow-blue 1.6s ease-in-out infinite" : "none",
+            pointerEvents: "none",
           }}
         >
           <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(dragonCard)}</div>
@@ -472,9 +476,10 @@ const DragonTigerGame = () => {
         <div
           className="absolute rounded-md"
           style={{
-            left: "59.4%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
-            boxShadow: "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8), inset 0 0 12px hsla(30, 100%, 65%, 0.6)",
-            animation: "dt-glow-red 1.6s ease-in-out infinite",
+            left: "59.8%", top: "30.2%", width: "14.4%", aspectRatio: "3/5.1",
+            boxShadow: tigerCard ? "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8)" : "none",
+            animation: tigerCard ? "dt-glow-red 1.6s ease-in-out infinite" : "none",
+            pointerEvents: "none",
           }}
         >
           <div className="absolute inset-0 overflow-hidden rounded-md">{renderCard(tigerCard)}</div>
@@ -538,7 +543,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "9.7%", top: "46.2%", width: "40.8%", height: "35.6%",
+                left: "8.5%", top: "49.5%", width: "41.2%", height: "33.8%",
                 zIndex: 7,
                 clipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
                 WebkitClipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
@@ -565,7 +570,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "49.5%", top: "46.2%", width: "40.8%", height: "35.6%",
+                left: "50%", top: "49.5%", width: "41.2%", height: "33.8%",
                 zIndex: 7,
                 clipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
                 WebkitClipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
@@ -592,7 +597,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "29%", top: "40.7%", width: "42%", height: "12%",
+                left: "28.5%", top: "50%", width: "43%", height: "10%",
                 zIndex: 7,
                 clipPath: "ellipse(50% 100% at 50% 100%)",
                 WebkitClipPath: "ellipse(50% 100% at 50% 100%)",
@@ -613,7 +618,7 @@ const DragonTigerGame = () => {
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
           className="absolute flex items-center justify-between"
-          style={{ left: "17%", right: "19%", top: "42.6%", height: "3.3%", zIndex: 8 }}
+          style={{ left: "14.5%", right: "18.3%", top: "45.4%", height: "3.1%", zIndex: 8 }}
         >
           {history.map((h, i) => (
             <div
@@ -641,7 +646,7 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tie")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "28.7%", top: "47.1%", width: "42.6%", height: "11.2%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "28.1%", top: "50.2%", width: "43.8%", height: "11.6%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
           aria-label="Bet on Tie"
         >
           {renderPlacedBet("tie", bets.tie)}
@@ -665,7 +670,7 @@ const DragonTigerGame = () => {
           onClick={() => addBet("dragon")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "9.5%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 0 55%" }}
+          style={{ left: "8.5%", top: "59%", width: "41.5%", height: "28.1%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 0 55%" }}
           aria-label="Bet on Dragon"
         >
           {renderPlacedBet("dragon", bets.dragon)}
@@ -686,7 +691,7 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tiger")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "49.6%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 55% 0" }}
+          style={{ left: "50%", top: "59%", width: "41.5%", height: "28.1%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 55% 0" }}
           aria-label="Bet on Tiger"
         >
           {renderPlacedBet("tiger", bets.tiger)}
@@ -706,7 +711,7 @@ const DragonTigerGame = () => {
           onClick={() => { if (phase === "betting" && totalBet === 0) setActiveWallet((w) => w === "dollar" ? "star" : "dollar"); }}
           className="absolute flex flex-col items-center justify-center font-black text-white"
           style={{
-            left: "2%", top: "84.4%", width: "10%", aspectRatio: "1/1.4",
+            left: "2%", top: "84.9%", width: "10%", aspectRatio: "1/1.4",
             background: "transparent",
             zIndex: 6,
           }}
@@ -723,7 +728,7 @@ const DragonTigerGame = () => {
             left: "0%",
             right: "0%",
             top: "81.9%",
-            height: "10%",
+            height: "10.4%",
             zIndex: 20,
             pointerEvents: "auto",
             overflow: "visible",
@@ -739,8 +744,8 @@ const DragonTigerGame = () => {
                 className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
-                  top: "53%",
-                  width: "12.8%",
+                  top: "53.6%",
+                  width: "12.4%",
                   aspectRatio: "1/1",
                   backgroundImage: isActive ? `url(${CHIP_IMAGES[index]})` : "none",
                   backgroundRepeat: "no-repeat",
@@ -748,7 +753,7 @@ const DragonTigerGame = () => {
                   backgroundSize: "contain",
                   border: 0,
                   padding: 0,
-                  transform: `translate(-50%, -50%) scale(${isActive ? 1.5 : 1}) translateZ(${isActive ? 28 : 0}px)`,
+                  transform: `translate(-50%, -50%) scale(${isActive ? 1.42 : 1}) translateZ(${isActive ? 28 : 0}px)`,
                   transformOrigin: "center",
                   transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
                   cursor: phase === "betting" ? "pointer" : "default",
@@ -770,20 +775,20 @@ const DragonTigerGame = () => {
         <button
           onClick={repeatBets}
           className="absolute"
-          style={{ left: "9%", top: "92.8%", width: "9%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
+          style={{ left: "8.5%", top: "92.2%", width: "9%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Repeat last bet"
         />
         <div
-          className="absolute flex items-center justify-center font-black text-white"
-          style={{ left: "20%", right: "32%", top: "92.9%", height: "4.2%", fontSize: "min(4.4vw, 22px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsl(0 0% 0% / 0.8), 0 0 12px hsl(45 100% 55% / 0.45)", zIndex: 18 }}
+          className="absolute flex items-center justify-center font-black"
+          style={{ left: "18%", right: "18%", top: "92.8%", height: "4.2%", fontSize: "min(4.4vw, 22px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsl(0 0% 0% / 0.8), 0 0 12px hsl(45 100% 55% / 0.45)", zIndex: 18 }}
         >
-          {betStatus || (totalBet > 0 ? totalBet.toFixed(2) : phase === "betting" ? `${sym}${chip}` : "0.00")}
+          {totalBet > 0 ? `${sym}${totalBet.toFixed(0)}` : ""}
         </div>
         <button
           onClick={deal}
           disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet}
           className="absolute"
-          style={{ right: "16%", top: "92.8%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
+          style={{ right: "9%", top: "43.4%", width: "9%", aspectRatio: "1/1", borderRadius: "20%", zIndex: 18 }}
           aria-label="Deal"
         >
           <AnimatePresence>
@@ -800,7 +805,7 @@ const DragonTigerGame = () => {
           onClick={doubleAllBets}
           disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet * 2}
           className="absolute"
-          style={{ right: "4%", top: "92.8%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
+          style={{ right: "3%", top: "92.2%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Double bet"
         >
           {phase === "betting" && totalBet > 0 && currentBalance >= totalBet * 2 && (
@@ -837,16 +842,15 @@ const DragonTigerGame = () => {
                 />
               ))}
               <motion.div
-                initial={{ scale: 0.55, rotateX: 55, y: 28 }}
-                animate={{ scale: 1, rotateX: 0, y: 0 }}
-                exit={{ scale: 0.75, opacity: 0 }}
+                initial={{ x: "-50%", scale: 0.55, rotateX: 55, y: 28 }}
+                animate={{ x: "-50%", scale: 1, rotateX: 0, y: 0 }}
+                exit={{ x: "-50%", scale: 0.75, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 18 }}
                 className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center text-center font-game"
                 style={{
                   width: "76%",
                   minHeight: "13%",
                   transformStyle: "preserve-3d",
-                  transform: "translate(-50%, -50%)",
                   borderRadius: "20px",
                   background: "linear-gradient(180deg, hsl(42 85% 20% / 0.92), hsl(20 85% 8% / 0.95))",
                   border: "2px solid hsl(45 95% 62% / 0.9)",
