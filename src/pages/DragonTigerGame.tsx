@@ -543,7 +543,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "9.7%", top: "46.2%", width: "40.8%", height: "35.6%",
+                left: "8.5%", top: "49.5%", width: "41.2%", height: "33.8%",
                 zIndex: 7,
                 clipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
                 WebkitClipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
@@ -570,7 +570,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "49.5%", top: "46.2%", width: "40.8%", height: "35.6%",
+                left: "50%", top: "49.5%", width: "41.2%", height: "33.8%",
                 zIndex: 7,
                 clipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
                 WebkitClipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
@@ -597,7 +597,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "29%", top: "40.7%", width: "42%", height: "12%",
+                left: "28.5%", top: "50%", width: "43%", height: "10%",
                 zIndex: 7,
                 clipPath: "ellipse(50% 100% at 50% 100%)",
                 WebkitClipPath: "ellipse(50% 100% at 50% 100%)",
@@ -618,7 +618,7 @@ const DragonTigerGame = () => {
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
           className="absolute flex items-center justify-between"
-          style={{ left: "17%", right: "19%", top: "42.6%", height: "3.3%", zIndex: 8 }}
+          style={{ left: "14.5%", right: "18.3%", top: "45.4%", height: "3.1%", zIndex: 8 }}
         >
           {history.map((h, i) => (
             <div
