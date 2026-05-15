@@ -899,30 +899,6 @@ const DragonTigerGame = () => {
           )}
         </AnimatePresence>
 
-        <AnimatePresence>
-          {false && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="absolute left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full"
-              style={{
-                top: "33%",
-                background: "hsla(220,30%,5%,0.92)",
-                border: "1.5px solid hsla(45,90%,55%,0.7)",
-                zIndex: 10,
-              }}
-            >
-              {winAmount > 0 ? (
-                <p className="font-black whitespace-nowrap" style={{ color: "hsl(50 95% 70%)", fontSize: "min(3vw, 14px)" }}>
-                  🎉 {winner === "tie" ? "TIE!" : winner.toUpperCase() + " WINS"} +{sym}{winAmount}
-                </p>
-              ) : (
-                <p className="font-black whitespace-nowrap" style={{ color: "hsl(0 80% 70%)", fontSize: "min(3vw, 14px)" }}>
-                  💨 {winner.toUpperCase()} — Better luck next round
-                </p>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );
