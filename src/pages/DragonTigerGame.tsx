@@ -443,8 +443,8 @@ const DragonTigerGame = () => {
         <div
           className="absolute flex items-center justify-center font-black"
           style={{
-            left: "50%", top: "24%", transform: "translate(-50%, -50%)",
-            width: "20%", aspectRatio: "1/1",
+            left: "50%", top: "23%", transform: "translate(-50%, -50%) rotateX(7deg)",
+            width: "22%", aspectRatio: "1/1",
             borderRadius: "50%",
             color: "hsl(50 95% 75%)",
             fontSize: "min(13vw, 64px)",
@@ -461,7 +461,7 @@ const DragonTigerGame = () => {
         <div
           className="absolute rounded-md"
           style={{
-            left: "25.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1",
+            left: "27.2%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
             boxShadow: "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75), inset 0 0 12px hsla(210, 100%, 70%, 0.6)",
             animation: "dt-glow-blue 1.6s ease-in-out infinite",
           }}
@@ -471,7 +471,7 @@ const DragonTigerGame = () => {
         <div
           className="absolute rounded-md"
           style={{
-            left: "60.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1",
+            left: "59.4%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
             boxShadow: "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8), inset 0 0 12px hsla(30, 100%, 65%, 0.6)",
             animation: "dt-glow-red 1.6s ease-in-out infinite",
           }}
