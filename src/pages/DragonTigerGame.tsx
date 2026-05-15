@@ -842,16 +842,15 @@ const DragonTigerGame = () => {
                 />
               ))}
               <motion.div
-                initial={{ scale: 0.55, rotateX: 55, y: 28 }}
-                animate={{ scale: 1, rotateX: 0, y: 0 }}
-                exit={{ scale: 0.75, opacity: 0 }}
+                initial={{ x: "-50%", scale: 0.55, rotateX: 55, y: 28 }}
+                animate={{ x: "-50%", scale: 1, rotateX: 0, y: 0 }}
+                exit={{ x: "-50%", scale: 0.75, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 18 }}
                 className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center text-center font-game"
                 style={{
                   width: "76%",
                   minHeight: "13%",
                   transformStyle: "preserve-3d",
-                  transform: "translate(-50%, -50%)",
                   borderRadius: "20px",
                   background: "linear-gradient(180deg, hsl(42 85% 20% / 0.92), hsl(20 85% 8% / 0.95))",
                   border: "2px solid hsl(45 95% 62% / 0.9)",
