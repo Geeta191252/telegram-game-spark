@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ import {
   stopBgMusic,
 } from "@/hooks/useGameSounds";
 import { useBalanceContext } from "@/contexts/BalanceContext";
-import { reportGameResult } from "@/lib/telegram";
+import { getTelegramUser, reportGameResult } from "@/lib/telegram";
 import arenaBg from "@/assets/dragon-tiger/arena-bg.png";
 import chip1Img from "@/assets/dragon-tiger/chip-1.png";
 import chip10Img from "@/assets/dragon-tiger/chip-10.png";
@@ -34,7 +34,7 @@ const SUITS = [
 ];
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
-const CHIP_HIT_POSITIONS = [12.85, 33.15, 50, 66.85, 83.55];
+const CHIP_HIT_POSITIONS = [19.7, 36.2, 50.9, 66.5, 81.9];
 const CHIP_IMAGES = [chip1Img, chip10Img, chip50Img, chip100Img, chip500Img];
 
 // Image intrinsic aspect ratio (width / height)
@@ -55,7 +55,8 @@ const DragonTigerGame = () => {
   const gameStar = starBalance + starWinning + localStarAdj;
 
   const [activeWallet, setActiveWallet] = useState<"dollar" | "star">("dollar");
-  const currentBalance = activeWallet === "dollar" ? gameDollar : gameStar;
+  const backendBalance = activeWallet === "dollar" ? gameDollar : gameStar;
+  const currentBalance = !getTelegramUser() && backendBalance <= 0 ? 50000 : backendBalance;
 
   const [bets, setBets] = useState<{ dragon: number; tiger: number; tie: number }>({ dragon: 0, tiger: 0, tie: 0 });
   const [lastBets, setLastBets] = useState<{ dragon: number; tiger: number; tie: number } | null>(null);
@@ -305,6 +306,65 @@ const DragonTigerGame = () => {
     if (playPromise) playPromise.catch(() => undefined);
   };
 
+  const chipImageForAmount = (amount: number) => {
+    if (amount >= 500) return chip500Img;
+    if (amount >= 100) return chip100Img;
+    if (amount >= 50) return chip50Img;
+    if (amount >= 10) return chip10Img;
+    return chip1Img;
+  };
+
+  const renderPlacedBet = (side: Side, amount: number) => {
+    if (amount <= 0) return null;
+    const accent = side === "dragon" ? "210 100% 60%" : side === "tiger" ? "22 100% 56%" : "130 85% 55%";
+    return (
+      <motion.div
+        key={`${side}-${amount}`}
+        initial={{ opacity: 0, y: 12, scale: 0.72, rotateX: 42 }}
+        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ type: "spring", stiffness: 420, damping: 22 }}
+        className="absolute pointer-events-none"
+        style={{
+          left: "50%",
+          top: side === "tie" ? "48%" : "45%",
+          width: side === "tie" ? "16%" : "24%",
+          aspectRatio: "1/1",
+          transform: "translate(-50%, -50%)",
+          transformStyle: "preserve-3d",
+          zIndex: 4,
+          filter: `drop-shadow(0 0 12px hsl(${accent} / 0.75)) drop-shadow(0 12px 10px hsl(0 0% 0% / 0.58))`,
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${chipImageForAmount(amount)})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            transform: "rotateX(14deg) translateZ(14px)",
+          }}
+        />
+        <div
+          className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center font-black whitespace-nowrap"
+          style={{
+            bottom: "-16%",
+            minWidth: "150%",
+            padding: "2px 7px",
+            borderRadius: 999,
+            background: "linear-gradient(180deg, hsl(48 95% 72%), hsl(33 96% 48%))",
+            color: "hsl(28 80% 13%)",
+            fontSize: "min(3vw, 14px)",
+            textShadow: "0 1px 0 hsl(52 100% 82% / 0.7)",
+            boxShadow: "inset 0 1px 1px hsl(0 0% 100% / 0.55), 0 5px 10px hsl(0 0% 0% / 0.55)",
+          }}
+        >
+          {sym}{amount}
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div
       className="fixed inset-0 w-full h-full overflow-hidden flex items-center justify-center"
@@ -317,18 +377,18 @@ const DragonTigerGame = () => {
           width: `min(100vw, calc(100vh * ${BG_W} / ${BG_H}))`,
         }}
       >
-        {/* 3D TABLE BACKGROUND with perspective tilt + ambient glow */}
+        {/* 3D TABLE BACKGROUND */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ perspective: "1400px", perspectiveOrigin: "50% 30%" }}
+          style={{ perspective: "1500px", perspectiveOrigin: "50% 28%" }}
         >
           <div
             className="absolute inset-0"
             style={{
-              transform: "rotateX(8deg) translateZ(0)",
+              transform: "translateZ(0)",
               transformStyle: "preserve-3d",
               transformOrigin: "50% 40%",
-              filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.75)) drop-shadow(0 0 60px rgba(255,170,40,0.18))",
+              filter: "drop-shadow(0 34px 44px hsl(0 0% 0% / 0.72)) drop-shadow(0 0 50px hsl(38 100% 56% / 0.2))",
             }}
           >
             <img
@@ -342,7 +402,7 @@ const DragonTigerGame = () => {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(ellipse 70% 35% at 50% 18%, hsla(45,95%,70%,0.18), transparent 70%), radial-gradient(ellipse 90% 55% at 50% 95%, hsla(0,0%,0%,0.55), transparent 60%)",
+                  "radial-gradient(ellipse 62% 32% at 50% 12%, hsl(45 95% 70% / 0.16), transparent 72%), radial-gradient(ellipse 90% 48% at 50% 92%, hsl(0 0% 0% / 0.5), transparent 62%)",
                 mixBlendMode: "screen",
               }}
             />
@@ -384,8 +444,8 @@ const DragonTigerGame = () => {
         <div
           className="absolute flex items-center justify-center font-black"
           style={{
-            left: "50%", top: "24%", transform: "translate(-50%, -50%)",
-            width: "20%", aspectRatio: "1/1",
+            left: "50%", top: "23%", transform: "translate(-50%, -50%) rotateX(7deg)",
+            width: "22%", aspectRatio: "1/1",
             borderRadius: "50%",
             color: "hsl(50 95% 75%)",
             fontSize: "min(13vw, 64px)",
@@ -402,7 +462,7 @@ const DragonTigerGame = () => {
         <div
           className="absolute rounded-md"
           style={{
-            left: "25.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1",
+            left: "27.2%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
             boxShadow: "0 0 14px 3px hsla(210, 100%, 60%, 0.95), 0 0 36px 8px hsla(210, 100%, 55%, 0.75), inset 0 0 12px hsla(210, 100%, 70%, 0.6)",
             animation: "dt-glow-blue 1.6s ease-in-out infinite",
           }}
@@ -412,7 +472,7 @@ const DragonTigerGame = () => {
         <div
           className="absolute rounded-md"
           style={{
-            left: "60.5%", top: "31.3%", width: "15%", aspectRatio: "3/5.1",
+            left: "59.4%", top: "29.6%", width: "13.8%", aspectRatio: "3/5.1",
             boxShadow: "0 0 14px 3px hsla(20, 100%, 55%, 0.95), 0 0 36px 8px hsla(15, 100%, 50%, 0.8), inset 0 0 12px hsla(30, 100%, 65%, 0.6)",
             animation: "dt-glow-red 1.6s ease-in-out infinite",
           }}
@@ -457,6 +517,16 @@ const DragonTigerGame = () => {
             20%  { opacity: 0.85; }
             100% { opacity: 0; }
           }
+          @keyframes dt-win-title-shine {
+            0% { background-position: 0% 50%; transform: translate(-50%, -50%) scale(0.9) rotateX(16deg); }
+            45% { background-position: 100% 50%; transform: translate(-50%, -50%) scale(1.08) rotateX(0deg); }
+            100% { background-position: 0% 50%; transform: translate(-50%, -50%) scale(1) rotateX(0deg); }
+          }
+          @keyframes dt-win-coin-burst {
+            0% { transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translateY(0) scale(0.3); opacity: 0; }
+            18% { opacity: 1; }
+            100% { transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translateY(var(--d, -120px)) scale(1); opacity: 0; }
+          }
         `}</style>
 
         {/* WIN VIDEO EFFECT OVERLAY ON BOWL PANELS — clipped to bowl-half shape */}
@@ -468,7 +538,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "10.7%", top: "48.1%", width: "39.6%", height: "33.6%",
+                left: "9.7%", top: "46.2%", width: "40.8%", height: "35.6%",
                 zIndex: 7,
                 clipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
                 WebkitClipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
@@ -495,7 +565,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "49.7%", top: "48.1%", width: "39.6%", height: "33.6%",
+                left: "49.5%", top: "46.2%", width: "40.8%", height: "35.6%",
                 zIndex: 7,
                 clipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
                 WebkitClipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
@@ -522,7 +592,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "30%", top: "39%", width: "40%", height: "11%",
+                left: "29%", top: "40.7%", width: "42%", height: "12%",
                 zIndex: 7,
                 clipPath: "ellipse(50% 100% at 50% 100%)",
                 WebkitClipPath: "ellipse(50% 100% at 50% 100%)",
@@ -543,7 +613,7 @@ const DragonTigerGame = () => {
         {/* HISTORY ROW — overlay D/T markers (10 slots) */}
         <div
           className="absolute flex items-center justify-between"
-          style={{ left: "16%", right: "20%", top: "47%", height: "3%" }}
+          style={{ left: "17%", right: "19%", top: "42.6%", height: "3.3%", zIndex: 8 }}
         >
           {history.map((h, i) => (
             <div
@@ -571,8 +641,10 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tie")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "30%", top: "37%", width: "40%", height: "12%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "28.7%", top: "47.1%", width: "42.6%", height: "11.2%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          aria-label="Bet on Tie"
         >
+          {renderPlacedBet("tie", bets.tie)}
           {phase === "betting" && betFeedback?.side === "tie" && (
             <motion.div
               key={`tie-${betFeedback.key}`}
@@ -582,12 +654,6 @@ const DragonTigerGame = () => {
               className="absolute inset-0 rounded-t-full pointer-events-none"
               style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 4px hsl(140 90% 55%), 0 0 28px hsl(140 90% 55%)" : "inset 0 0 0 4px hsl(0 85% 60%), 0 0 28px hsl(0 85% 60%)" }}
             />
-          )}
-          {bets.tie > 0 && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-0.5 rounded-full font-black"
-              style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)" }}>
-              {sym}{bets.tie}
-            </div>
           )}
           {phase === "result" && winner === "tie" && (
             <div className="absolute inset-0 rounded-t-full" style={{ boxShadow: "inset 0 0 0 3px hsl(140 80% 55%), 0 0 25px hsl(140 80% 55%)" }} />
@@ -599,8 +665,10 @@ const DragonTigerGame = () => {
           onClick={() => addBet("dragon")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "13%", top: "49%", width: "37%", height: "32%", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "9.5%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 0 55%" }}
+          aria-label="Bet on Dragon"
         >
+          {renderPlacedBet("dragon", bets.dragon)}
           {phase === "betting" && betFeedback?.side === "dragon" && (
             <motion.div
               key={`dragon-${betFeedback.key}`}
@@ -611,12 +679,6 @@ const DragonTigerGame = () => {
               style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" : "inset 0 0 0 5px hsl(0 85% 60%), 0 0 30px hsl(0 85% 60%)" }}
             />
           )}
-          {bets.dragon > 0 && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
-              style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
-              {sym}{bets.dragon}
-            </div>
-          )}
         </button>
 
         {/* TIGER PANEL (right half of bowl) */}
@@ -624,8 +686,10 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tiger")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "50%", top: "49%", width: "37%", height: "32%", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "49.6%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 55% 0" }}
+          aria-label="Bet on Tiger"
         >
+          {renderPlacedBet("tiger", bets.tiger)}
           {phase === "betting" && betFeedback?.side === "tiger" && (
             <motion.div
               key={`tiger-${betFeedback.key}`}
@@ -636,19 +700,13 @@ const DragonTigerGame = () => {
               style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" : "inset 0 0 0 5px hsl(0 85% 60%), 0 0 30px hsl(0 85% 60%)" }}
             />
           )}
-          {bets.tiger > 0 && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
-              style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
-              {sym}{bets.tiger}
-            </div>
-          )}
         </button>
 
         <button
           onClick={() => { if (phase === "betting" && totalBet === 0) setActiveWallet((w) => w === "dollar" ? "star" : "dollar"); }}
           className="absolute flex flex-col items-center justify-center font-black text-white"
           style={{
-            left: "2%", top: "82%", width: "10%", aspectRatio: "1/1.4",
+            left: "2%", top: "84.4%", width: "10%", aspectRatio: "1/1.4",
             background: "transparent",
             zIndex: 6,
           }}
@@ -664,8 +722,8 @@ const DragonTigerGame = () => {
           style={{
             left: "0%",
             right: "0%",
-            top: "83.15%",
-            height: "10.4%",
+            top: "81.9%",
+            height: "10%",
             zIndex: 20,
             pointerEvents: "auto",
             overflow: "visible",
@@ -681,8 +739,8 @@ const DragonTigerGame = () => {
                 className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
-                  top: "50%",
-                  width: "13.8%",
+                  top: "53%",
+                  width: "12.8%",
                   aspectRatio: "1/1",
                   backgroundImage: isActive ? `url(${CHIP_IMAGES[index]})` : "none",
                   backgroundRepeat: "no-repeat",
@@ -690,7 +748,7 @@ const DragonTigerGame = () => {
                   backgroundSize: "contain",
                   border: 0,
                   padding: 0,
-                  transform: `translate(-50%, -50%) scale(${isActive ? 1.42 : 1})`,
+                  transform: `translate(-50%, -50%) scale(${isActive ? 1.5 : 1}) translateZ(${isActive ? 28 : 0}px)`,
                   transformOrigin: "center",
                   transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
                   cursor: phase === "betting" ? "pointer" : "default",
@@ -712,12 +770,12 @@ const DragonTigerGame = () => {
         <button
           onClick={repeatBets}
           className="absolute"
-          style={{ left: "9%", top: "96%", width: "9%", aspectRatio: "1/1", borderRadius: "50%" }}
+          style={{ left: "9%", top: "92.8%", width: "9%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Repeat last bet"
         />
         <div
           className="absolute flex items-center justify-center font-black text-white"
-          style={{ left: "20%", right: "32%", top: "96.4%", height: "3.5%", fontSize: "min(4vw, 18px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsla(0,0%,0%,0.6)" }}
+          style={{ left: "20%", right: "32%", top: "92.9%", height: "4.2%", fontSize: "min(4.4vw, 22px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsl(0 0% 0% / 0.8), 0 0 12px hsl(45 100% 55% / 0.45)", zIndex: 18 }}
         >
           {betStatus || (totalBet > 0 ? totalBet.toFixed(2) : phase === "betting" ? `${sym}${chip}` : "0.00")}
         </div>
@@ -725,7 +783,7 @@ const DragonTigerGame = () => {
           onClick={deal}
           disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet}
           className="absolute"
-          style={{ right: "16%", top: "96%", width: "8%", aspectRatio: "1/1", borderRadius: "50%" }}
+          style={{ right: "16%", top: "92.8%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Deal"
         >
           <AnimatePresence>
@@ -742,7 +800,7 @@ const DragonTigerGame = () => {
           onClick={doubleAllBets}
           disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet * 2}
           className="absolute"
-          style={{ right: "4%", top: "96%", width: "8%", aspectRatio: "1/1", borderRadius: "50%" }}
+          style={{ right: "4%", top: "92.8%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Double bet"
         >
           {phase === "betting" && totalBet > 0 && currentBalance >= totalBet * 2 && (
@@ -753,31 +811,98 @@ const DragonTigerGame = () => {
           )}
         </button>
 
-        {/* RESULT MESSAGE FLOATING */}
+        {/* RESULT MESSAGE + 3D WIN ANIMATION */}
         <AnimatePresence>
           {phase === "result" && winner && (
             <motion.div
-              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="absolute left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full"
-              style={{
-                top: "33%",
-                background: "hsla(220,30%,5%,0.92)",
-                border: "1.5px solid hsla(45,90%,55%,0.7)",
-                zIndex: 10,
-              }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 30, perspective: "1000px" }}
             >
-              {winAmount > 0 ? (
-                <p className="font-black whitespace-nowrap" style={{ color: "hsl(50 95% 70%)", fontSize: "min(3vw, 14px)" }}>
-                  🎉 {winner === "tie" ? "TIE!" : winner.toUpperCase() + " WINS"} +{sym}{winAmount}
-                </p>
-              ) : (
-                <p className="font-black whitespace-nowrap" style={{ color: "hsl(0 80% 70%)", fontSize: "min(3vw, 14px)" }}>
-                  💨 {winner.toUpperCase()} — Better luck next round
-                </p>
-              )}
+              {winAmount > 0 && Array.from({ length: 16 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    left: "50%",
+                    top: "52%",
+                    width: "min(3.2vw, 16px)",
+                    aspectRatio: "1/1",
+                    background: "radial-gradient(circle at 35% 28%, hsl(53 100% 82%), hsl(38 96% 50%) 52%, hsl(28 88% 34%))",
+                    boxShadow: "inset 0 1px 1px hsl(0 0% 100% / 0.65), 0 0 10px hsl(43 100% 55% / 0.8)",
+                    animation: `dt-win-coin-burst ${900 + (i % 4) * 140}ms ease-out ${i * 34}ms both`,
+                    ["--r" as string]: `${i * 22.5}deg`,
+                    ["--d" as string]: `${90 + (i % 5) * 22}px`,
+                  } as CSSProperties & Record<string, string>}
+                />
+              ))}
+              <motion.div
+                initial={{ scale: 0.55, rotateX: 55, y: 28 }}
+                animate={{ scale: 1, rotateX: 0, y: 0 }}
+                exit={{ scale: 0.75, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center text-center font-game"
+                style={{
+                  width: "76%",
+                  minHeight: "13%",
+                  transformStyle: "preserve-3d",
+                  transform: "translate(-50%, -50%)",
+                  borderRadius: "20px",
+                  background: "linear-gradient(180deg, hsl(42 85% 20% / 0.92), hsl(20 85% 8% / 0.95))",
+                  border: "2px solid hsl(45 95% 62% / 0.9)",
+                  boxShadow: "inset 0 2px 1px hsl(52 100% 82% / 0.45), inset 0 -6px 18px hsl(0 0% 0% / 0.45), 0 18px 38px hsl(0 0% 0% / 0.75), 0 0 36px hsl(43 100% 55% / 0.65)",
+                }}
+              >
+                <div
+                  className="absolute inset-0 rounded-[18px]"
+                  style={{ background: "linear-gradient(120deg, transparent 20%, hsl(52 100% 78% / 0.22), transparent 80%)" }}
+                />
+                <div
+                  className="relative font-black uppercase"
+                  style={{
+                    fontSize: "min(10vw, 56px)",
+                    lineHeight: 0.95,
+                    letterSpacing: 0,
+                    color: "transparent",
+                    background: winAmount > 0
+                      ? "linear-gradient(90deg, hsl(39 90% 45%), hsl(54 100% 78%), hsl(32 95% 52%), hsl(54 100% 78%))"
+                      : "linear-gradient(90deg, hsl(0 80% 58%), hsl(28 90% 70%), hsl(0 80% 58%))",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    backgroundSize: "260% 100%",
+                    animation: "dt-win-title-shine 1.15s ease-out both",
+                    textShadow: "0 5px 0 hsl(24 100% 12% / 0.75), 0 0 24px hsl(45 100% 58% / 0.65)",
+                  }}
+                >
+                  {winAmount > 0 ? "WIN" : "LOSE"}
+                </div>
+                <div
+                  className="relative font-black uppercase"
+                  style={{
+                    marginTop: 4,
+                    fontSize: "min(4.2vw, 22px)",
+                    color: winner === "dragon" ? "hsl(205 100% 72%)" : winner === "tiger" ? "hsl(27 100% 70%)" : "hsl(130 90% 68%)",
+                    textShadow: "0 2px 0 hsl(0 0% 0% / 0.8), 0 0 14px currentColor",
+                  }}
+                >
+                  {winner === "tie" ? "TIE 8:1" : `${winner} wins`}
+                </div>
+                <div
+                  className="relative font-black"
+                  style={{
+                    marginTop: 2,
+                    fontSize: "min(5.2vw, 28px)",
+                    color: winAmount > 0 ? "hsl(50 96% 72%)" : "hsl(0 78% 72%)",
+                    textShadow: "0 2px 0 hsl(0 0% 0% / 0.75)",
+                  }}
+                >
+                  {winAmount > 0 ? `+${sym}${winAmount}` : "Better luck"}
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+
       </div>
     </div>
   );
