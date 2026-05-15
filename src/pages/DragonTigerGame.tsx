@@ -646,7 +646,7 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tie")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "28.7%", top: "47.1%", width: "42.6%", height: "11.2%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "28.1%", top: "50.2%", width: "43.8%", height: "11.6%", borderRadius: "50% 50% 0 0", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
           aria-label="Bet on Tie"
         >
           {renderPlacedBet("tie", bets.tie)}
@@ -670,7 +670,7 @@ const DragonTigerGame = () => {
           onClick={() => addBet("dragon")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "9.5%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 0 55%" }}
+          style={{ left: "8.5%", top: "59%", width: "41.5%", height: "28.1%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 0 55%" }}
           aria-label="Bet on Dragon"
         >
           {renderPlacedBet("dragon", bets.dragon)}
@@ -691,7 +691,7 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tiger")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "49.6%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 55% 0" }}
+          style={{ left: "50%", top: "59%", width: "41.5%", height: "28.1%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 55% 0" }}
           aria-label="Bet on Tiger"
         >
           {renderPlacedBet("tiger", bets.tiger)}
