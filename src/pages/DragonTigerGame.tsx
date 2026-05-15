@@ -684,43 +684,26 @@ const DragonTigerGame = () => {
                   top: "50%",
                   width: "13.8%",
                   aspectRatio: "1/1",
-                  background: "transparent",
+                  backgroundImage: isActive ? `url(${CHIP_IMAGES[index]})` : "none",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  backgroundSize: "contain",
                   border: 0,
                   padding: 0,
-                  transform: "translate(-50%, -50%)",
+                  transform: `translate(-50%, -50%) scale(${isActive ? 1.42 : 1})`,
                   transformOrigin: "center",
+                  transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
                   cursor: phase === "betting" ? "pointer" : "default",
                   zIndex: 28,
                   touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
                   overflow: "visible",
+                  filter: isActive ? "drop-shadow(0 10px 10px hsla(0, 0%, 0%, 0.55))" : "none",
                 }}
                 aria-label={`Chip ${v}`}
                 aria-pressed={isActive}
                 disabled={phase !== "betting"}
-              >
-                {isActive && (
-                  <img
-                    src={CHIP_IMAGES[index]}
-                    alt=""
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      left: "50%",
-                      top: "50%",
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      objectFit: "contain",
-                      transform: "translate(-50%, -50%) scale(1.42)",
-                      transformOrigin: "center",
-                      transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
-                      pointerEvents: "none",
-                      filter: "drop-shadow(0 10px 10px hsla(0, 0%, 0%, 0.55))",
-                    }}
-                  />
-                )}
-              </button>
+              />
             );
           })}
         </div>
