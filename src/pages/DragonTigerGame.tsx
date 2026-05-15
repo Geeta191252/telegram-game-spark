@@ -775,12 +775,12 @@ const DragonTigerGame = () => {
         <button
           onClick={repeatBets}
           className="absolute"
-          style={{ left: "9%", top: "92.8%", width: "9%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
+          style={{ left: "8.5%", top: "92.2%", width: "9%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Repeat last bet"
         />
         <div
           className="absolute flex items-center justify-center font-black text-white"
-          style={{ left: "20%", right: "32%", top: "92.9%", height: "4.2%", fontSize: "min(4.4vw, 22px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsl(0 0% 0% / 0.8), 0 0 12px hsl(45 100% 55% / 0.45)", zIndex: 18 }}
+          style={{ left: "18%", right: "18%", top: "92.8%", height: "4.2%", fontSize: "min(4.4vw, 22px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsl(0 0% 0% / 0.8), 0 0 12px hsl(45 100% 55% / 0.45)", zIndex: 18 }}
         >
           {betStatus || (totalBet > 0 ? totalBet.toFixed(2) : phase === "betting" ? `${sym}${chip}` : "0.00")}
         </div>
@@ -788,7 +788,7 @@ const DragonTigerGame = () => {
           onClick={deal}
           disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet}
           className="absolute"
-          style={{ right: "16%", top: "92.8%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
+          style={{ right: "9%", top: "43.4%", width: "9%", aspectRatio: "1/1", borderRadius: "20%", zIndex: 18 }}
           aria-label="Deal"
         >
           <AnimatePresence>
@@ -805,7 +805,7 @@ const DragonTigerGame = () => {
           onClick={doubleAllBets}
           disabled={phase !== "betting" || totalBet === 0 || currentBalance < totalBet * 2}
           className="absolute"
-          style={{ right: "4%", top: "92.8%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
+          style={{ right: "3%", top: "92.2%", width: "8%", aspectRatio: "1/1", borderRadius: "50%", zIndex: 18 }}
           aria-label="Double bet"
         >
           {phase === "betting" && totalBet > 0 && currentBalance >= totalBet * 2 && (
