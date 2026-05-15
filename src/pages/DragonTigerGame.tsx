@@ -537,7 +537,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "10.7%", top: "48.1%", width: "39.6%", height: "33.6%",
+                left: "9.7%", top: "46.2%", width: "40.8%", height: "35.6%",
                 zIndex: 7,
                 clipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
                 WebkitClipPath: "polygon(9% 49%, 12% 31%, 22% 14%, 41% 4%, 75% 0, 100% 24%, 100% 100%, 44% 100%, 21% 89%, 9% 72%)",
@@ -564,7 +564,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "49.7%", top: "48.1%", width: "39.6%", height: "33.6%",
+                left: "49.5%", top: "46.2%", width: "40.8%", height: "35.6%",
                 zIndex: 7,
                 clipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
                 WebkitClipPath: "polygon(0 24%, 25% 0, 59% 4%, 78% 14%, 88% 31%, 91% 49%, 91% 72%, 79% 89%, 56% 100%, 0 100%)",
@@ -591,7 +591,7 @@ const DragonTigerGame = () => {
               transition={{ duration: 0.35 }}
               className="absolute pointer-events-none"
               style={{
-                left: "30%", top: "39%", width: "40%", height: "11%",
+                left: "29%", top: "40.7%", width: "42%", height: "12%",
                 zIndex: 7,
                 clipPath: "ellipse(50% 100% at 50% 100%)",
                 WebkitClipPath: "ellipse(50% 100% at 50% 100%)",
