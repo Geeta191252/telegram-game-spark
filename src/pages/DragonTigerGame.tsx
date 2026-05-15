@@ -663,8 +663,9 @@ const DragonTigerGame = () => {
           onClick={() => addBet("dragon")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "13%", top: "49%", width: "37%", height: "32%", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "9.5%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 0 55%" }}
         >
+          {renderPlacedBet("dragon", bets.dragon)}
           {phase === "betting" && betFeedback?.side === "dragon" && (
             <motion.div
               key={`dragon-${betFeedback.key}`}
@@ -675,12 +676,6 @@ const DragonTigerGame = () => {
               style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" : "inset 0 0 0 5px hsl(0 85% 60%), 0 0 30px hsl(0 85% 60%)" }}
             />
           )}
-          {bets.dragon > 0 && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
-              style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
-              {sym}{bets.dragon}
-            </div>
-          )}
         </button>
 
         {/* TIGER PANEL (right half of bowl) */}
@@ -688,8 +683,9 @@ const DragonTigerGame = () => {
           onClick={() => addBet("tiger")}
           disabled={phase !== "betting"}
           className="absolute overflow-visible"
-          style={{ left: "50%", top: "49%", width: "37%", height: "32%", zIndex: 12, WebkitTapHighlightColor: "transparent" }}
+          style={{ left: "49.6%", top: "56.4%", width: "40.8%", height: "28.8%", zIndex: 12, WebkitTapHighlightColor: "transparent", borderRadius: "0 0 55% 0" }}
         >
+          {renderPlacedBet("tiger", bets.tiger)}
           {phase === "betting" && betFeedback?.side === "tiger" && (
             <motion.div
               key={`tiger-${betFeedback.key}`}
@@ -699,12 +695,6 @@ const DragonTigerGame = () => {
               className="absolute inset-0 rounded-r-full pointer-events-none"
               style={{ boxShadow: betFeedback.kind === "success" ? "inset 0 0 0 5px hsl(140 90% 55%), 0 0 30px hsl(140 90% 55%)" : "inset 0 0 0 5px hsl(0 85% 60%), 0 0 30px hsl(0 85% 60%)" }}
             />
-          )}
-          {bets.tiger > 0 && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full font-black"
-              style={{ background: "linear-gradient(135deg, hsl(45 95% 60%), hsl(25 90% 50%))", color: "hsl(0 0% 12%)", fontSize: "min(2.8vw, 13px)", boxShadow: "0 2px 8px hsla(0,0%,0%,0.6)" }}>
-              {sym}{bets.tiger}
-            </div>
           )}
         </button>
 
