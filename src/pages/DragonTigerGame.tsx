@@ -30,6 +30,8 @@ const SUITS = [
 const RANK_LABELS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const CHIP_VALUES = [1, 10, 50, 100, 500];
 const CHIP_HIT_POSITIONS = [18.3, 34.2, 50.2, 66.2, 82.1];
+const CHIP_BG_X = [16.98, 33.55, 50.21, 66.87, 83.43];
+const CHIP_BG_Y = 88.55;
 
 // Image intrinsic aspect ratio (width / height)
 const BG_W = 768;
@@ -666,8 +668,6 @@ const DragonTigerGame = () => {
           }}
         >
           {CHIP_VALUES.map((v, index) => {
-            const CHIP_BG_X = [16.98, 33.55, 50.21, 66.87, 83.43];
-            const CHIP_BG_Y = 90.97;
             const isActive = chip === v;
             return (
               <button
@@ -677,7 +677,7 @@ const DragonTigerGame = () => {
                 className="absolute rounded-full touch-manipulation"
                 style={{
                   left: `${CHIP_HIT_POSITIONS[index]}%`,
-                  top: "50%",
+                  top: "23%",
                   width: "14.6%",
                   aspectRatio: "1/1",
                   background: "transparent",
@@ -695,22 +695,24 @@ const DragonTigerGame = () => {
                 aria-pressed={isActive}
                 disabled={phase !== "betting"}
               >
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "50%",
-                    backgroundImage: `url(${arenaBg})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "757.7% 1357.5%",
-                    backgroundPosition: `${CHIP_BG_X[index]}% ${CHIP_BG_Y}%`,
-                    transform: isActive ? "scale(1.35)" : "scale(1)",
-                    transformOrigin: "center",
-                    transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
-                    pointerEvents: "none",
-                  }}
-                />
+                {isActive && (
+                  <div
+                    aria-hidden
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: "50%",
+                      backgroundImage: `url(${arenaBg})`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "757.7% 1357.5%",
+                      backgroundPosition: `${CHIP_BG_X[index]}% ${CHIP_BG_Y}%`,
+                      transform: "scale(1.35)",
+                      transformOrigin: "center",
+                      transition: "transform 180ms cubic-bezier(0.34,1.56,0.64,1)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                )}
               </button>
             );
           })}
