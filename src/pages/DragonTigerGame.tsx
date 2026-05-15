@@ -779,10 +779,10 @@ const DragonTigerGame = () => {
           aria-label="Repeat last bet"
         />
         <div
-          className="absolute flex items-center justify-center font-black text-white"
+          className="absolute flex items-center justify-center font-black"
           style={{ left: "18%", right: "18%", top: "92.8%", height: "4.2%", fontSize: "min(4.4vw, 22px)", color: "hsl(45 95% 70%)", textShadow: "0 1px 0 hsl(0 0% 0% / 0.8), 0 0 12px hsl(45 100% 55% / 0.45)", zIndex: 18 }}
         >
-          {betStatus || (totalBet > 0 ? totalBet.toFixed(2) : phase === "betting" ? `${sym}${chip}` : "0.00")}
+          {totalBet > 0 ? `${sym}${totalBet.toFixed(0)}` : ""}
         </div>
         <button
           onClick={deal}
