@@ -22,7 +22,7 @@ import gameMines from "@/assets/game-mines.jpg";
 import gameAviator from "@/assets/game-aviator.jpg";
 import gamePlinko from "@/assets/game-plinko.jpg";
 import gameChickenRoad from "@/assets/game-chicken-road.jpg";
-import gameDragonTiger from "@/assets/game-dragon-tiger.jpg";
+
 
 import homeBg from "@/assets/home-bg.png";
 
@@ -126,7 +126,7 @@ const HomeScreen = () => {
   const goToAviator = () => navigate("/aviator");
   const goToPlinko = () => navigate("/plinko");
   const goToChickenRoad = () => navigate("/chicken-road");
-  const goToDragonTiger = () => navigate("/dragon-tiger");
+  
   
   const goToAdmin = () => navigate("/admin");
 
