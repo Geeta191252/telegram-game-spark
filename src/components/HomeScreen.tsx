@@ -491,17 +491,6 @@ const HomeScreen = () => {
                     delay={0.15}
                     onClick={goToChickenRoad}
                   />
-                  <GameTile
-                    image={gameDragonTiger}
-                    name="Dragon Tiger"
-                    description="Pick a side, win 8x on Tie!"
-                    badge="🐉 NEW"
-                    badgeGradient="linear-gradient(135deg, hsl(45 95% 55%), hsl(0 80% 50%))"
-                    borderGradient="linear-gradient(135deg, hsl(45 95% 60%), hsl(0 80% 55%), hsl(25 90% 55%))"
-                    glowColor="hsla(0, 80%, 55%, 0.45)"
-                    delay={0.2}
-                    onClick={goToDragonTiger}
-                  />
                 </div>
               </section>
               )}
