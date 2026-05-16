@@ -22,7 +22,7 @@ import gameMines from "@/assets/game-mines.jpg";
 import gameAviator from "@/assets/game-aviator.jpg";
 import gamePlinko from "@/assets/game-plinko.jpg";
 import gameChickenRoad from "@/assets/game-chicken-road.jpg";
-import gameDragonTiger from "@/assets/game-dragon-tiger.jpg";
+
 
 import homeBg from "@/assets/home-bg.png";
 
@@ -126,7 +126,7 @@ const HomeScreen = () => {
   const goToAviator = () => navigate("/aviator");
   const goToPlinko = () => navigate("/plinko");
   const goToChickenRoad = () => navigate("/chicken-road");
-  const goToDragonTiger = () => navigate("/dragon-tiger");
+  
   
   const goToAdmin = () => navigate("/admin");
 
@@ -490,17 +490,6 @@ const HomeScreen = () => {
                     glowColor="hsla(25, 90%, 55%, 0.4)"
                     delay={0.15}
                     onClick={goToChickenRoad}
-                  />
-                  <GameTile
-                    image={gameDragonTiger}
-                    name="Dragon Tiger"
-                    description="Pick a side, win 8x on Tie!"
-                    badge="🐉 NEW"
-                    badgeGradient="linear-gradient(135deg, hsl(45 95% 55%), hsl(0 80% 50%))"
-                    borderGradient="linear-gradient(135deg, hsl(45 95% 60%), hsl(0 80% 55%), hsl(25 90% 55%))"
-                    glowColor="hsla(0, 80%, 55%, 0.45)"
-                    delay={0.2}
-                    onClick={goToDragonTiger}
                   />
                 </div>
               </section>
