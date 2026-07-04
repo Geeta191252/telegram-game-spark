@@ -102,6 +102,7 @@ const App = () => {
                   <Route path="/aviator" element={<AviatorGame />} />
                   <Route path="/plinko" element={<PlinkoGame />} />
                   <Route path="/chicken-road" element={<ChickenRoadGame />} />
+                  <Route path="/jetx" element={<JetXGame />} />
                   <Route path="/admin" element={<AdminPanel />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
