@@ -19,6 +19,7 @@ const MinesGame = lazy(() => import("./pages/MinesGame"));
 const AviatorGame = lazy(() => import("./pages/AviatorGame"));
 const PlinkoGame = lazy(() => import("./pages/PlinkoGame"));
 const ChickenRoadGame = lazy(() => import("./pages/ChickenRoadGame"));
+const JetXGame = lazy(() => import("./pages/JetXGame"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const STARTAPP_GAME_ROUTES: Record<string, string> = {
   g_greedy: "/greedy-king",
   g_plinko: "/plinko",
   g_chicken: "/chicken-road",
+  g_jetx: "/jetx",
 };
 
 const StartParamNavigator = () => {
