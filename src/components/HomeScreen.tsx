@@ -22,6 +22,7 @@ import gameMines from "@/assets/game-mines.jpg";
 import gameAviator from "@/assets/game-aviator.jpg";
 import gamePlinko from "@/assets/game-plinko.jpg";
 import gameChickenRoad from "@/assets/game-chicken-road.jpg";
+import gameJetx from "@/assets/game-jetx.jpg";
 
 
 import homeBg from "@/assets/home-bg.png";
@@ -126,6 +127,7 @@ const HomeScreen = () => {
   const goToAviator = () => navigate("/aviator");
   const goToPlinko = () => navigate("/plinko");
   const goToChickenRoad = () => navigate("/chicken-road");
+  const goToJetX = () => navigate("/jetx");
   
   
   const goToAdmin = () => navigate("/admin");
@@ -479,6 +481,17 @@ const HomeScreen = () => {
                     glowColor="hsla(310, 80%, 55%, 0.4)"
                     delay={0.1}
                     onClick={goToAviator}
+                  />
+                  <GameTile
+                    image={gameJetx}
+                    name="JetX"
+                    description="Fly high, cash out fast!"
+                    badge="🔥 HOT"
+                    badgeGradient="linear-gradient(135deg, hsl(0 85% 55%), hsl(15 90% 55%))"
+                    borderGradient="linear-gradient(135deg, hsl(0 85% 60%), hsl(15 90% 55%), hsl(45 85% 55%))"
+                    glowColor="hsla(0, 85%, 55%, 0.45)"
+                    delay={0.12}
+                    onClick={goToJetX}
                   />
                   <GameTile
                     image={gameChickenRoad}

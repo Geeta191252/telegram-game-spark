@@ -2758,6 +2758,252 @@ app.post("/api/admin/tournaments/distribute", async (req, res) => {
   }
 });
 
+// ============================================
+// JETX MULTIPLAYER (PHP-EXACT rigging, per-currency pools)
+// Ported from raja-aviator.cloud server.js:
+//   - Betting window 5s
+//   - When flying starts, sum pending bets:
+//       total == 0   → finalCrash = randInt(2..7),   tick 200ms
+//       total <= 100 → finalCrash = 1.00 + rand*0.50, tick 300ms
+//       total  > 100 → finalCrash = 1.00 + rand*0.50, tick 200ms
+//   - Multiplier starts at 0.99 and +0.01 every tick until >= finalCrash
+//   - Payout on cashout = amount * 0.98 * currentMultiplier
+//   - Crashed phase 4s (3s show + 1s reset gap) then new round
+// ============================================
+const JETX_BETTING_MS = 5000;
+const JETX_CRASHED_MS = 4000;
+const JETX_HISTORY_LEN = 18;
+
+function makeJetxPool() {
+  return {
+    roundNumber: 1,
+    phase: "betting",              // "betting" | "flying" | "crashed"
+    phaseStartTime: Date.now(),
+    finalCrash: 1,
+    crashPosition: 0.99,
+    tickIntervalMs: 200,
+    flyTimer: null,
+    bets: {},                      // { telegramId: { amount, firstName, cashedOutAt, winAmount } }
+    totalPool: 0,
+    history: [],
+  };
+}
+const jetxState = {
+  dollar: makeJetxPool(),
+  star: makeJetxPool(),
+};
+
+function jetxComputeCrash(pool) {
+  const total = pool.totalPool;
+  if (total === 0) {
+    pool.finalCrash = Math.floor(Math.random() * 6) + 2;         // 2..7
+    pool.tickIntervalMs = 200;
+  } else if (total <= 100) {
+    pool.finalCrash = Number((Math.random() * 0.5 + 1).toFixed(2));
+    pool.tickIntervalMs = 300;
+  } else {
+    pool.finalCrash = Number((Math.random() * 0.5 + 1).toFixed(2));
+    pool.tickIntervalMs = 200;
+  }
+}
+
+async function jetxStartFlying(currency) {
+  const s = jetxState[currency];
+  s.phase = "flying";
+  s.phaseStartTime = Date.now();
+  s.crashPosition = 0.99;
+  jetxComputeCrash(s);
+
+  if (s.flyTimer) clearInterval(s.flyTimer);
+  s.flyTimer = setInterval(() => {
+    const fc = parseFloat(s.finalCrash);
+    const cp = parseFloat(s.crashPosition);
+    if (fc > cp) {
+      s.crashPosition = Number((cp + 0.01).toFixed(2));
+    } else {
+      clearInterval(s.flyTimer);
+      s.flyTimer = null;
+      jetxOnCrash(currency).catch((e) => console.error("JetX crash error:", e));
+    }
+  }, s.tickIntervalMs);
+}
+
+async function jetxOnCrash(currency) {
+  const s = jetxState[currency];
+  s.phase = "crashed";
+  s.phaseStartTime = Date.now();
+  s.history = [Number(s.crashPosition), ...s.history].slice(0, JETX_HISTORY_LEN);
+
+  // Persist losing bets (winners already got their 'win' tx on cashout)
+  try {
+    for (const key of Object.keys(s.bets)) {
+      const b = s.bets[key];
+      if (b.amount > 0 && !b.cashedOutAt) {
+        await Transaction.create({
+          telegramId: Number(key),
+          type: "bet",
+          currency,
+          amount: -b.amount,
+          status: "completed",
+          description: `jetx: Bet ${b.amount} lost @ ${s.crashPosition}x (Round ${s.roundNumber})`,
+          game: "jetx",
+        });
+      }
+    }
+  } catch (err) { console.error("JetX bet log error:", err); }
+}
+
+function jetxResetRound(currency) {
+  const s = jetxState[currency];
+  s.roundNumber++;
+  s.phase = "betting";
+  s.phaseStartTime = Date.now();
+  s.bets = {};
+  s.totalPool = 0;
+  s.crashPosition = 0.99;
+  s.finalCrash = 1;
+}
+
+function jetxSupervisor(currency) {
+  const s = jetxState[currency];
+  const now = Date.now();
+  if (s.phase === "betting" && now - s.phaseStartTime >= JETX_BETTING_MS) {
+    jetxStartFlying(currency).catch((e) => console.error("JetX fly start:", e));
+  } else if (s.phase === "crashed" && now - s.phaseStartTime >= JETX_CRASHED_MS) {
+    jetxResetRound(currency);
+  }
+}
+setInterval(() => { jetxSupervisor("dollar"); jetxSupervisor("star"); }, 250);
+
+// GET /api/jetx/state?currency=dollar|star
+app.get("/api/jetx/state", (req, res) => {
+  const currency = req.query.currency === "star" ? "star" : "dollar";
+  const s = jetxState[currency];
+  const now = Date.now();
+  let multiplier = 1;
+  let timeLeft = 0;
+  if (s.phase === "betting") {
+    timeLeft = Math.max(0, Math.ceil((JETX_BETTING_MS - (now - s.phaseStartTime)) / 1000));
+  } else if (s.phase === "flying") {
+    multiplier = Number(s.crashPosition);
+  } else if (s.phase === "crashed") {
+    multiplier = Number(s.crashPosition);
+  }
+  const betsList = Object.entries(s.bets).slice(0, 30).map(([tgId, b]) => ({
+    user: (b.firstName || "Player").slice(0, 1) + "***" + String(tgId).slice(-2),
+    amount: b.amount,
+    multiplier: b.cashedOutAt || null,
+    cashout: b.cashedOutAt ? Number((b.amount * 0.98 * b.cashedOutAt).toFixed(2)) : null,
+  }));
+  res.json({
+    roundNumber: s.roundNumber,
+    phase: s.phase,
+    multiplier: Number(multiplier.toFixed(2)),
+    crashAt: s.phase === "crashed" ? Number(s.crashPosition) : null,
+    timeLeft,
+    bets: betsList,
+    totalPlayers: Object.keys(s.bets).length,
+    history: s.history,
+  });
+});
+
+// POST /api/jetx/bet
+app.post("/api/jetx/bet", async (req, res) => {
+  try {
+    const { userId, amount, currency, firstName } = req.body;
+    const curr = currency === "star" ? "star" : "dollar";
+    const s = jetxState[curr];
+    if (s.phase !== "betting") return res.status(400).json({ error: "Betting closed for this round" });
+    const numAmt = Number(amount);
+    if (!numAmt || numAmt <= 0) return res.status(400).json({ error: "Invalid amount" });
+
+    const user = await getOrCreateUser(userId);
+    const balField = curr === "dollar" ? "dollarBalance" : "starBalance";
+    const winField = curr === "dollar" ? "dollarWinning" : "starWinning";
+    const wallet = user[balField] || 0;
+    const winning = user[winField] || 0;
+    if (wallet + winning < numAmt) return res.status(400).json({ error: "Insufficient balance" });
+
+    const key = String(user.telegramId);
+    if (s.bets[key]) return res.status(400).json({ error: "You already have a bet this round" });
+
+    const fromWallet = Math.min(wallet, numAmt);
+    const fromWin = numAmt - fromWallet;
+    user[balField] = wallet - fromWallet;
+    user[winField] = winning - fromWin;
+    await user.save();
+
+    s.bets[key] = {
+      amount: numAmt,
+      firstName: firstName || user.firstName || "Player",
+      cashedOutAt: null,
+      winAmount: 0,
+    };
+    s.totalPool += numAmt;
+
+    res.json({ success: true, roundNumber: s.roundNumber });
+  } catch (err) {
+    console.error("JetX bet error:", err);
+    res.status(500).json({ error: "Failed to place bet" });
+  }
+});
+
+// POST /api/jetx/cashout
+app.post("/api/jetx/cashout", async (req, res) => {
+  try {
+    const { userId, currency } = req.body;
+    const curr = currency === "star" ? "star" : "dollar";
+    const s = jetxState[curr];
+    if (s.phase !== "flying") return res.status(400).json({ error: "Cannot cash out now" });
+
+    const numericId = Number(userId);
+    const key = String(numericId);
+    const bet = s.bets[key];
+    if (!bet) return res.status(400).json({ error: "No active bet" });
+    if (bet.cashedOutAt) return res.status(400).json({ error: "Already cashed out" });
+
+    const mult = Number(s.crashPosition);
+    // PHP-exact payout: winamount = amount * 98/100 * winpoint
+    const win = Number((bet.amount * 0.98 * mult).toFixed(2));
+    bet.cashedOutAt = mult;
+    bet.winAmount = win;
+
+    const user = await getOrCreateUser(numericId);
+    const winField = curr === "dollar" ? "dollarWinning" : "starWinning";
+    user[winField] = (user[winField] || 0) + win;
+    await user.save();
+    await Transaction.create({
+      telegramId: numericId,
+      type: "win",
+      currency: curr,
+      amount: win,
+      status: "completed",
+      description: `jetx: Won ${win} @ ${mult}x (Round ${s.roundNumber})`,
+      game: "jetx",
+    });
+
+    res.json({ success: true, multiplier: mult, winAmount: win });
+  } catch (err) {
+    console.error("JetX cashout error:", err);
+    res.status(500).json({ error: "Failed to cash out" });
+  }
+});
+
+// GET /api/jetx/my-bet?userId=&currency=
+app.get("/api/jetx/my-bet", (req, res) => {
+  const curr = req.query.currency === "star" ? "star" : "dollar";
+  const s = jetxState[curr];
+  const key = String(Number(req.query.userId));
+  const b = s.bets[key];
+  res.json({
+    roundNumber: s.roundNumber,
+    phase: s.phase,
+    bet: b ? { amount: b.amount, cashedOutAt: b.cashedOutAt, winAmount: b.winAmount } : null,
+  });
+});
+
+
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
