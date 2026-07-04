@@ -63,6 +63,7 @@ const prefetchGames = () => {
     import("./pages/AviatorGame");
     import("./pages/PlinkoGame");
     import("./pages/ChickenRoadGame");
+    import("./pages/JetXGame");
   };
   const ric = (window as any).requestIdleCallback as
     | ((cb: () => void, opts?: { timeout: number }) => number)
