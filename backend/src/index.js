@@ -2771,7 +2771,8 @@ app.post("/api/admin/tournaments/distribute", async (req, res) => {
 //   - Crashed phase 4s (3s show + 1s reset gap) then new round
 // ============================================
 const JETX_BETTING_MS = 5000;
-const JETX_CRASHED_MS = 4000;
+// PHP: after crash, 200ms fail pending → 3s wait → removecrash → 4s wait → prepareplane+flyplane → 1s → setcrash
+const JETX_CRASHED_MS = 8000;
 const JETX_HISTORY_LEN = 18;
 
 function makeJetxPool() {
