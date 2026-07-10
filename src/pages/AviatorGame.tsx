@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ChevronDown, ClipboardList, Menu, MessageCircle, Plus, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBalanceContext } from "@/contexts/BalanceContext";
-import { getTelegramUser, type CurrencyType, fetchAviatorState, placeAviatorBet, cashOutAviator, type AviatorState } from "@/lib/telegram";
+import { getTelegramUser, type CurrencyType, fetchAviatorState, placeAviatorBet, cashOutAviator, cancelAviatorBet, type AviatorState } from "@/lib/telegram";
 import { toast } from "sonner";
 import logoImg from "@/assets/aviator/logo.png";
 import planeImg from "@/assets/aviator/plane.png";
@@ -469,19 +469,35 @@ const BetPanel = ({
 
   const placeBet = async () => {
     unlockAudio();
-    if (phase !== "betting") return toast.error("Wait for next round");
-    if (betAmount <= 0) return toast.error("Enter valid amount");
-    if (betAmount > balance) return toast.error("Insufficient balance");
+    if (phase !== "betting") return;
+    if (betAmount <= 0) return;
+    if (betAmount > balance) return;
     if (hasBet || pendingBet) return;
-    if (!tgUserId) return toast.error("Open inside Telegram to bet");
+    if (!tgUserId) return;
     setPendingBet(true);
     try {
       await placeAviatorBet({ userId: tgUserId, amount: betAmount, currency, firstName: userName, slot: auto ? 2 : 1 });
       setHasBet(true);
       setCashedOutAt(null);
       refreshBalance();
-    } catch (e) {
-      toast.error((e as Error).message || "Failed to place bet");
+    } catch {
+      // silent — no popup
+    } finally {
+      setPendingBet(false);
+    }
+  };
+
+  const cancelBet = async () => {
+    if (!hasBet || phase !== "betting" || pendingBet) return;
+    if (!tgUserId) return;
+    setPendingBet(true);
+    try {
+      await cancelAviatorBet(tgUserId, currency, auto ? 2 : 1);
+      setHasBet(false);
+      setCashedOutAt(null);
+      refreshBalance();
+    } catch {
+      // silent — no popup
     } finally {
       setPendingBet(false);
     }
@@ -569,13 +585,21 @@ const BetPanel = ({
           <span>CASHED</span>
           <span className="text-xs">{cashedOutAt.toFixed(2)}x</span>
         </div>
+      ) : isWaiting ? (
+        <button
+          onClick={cancelBet}
+          disabled={pendingBet}
+          className="w-full h-7 rounded-md bg-gradient-to-b from-[hsl(0_75%_55%)] to-[hsl(0_80%_38%)] text-white font-game text-base tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(0_80%_25%),0_3px_12px_hsl(0_80%_40%/0.4)] disabled:opacity-70"
+        >
+          <span>CANCEL</span>
+        </button>
       ) : (
         <button
           onClick={placeBet}
-          disabled={isWaiting || phase !== "betting" || pendingBet}
+          disabled={phase !== "betting" || pendingBet}
           className="w-full h-7 rounded-md bg-gradient-to-b from-[hsl(110_75%_55%)] to-[hsl(120_80%_38%)] text-white font-game text-base tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(120_80%_25%),0_3px_12px_hsl(120_80%_40%/0.4)] disabled:opacity-70"
         >
-          <span>{isWaiting ? "WAITING…" : "PLACE BET"}</span>
+          <span>PLACE BET</span>
           <svg viewBox="0 0 24 24" className="w-4 h-4 -rotate-12" fill="currentColor">
             <path d="M2 21 L23 12 L2 3 L2 10 L17 12 L2 14 Z" />
           </svg>

@@ -2246,6 +2246,33 @@ app.post("/api/aviator/bet", async (req, res) => {
   }
 });
 
+// POST /api/aviator/cancel — refund bet only during betting phase
+app.post("/api/aviator/cancel", async (req, res) => {
+  try {
+    const { userId, currency, slot } = req.body;
+    const curr = currency === "star" ? "star" : "dollar";
+    const s = aviatorState[curr];
+    if (s.phase !== "betting") return res.status(400).json({ error: "Cannot cancel — round already started" });
+    const slotNum = slot === 2 ? 2 : 1;
+    const user = await getOrCreateUser(userId);
+    const key = `${user.telegramId}:${slotNum}`;
+    const bet = s.bets[key];
+    if (!bet) return res.status(400).json({ error: "No bet to cancel" });
+
+    const balField = curr === "dollar" ? "dollarBalance" : "starBalance";
+    user[balField] = (user[balField] || 0) + bet.amount;
+    await user.save();
+
+    s.totalPool = Math.max(0, s.totalPool - bet.amount);
+    delete s.bets[key];
+
+    res.json({ success: true, refunded: bet.amount });
+  } catch (err) {
+    console.error("Aviator cancel error:", err);
+    res.status(500).json({ error: "Failed to cancel bet" });
+  }
+});
+
 // POST /api/aviator/cashout
 app.post("/api/aviator/cashout", async (req, res) => {
   try {

@@ -372,3 +372,15 @@ export const cashOutAviator = async (userId: number | string, currency: Currency
   return json;
 };
 
+export const cancelAviatorBet = async (userId: number | string, currency: CurrencyType, slot: 1 | 2 = 1): Promise<{ success: boolean; refunded: number }> => {
+  const res = await fetch(`${API_BASE_URL}/aviator/cancel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, currency, slot }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.error || "Failed to cancel bet");
+  return json;
+};
+
+
