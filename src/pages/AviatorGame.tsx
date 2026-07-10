@@ -469,19 +469,35 @@ const BetPanel = ({
 
   const placeBet = async () => {
     unlockAudio();
-    if (phase !== "betting") return toast.error("Wait for next round");
-    if (betAmount <= 0) return toast.error("Enter valid amount");
-    if (betAmount > balance) return toast.error("Insufficient balance");
+    if (phase !== "betting") return;
+    if (betAmount <= 0) return;
+    if (betAmount > balance) return;
     if (hasBet || pendingBet) return;
-    if (!tgUserId) return toast.error("Open inside Telegram to bet");
+    if (!tgUserId) return;
     setPendingBet(true);
     try {
       await placeAviatorBet({ userId: tgUserId, amount: betAmount, currency, firstName: userName, slot: auto ? 2 : 1 });
       setHasBet(true);
       setCashedOutAt(null);
       refreshBalance();
-    } catch (e) {
-      toast.error((e as Error).message || "Failed to place bet");
+    } catch {
+      // silent — no popup
+    } finally {
+      setPendingBet(false);
+    }
+  };
+
+  const cancelBet = async () => {
+    if (!hasBet || phase !== "betting" || pendingBet) return;
+    if (!tgUserId) return;
+    setPendingBet(true);
+    try {
+      await cancelAviatorBet(tgUserId, currency, auto ? 2 : 1);
+      setHasBet(false);
+      setCashedOutAt(null);
+      refreshBalance();
+    } catch {
+      // silent — no popup
     } finally {
       setPendingBet(false);
     }
