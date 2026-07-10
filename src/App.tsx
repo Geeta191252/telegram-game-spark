@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { BalanceProvider } from "@/contexts/BalanceContext";
+import { useGlobalClickSound } from "@/hooks/useGlobalClickSound";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
@@ -79,6 +80,7 @@ const RouteFallback = () => (
 );
 
 const App = () => {
+  useGlobalClickSound();
   useEffect(() => {
     prefetchGames();
   }, []);
