@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useButtonClick } from "@/hooks/useButtonClick";
 import navGames from "@/assets/nav-games.png";
 import navMarket from "@/assets/nav-market.png";
 import navEarn from "@/assets/nav-earn.png";
