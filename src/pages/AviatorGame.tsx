@@ -296,7 +296,7 @@ const AviatorGame = () => {
             <div className="absolute inset-0 bg-black/20" />
             
             {phase !== "betting" && (
-              <div className="absolute left-5 right-6 bottom-6 top-7 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none">
                 <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                   <defs>
                     <linearGradient id="aviatorStroke" x1="0" y1="1" x2="1" y2="0">
