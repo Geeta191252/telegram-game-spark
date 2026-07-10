@@ -54,23 +54,29 @@ const StartParamNavigator = () => {
   return null;
 };
 
-// Prefetch all game chunks after the app is idle so clicks feel instant.
+// Prefetch game chunks sequentially after idle so clicks feel instant
+// without jamming the main thread / network on slow devices.
 const prefetchGames = () => {
-  const run = () => {
-    import("./pages/GreedyKingGame");
-    import("./pages/DiceMasterGame");
-    import("./pages/CarnivalSpinGame");
-    import("./pages/MinesGame");
-    import("./pages/AviatorGame");
-    import("./pages/PlinkoGame");
-    import("./pages/ChickenRoadGame");
-    import("./pages/JetXGame");
+  const loaders: Array<() => Promise<unknown>> = [
+    () => import("./pages/AviatorGame"),
+    () => import("./pages/GreedyKingGame"),
+    () => import("./pages/MinesGame"),
+    () => import("./pages/DiceMasterGame"),
+    () => import("./pages/CarnivalSpinGame"),
+    () => import("./pages/PlinkoGame"),
+    () => import("./pages/ChickenRoadGame"),
+    () => import("./pages/JetXGame"),
+  ];
+  const runNext = (i: number) => {
+    if (i >= loaders.length) return;
+    loaders[i]().finally(() => setTimeout(() => runNext(i + 1), 400));
   };
+  const start = () => runNext(0);
   const ric = (window as any).requestIdleCallback as
     | ((cb: () => void, opts?: { timeout: number }) => number)
     | undefined;
-  if (ric) ric(run, { timeout: 3000 });
-  else setTimeout(run, 1500);
+  if (ric) ric(start, { timeout: 4000 });
+  else setTimeout(start, 2000);
 };
 
 const RouteFallback = () => (
