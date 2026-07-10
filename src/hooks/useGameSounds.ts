@@ -44,6 +44,21 @@ export const playLoseSound = () => {
   setTimeout(() => playTone(200, 0.4, "sawtooth", 0.12), 200);
 };
 
+export const playClickSound = () => {
+  // Short, crisp casino-style UI click
+  const c = getCtx();
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(1200, c.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.06);
+  gain.gain.setValueAtTime(0.12, c.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.06);
+  osc.connect(gain).connect(c.destination);
+  osc.start();
+  osc.stop(c.currentTime + 0.06);
+};
+
 export const playCountdownBeep = () => {
   playTone(600, 0.1, "sine", 0.2);
 };
