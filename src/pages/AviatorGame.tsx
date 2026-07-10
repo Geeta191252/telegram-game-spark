@@ -181,14 +181,14 @@ const AviatorGame = () => {
     return Math.min(Math.max(Math.pow((multiplier - 1) / 2.45, 0.58), 0.055), 0.97);
   }, [multiplier, phase]);
 
-  const sX = 9;
-  const sY = 86;
-  const c1X = 32;
-  const c1Y = 88;
-  const c2X = 64;
-  const c2Y = 36;
-  const eX = 88;
-  const eY = 15;
+  const sX = 0;
+  const sY = 100;
+  const c1X = 28;
+  const c1Y = 100;
+  const c2X = 60;
+  const c2Y = 40;
+  const eX = 90;
+  const eY = 12;
   const t = progress;
   const planeX = Math.pow(1 - t, 3) * sX + 3 * Math.pow(1 - t, 2) * t * c1X + 3 * (1 - t) * t * t * c2X + t * t * t * eX;
   const planeY = Math.pow(1 - t, 3) * sY + 3 * Math.pow(1 - t, 2) * t * c1Y + 3 * (1 - t) * t * t * c2Y + t * t * t * eY;
@@ -199,7 +199,7 @@ const AviatorGame = () => {
   const cp2xCur = sX + (c1X - sX) * t + ((c2X - c1X) * t) * t;
   const cp2yCur = sY + (c1Y - sY) * t + ((c2Y - c1Y) * t) * t;
   const trailPath = `M ${sX} ${sY} C ${cp1xCur} ${cp1yCur}, ${cp2xCur} ${cp2yCur}, ${planeX} ${planeY}`;
-  const trailFillPath = `${trailPath} L ${planeX} 91 L ${sX} 91 Z`;
+  const trailFillPath = `${trailPath} L ${planeX} 100 L ${sX} 100 Z`;
 
   const displayedBets = serverBets;
 
