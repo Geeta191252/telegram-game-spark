@@ -28,11 +28,10 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
       <div className="mx-auto flex max-w-md items-center justify-around py-1">
         {tabs.map((tab, i) => {
           const isActive = activeTab === i;
-          const handleClick = useButtonClick(() => onTabChange(i));
           return (
             <motion.button
               key={tab.label}
-              onClick={handleClick}
+              onClick={() => onTabChange(i)}
               whileTap={{ scale: 0.85 }}
               className="flex flex-col items-center gap-0.5 px-4 py-1 relative"
             >
