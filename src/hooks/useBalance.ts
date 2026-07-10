@@ -8,8 +8,8 @@ export const useBalance = () => {
     // Fallback to zero balances if backend is not reachable
     placeholderData: { dollarBalance: 0, starBalance: 0, dollarWinning: 0, starWinning: 0, referralCount: 0 },
     retry: 2,
-    refetchInterval: 5000, // refresh every 5s (was 1s — reduced to cut Android lag)
+    refetchInterval: 500, // refresh every 0.5s for instant balance updates
     refetchIntervalInBackground: false,
-    staleTime: 2000,
+    staleTime: 0,
   });
 };
