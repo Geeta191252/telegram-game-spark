@@ -80,6 +80,7 @@ const RouteFallback = () => (
 );
 
 const App = () => {
+  useGlobalClickSound();
   useEffect(() => {
     prefetchGames();
   }, []);
