@@ -585,13 +585,21 @@ const BetPanel = ({
           <span>CASHED</span>
           <span className="text-xs">{cashedOutAt.toFixed(2)}x</span>
         </div>
+      ) : isWaiting ? (
+        <button
+          onClick={cancelBet}
+          disabled={pendingBet}
+          className="w-full h-7 rounded-md bg-gradient-to-b from-[hsl(0_75%_55%)] to-[hsl(0_80%_38%)] text-white font-game text-base tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(0_80%_25%),0_3px_12px_hsl(0_80%_40%/0.4)] disabled:opacity-70"
+        >
+          <span>CANCEL</span>
+        </button>
       ) : (
         <button
           onClick={placeBet}
-          disabled={isWaiting || phase !== "betting" || pendingBet}
+          disabled={phase !== "betting" || pendingBet}
           className="w-full h-7 rounded-md bg-gradient-to-b from-[hsl(110_75%_55%)] to-[hsl(120_80%_38%)] text-white font-game text-base tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_-3px_0_hsl(120_80%_25%),0_3px_12px_hsl(120_80%_40%/0.4)] disabled:opacity-70"
         >
-          <span>{isWaiting ? "WAITING…" : "PLACE BET"}</span>
+          <span>PLACE BET</span>
           <svg viewBox="0 0 24 24" className="w-4 h-4 -rotate-12" fill="currentColor">
             <path d="M2 21 L23 12 L2 3 L2 10 L17 12 L2 14 Z" />
           </svg>
